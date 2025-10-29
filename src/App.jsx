@@ -21,7 +21,12 @@ import PharmaPrescriptions from "./pages/PharmacistPage/PharmaPrescriptions";
 import PharmaStock from "./pages/PharmacistPage/PharmaStock";
 import PharmaUpdatePage from "./pages/PharmacistPage/PharmaUpdatePage";
 import LabTechDashboard from "./pages/LabtachPage/LabTechDashboard";
-import LabTechPrescriptions from "./pages/LabtachPage/LabTechPrescriptions";
+import LabTestList from "./pages/LabtachPage/LabTestList";
+import TodayAppointments from "./pages/TodayAppointments";
+import AppointmentsList from "./pages/ReceptionistPage/AppointmentsList";
+import AppointmentsCreate from "./pages/ReceptionistPage/AppointmentsCreate";
+import LabTestOrder from "./pages/PatientProfile/LabtestOrder";
+import LabTestResults from "./pages/PatientProfile/LabtestResults";
 function App() {
   return (
     <SidebarProvider>
@@ -46,6 +51,14 @@ function App() {
             }
           />
           <Route
+            path="/today-appoinments"
+            element={
+              <AdminLayout>
+                <TodayAppointments />
+              </AdminLayout>
+            }
+          />
+          <Route
             path="/overview/:id"
             element={
               <AdminLayout>
@@ -54,10 +67,42 @@ function App() {
             }
           />
           <Route
-            path="/doctor-notes"
+            path="/appointment"
+            element={
+              <AdminLayout>
+                <AppointmentsList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/appointment/create"
+            element={
+              <AdminLayout>
+                <AppointmentsCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/doctor-notes/:appointment_id"
             element={
               <AdminLayout>
                 <DoctorNotes />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/labtestorder/:encounter_id"
+            element={
+              <AdminLayout>
+                <LabTestOrder />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/testresults/:encounter_id"
+            element={
+              <AdminLayout>
+                <LabTestResults />
               </AdminLayout>
             }
           />
@@ -137,7 +182,7 @@ function App() {
             path="/lab-tech-prescriptions"
             element={
               <AdminLayout>
-                <LabTechPrescriptions />
+                <LabTestList />
               </AdminLayout>
             }
           />

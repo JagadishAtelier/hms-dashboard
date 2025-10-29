@@ -1,39 +1,50 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import authService from "../../service/authService.js";
 
 function Login() {
-    const navigate = useNavigate()
-        const [formData, setFormData] = useState({ email: "", password: "" });
- const handleLogin = () => {
-  const { email } = formData;
-  let userRole = "receptionist";
-  const normalizedEmail = email.toLowerCase();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ identifier: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  if (normalizedEmail === "doctor@gmail.com") userRole = "doctor";
-  else if (normalizedEmail === "pharmacist@gmail.com") userRole = "pharmacist";
-  else if (normalizedEmail === "labtech@gmail.com") userRole = "labtech";
-  
+  const handleLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const { identifier, password } = formData;
+      if (!identifier || !password) {
+        setError("Please enter both email/phone and password");
+        setLoading(false);
+        return;
+      }
 
-  localStorage.setItem("role", userRole);
+      const res = await authService.login(identifier, password);
+      console.log("Login response:", res);
 
-  // Role-based navigation
-if (userRole === "doctor") {
-  navigate("/dashboard");
-  window.location.reload();
-} else if (userRole === "pharmacist") {
-  navigate("/pharma-dashboard");
-  window.location.reload();
-} else if (userRole === "labtech") {
-  navigate("/labtech-dashboard");
-  window.location.reload();
-} else {
-  navigate("/dashboard");
-  window.location.reload();
-}
+      // 🔹 Normalize role (lowercase + remove spaces)
+      const rawRole = res?.user?.role || "Receptionist";
+      const normalizedRole = rawRole.toLowerCase().replace(/\s+/g, ""); // e.g. "Lab Technician" → "labtechnician"
 
-};
+      localStorage.setItem("role", normalizedRole);
+
+      // 🔹 Role-based navigation
+      if (normalizedRole === "doctor") navigate("/dashboard");
+      else if (normalizedRole === "pharmacist") navigate("/pharma-dashboard");
+      else if (normalizedRole === "labtechnician") navigate("/labtech-dashboard");
+      else navigate("/dashboard");
+
+      window.location.reload();
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.error || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex w-full h-screen items-center justify-center gap-20">
       {/* Left side - Image */}
@@ -48,37 +59,60 @@ if (userRole === "doctor") {
       {/* Right side - Form */}
       <div className="w-fit flex flex-col items-center justify-center gap-3">
         <div className="text-center mb-4">
-          <h1 className="text-3xl font-bold">Create Account</h1>
-          <p className="text-gray-500">
-            Create an account to handle patient intake and records
-          </p>
+          <h1 className="text-3xl font-bold">Welcome Back</h1>
+          <p className="text-gray-500">Login to manage patient records</p>
         </div>
 
         <div className="w-full space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <Input type="text" placeholder="Enter Name" className="h-13 bg-white w-full"/>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <Input type="text" placeholder="Enter Email" className="h-13 bg-white w-full"
-             onChange={(e) => setFormData({ ...formData, email: e.target.value })}/>
+            <label className="block text-sm font-medium mb-1">Email or Phone</label>
+            <Input
+              type="text"
+              placeholder="Enter Email or Phone"
+              className="h-13 bg-white w-full"
+              value={formData.identifier}
+              onChange={(e) =>
+                setFormData({ ...formData, identifier: e.target.value })
+              }
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
-            <Input type="password" placeholder="Enter Password" className="h-13 bg-white w-full"
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}/>
+            <Input
+              type="password"
+              placeholder="Enter Password"
+              className="h-13 bg-white w-full"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
           </div>
-          <p>Must be at least 8 characters.</p>
-          <Button className="w-full h-13 bg-[#1D3557] hover:bg-[#1D3557]"onClick={handleLogin}>Get Started</Button>
+
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <p className="text-gray-500 text-xs">Must be at least 8 characters.</p>
+
+          <Button
+            className="w-full h-13 bg-[#1D3557] hover:bg-[#1D3557]"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </Button>
+
           <div className="flex items-center gap-2">
             <div className="border w-full"></div>
             <p>OR</p>
             <div className="border w-full"></div>
           </div>
-          <p className="text-center">Already have an account?<a href="/login" className="underline text-[#0E1680]">Log in</a></p>
+
+          <p className="text-center">
+            Don’t have an account?{" "}
+            <a href="/register" className="underline text-[#0E1680]">
+              Create one
+            </a>
+          </p>
         </div>
       </div>
     </div>
