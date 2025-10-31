@@ -67,7 +67,6 @@ if (userRole === "doctor") {
             <Input type="password" placeholder="Enter Password" className="h-13 bg-white w-full"
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}/>
           </div>
-          <p>Must be at least 8 characters.</p>
           <Button className="w-full h-13 bg-[#1D3557] hover:bg-[#1D3557]" onClick={handleLogin}>Log in</Button>
           <div className="flex items-center gap-2">
             <div className="border w-full"></div>

@@ -13,41 +13,85 @@ function Login() {
   const handleLogin = async () => {
     setError("");
     setLoading(true);
+
     try {
       const { identifier, password } = formData;
+
+      // ✅ Validation
       if (!identifier || !password) {
         setError("Please enter both email/phone and password");
         setLoading(false);
         return;
       }
 
+      // ✅ API Call
       const res = await authService.login(identifier, password);
       console.log("Login response:", res);
 
-      // 🔹 Normalize role (lowercase + remove spaces)
-      const rawRole = res?.user?.role || "Receptionist";
-      const normalizedRole = rawRole.toLowerCase().replace(/\s+/g, ""); // e.g. "Lab Technician" → "labtechnician"
+      // ❌ If backend sends "error" field
+      if (res?.error) {
+        setError(res.error || "Invalid credentials. Please try again.");
+        setLoading(false);
+        return;
+      }
 
+      // ❌ If missing user/token
+      if (!res?.user || !res?.token) {
+        setError("Invalid response from server. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Extract user + role
+      const { token, user } = res;
+      const normalizedRole = (user.role || "Receptionist")
+        .toLowerCase()
+        .replace(/\s+/g, "");
+
+      // ✅ Store user info
+      localStorage.setItem("token", token);
       localStorage.setItem("role", normalizedRole);
+      localStorage.setItem("username", user.username || "");
 
-      // 🔹 Role-based navigation
-      if (normalizedRole === "doctor") navigate("/dashboard");
-      else if (normalizedRole === "pharmacist") navigate("/pharma-dashboard");
-      else if (normalizedRole === "labtechnician") navigate("/labtech-dashboard");
-      else navigate("/dashboard");
+      // ✅ Redirect based on role
+      switch (normalizedRole) {
+        case "superadmin":
+        case "doctor":
+          navigate("/dashboard");
+          break;
+        case "pharmacist":
+          navigate("/pharma-dashboard");
+          break;
+        case "labtechnician":
+          navigate("/labtech-dashboard");
+          break;
+        default:
+          navigate("/dashboard");
+      }
 
-      window.location.reload();
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.response?.data?.error || "Login failed");
+
+      // ✅ Handle all error types gracefully
+      let message =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Invalid credentials. Please try again.";
+
+      if (message.toLowerCase().includes("invalid")) {
+        message = "Invalid credentials. Please check your email or password.";
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex w-full h-screen items-center justify-center gap-20">
-      {/* Left side - Image */}
+    <div className="flex w-full h-screen items-center justify-center gap-20 bg-gray-50">
+      {/* Left Image */}
       <div className="w-fit h-full flex items-center justify-center">
         <img
           src="/loginBanner.png"
@@ -56,7 +100,7 @@ function Login() {
         />
       </div>
 
-      {/* Right side - Form */}
+      {/* Right Form */}
       <div className="w-fit flex flex-col items-center justify-center gap-3">
         <div className="text-center mb-4">
           <h1 className="text-3xl font-bold">Welcome Back</h1>
@@ -65,7 +109,9 @@ function Login() {
 
         <div className="w-full space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-1">Email or Phone</label>
+            <label className="block text-sm font-medium mb-1">
+              Email or Phone
+            </label>
             <Input
               type="text"
               placeholder="Enter Email or Phone"
@@ -90,29 +136,20 @@ function Login() {
             />
           </div>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-          <p className="text-gray-500 text-xs">Must be at least 8 characters.</p>
+          {/* 🔴 Error Message */}
+          {error && (
+            <p className="text-red-600 text-sm text-center font-medium">
+              Invalid credentials. Please try again.
+            </p>
+          )}
 
           <Button
-            className="w-full h-13 bg-[#1D3557] hover:bg-[#1D3557]"
+            className="w-full h-13 bg-[#1D3557] hover:bg-[#1D3557]/90"
             onClick={handleLogin}
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
           </Button>
-
-          <div className="flex items-center gap-2">
-            <div className="border w-full"></div>
-            <p>OR</p>
-            <div className="border w-full"></div>
-          </div>
-
-          <p className="text-center">
-            Don’t have an account?{" "}
-            <a href="/register" className="underline text-[#0E1680]">
-              Create one
-            </a>
-          </p>
         </div>
       </div>
     </div>

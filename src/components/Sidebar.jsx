@@ -1,14 +1,12 @@
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
-import logo from '../assets/logo.png'
-import LabResultModal from "./Context/LabResultModal"
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import logo from "../assets/logo.png";
+import LabResultModal from "./Context/LabResultModal";
 import {
   Users,
   Settings,
   CalendarDays,
-  LogOut,
   LayoutDashboard,
   Bed,
   UserPlus,
@@ -17,53 +15,68 @@ import {
   SquareUser,
   HousePlus,
   DoorOpen,
-  TestTubeDiagonal
-} from "lucide-react"
-import { useSidebar } from "./Context/SidebarContext"
-import { useEffect, useState } from "react"
-import AddPatientModal from "./Context/AddPatientModal"
+  TestTubeDiagonal,
+  LogOut,
+} from "lucide-react";
+import { useSidebar } from "./Context/SidebarContext";
+import { useEffect, useState } from "react";
+import AddPatientModal from "./Context/AddPatientModal";
 
 export default function Sidebar() {
-  const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const [openLabModal, setOpenLabModal] = useState(false)
-  const { pathname } = useLocation()
-  const { activeLink, setActiveLink } = useSidebar()
-  const location = useLocation()
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [openLabModal, setOpenLabModal] = useState(false);
+  const { pathname } = useLocation();
+  const { activeLink, setActiveLink } = useSidebar();
 
-  const [role, setRole] = useState(localStorage.getItem("role") || "receptionist")
+  const [role, setRole] = useState(localStorage.getItem("role") || "");
 
+  // ✅ Redirect to login if not logged in
   useEffect(() => {
-    const storedRole = localStorage.getItem("role")
-    if (storedRole) setRole(storedRole)
-  }, [location.pathname])
+  const token = localStorage.getItem("token");
+  const storedRole = localStorage.getItem("role");
 
+  // ✅ Prevent redirect if already on login page
+  if (!token || !storedRole) {
+    if (pathname !== "/login") navigate("/login");
+    return;
+  }
+
+  setRole(storedRole);
+}, [navigate, pathname]);
+
+
+  // ✅ Logout handler
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  // ✅ Sidebar links by role
   const defaultLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/admissions", label: "Admissions", icon: Bed },
-    { to: "/add-patient", label: "Add Patient", icon: UserPlus },
-  ]
+  ];
 
   const doctorSidebarLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarDays },
-    { to: "/admissions", label: "Admissions", icon: Bed },
-    { to: "/Lab-Results", label: "Lab Results", icon: UserPlus },
-  ]
+    { to: "/admissions", label: "Admissions", icon: Bed }
+  ];
 
   const pharmacistSidebarLinks = [
     { to: "/pharma-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/prescriptions", label: "Prescriptions", icon: Users },
     { to: "/stockinventory", label: "Stock & Inventory", icon: Bed },
-  ]
+  ];
 
   const labtechSidebarLinks = [
     { to: "/labtech-dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/lab-tech-prescriptions", label: "Prescriptions", icon: Users },
-  ]
+    { to: "/lab-tech-prescriptions", label: "Lab Order", icon: Users },
+  ];
 
   const superadminSidebarLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -72,12 +85,12 @@ export default function Sidebar() {
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
     { to: "/admissions", label: "Admissions", icon: Bed },
     { to: "/department", label: "Departments", icon: Building },
-    { to: "/designation", label:"Designations", icon: IdCardLanyard},
+    { to: "/designation", label: "Designations", icon: IdCardLanyard },
     { to: "/ward", label: "Ward", icon: DoorOpen },
     { to: "/room", label: "Room", icon: HousePlus },
     { to: "/bed", label: "Bed", icon: Bed },
     { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
-  ]
+  ];
 
   const links =
     role === "doctor"
@@ -88,7 +101,7 @@ export default function Sidebar() {
       ? labtechSidebarLinks
       : role === "superadmin"
       ? superadminSidebarLinks
-      : defaultLinks
+      : defaultLinks;
 
   return (
     <aside className="sticky top-0 h-screen hidden md:hidden lg:flex flex-col w-64 bg-[#FCFCFD] shadow-lg">
@@ -102,8 +115,8 @@ export default function Sidebar() {
       <ScrollArea className="flex-1 overflow-y-auto">
         <nav className="p-4 space-y-2">
           {links.map((link) => {
-            const Icon = link.icon
-            const isActive = pathname === link.to
+            const Icon = link.icon;
+            const isActive = pathname === link.to;
 
             return (
               <div
@@ -120,13 +133,13 @@ export default function Sidebar() {
                   className="flex items-center gap-2 text-base"
                   onClick={(e) => {
                     if (link.label === "Lab Results") {
-                      e.preventDefault()
-                      setOpenLabModal(true)
+                      e.preventDefault();
+                      setOpenLabModal(true);
                     } else if (link.label === "Add Patient") {
-                      e.preventDefault()
-                      setOpen(true)
+                      e.preventDefault();
+                      setOpen(true);
                     } else {
-                      setActiveLink(link.label.toLowerCase())
+                      setActiveLink(link.label.toLowerCase());
                     }
                   }}
                 >
@@ -134,35 +147,32 @@ export default function Sidebar() {
                   {link.label}
                 </Link>
               </div>
-            )
+            );
           })}
         </nav>
       </ScrollArea>
 
-      {/* ✅ Footer stays fixed below scroll area */}
+      {/* ✅ Footer */}
       <div className="p-4 border-t bg-white">
-        {[{ icon: Settings, label: "Settings" }].map(
-          (item) => {
-            const Icon = item.icon
-            return (
-              <div
-                key={item.label}
-                className={cn(
-                  "flex items-center justify-start gap-2 w-full text-base font-medium p-2 rounded-md cursor-pointer transition-colors",
-                  "hover:bg-gray-100 text-[#667085]"
-                )}
-              >
-                <Icon size={20} />
-                {item.label}
-              </div>
-            )
-          }
-        )}
+        <div
+          className="flex items-center justify-start gap-2 w-full text-base font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]"
+          onClick={handleLogout}
+        >
+          <LogOut size={20} />
+          Logout
+        </div>
+
+        <div
+          className="flex items-center justify-start gap-2 w-full text-base font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]"
+        >
+          <Settings size={20} />
+          Settings
+        </div>
       </div>
 
       {/* Modals */}
       <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
       <AddPatientModal open={open} setOpen={setOpen} />
     </aside>
-  )
+  );
 }
