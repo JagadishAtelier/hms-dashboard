@@ -1,7 +1,14 @@
-import { Calendar, Users, FileText, DollarSign, ArrowUpCircle, ChevronDown } from "lucide-react"
-import { Line } from "react-chartjs-2"
+import {
+  Calendar,
+  Users,
+  FileText,
+  DollarSign,
+  BedDouble,
+  ChevronDown,
+  ArrowUpCircle,
+} from "lucide-react";
+import { Line, Doughnut } from "react-chartjs-2";
 import React, { useRef, useEffect } from "react";
-import { Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,7 +18,7 @@ import {
   ArcElement,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 } from "chart.js";
 import RecentActivities from "./RecentActivities";
 
@@ -26,55 +33,51 @@ ChartJS.register(
   Filler
 );
 
-
 export default function Dashboard() {
-   const chartRef = useRef(null);
+  const chartRef = useRef(null);
 
-const data1 = {
-  labels: ["Critical (20%)", "High Priority (30%)", "Moderate (40%)", "Low Priority (10%)"],
-  datasets: [
-    {
-      data: [34, 76, 120, 24],
-      backgroundColor: ["#0b1b3d", "#2a3a5d", "#8c9bb3", "#cfd4e0"],
-      borderWidth: 2,
-      borderColor: "#fff",     // white gap between slices
-      spacing: 4,              // gap between slices (Chart.js v4+)
-      hoverOffset: 10,         // optional: makes slices pop on hover
-    },
-  ],
-};
+  // ✅ Doughnut Chart Data
+  const data1 = {
+    labels: ["Critical (20%)", "High Priority (30%)", "Moderate (40%)", "Low Priority (10%)"],
+    datasets: [
+      {
+        data: [34, 76, 120, 24],
+        backgroundColor: ["#7EA6F4", "#A8C5F9", "#C9DAFB", "#E8F0FF"],
+        borderWidth: 2,
+        borderColor: "#fff",
+        spacing: 4,
+        hoverOffset: 10,
+      },
+    ],
+  };
 
-   
-const options1 = {
-  cutout: "60%",
-  plugins: {
-    legend: {
-      position: "right",
-      labels: {
-        boxWidth: 20,      // width of color box
-        boxHeight: 20,     // height of color box
-        borderRadius: 10,  // make box rounded (max for circle)
-        padding: 15,       // space between box and label
-        color: "#333",     // label text color
-        font: {
-          size: 16,        // label font size
-          weight: "500",
+  const options1 = {
+    cutout: "60%",
+    plugins: {
+      legend: {
+        position: "right",
+        labels: {
+          boxWidth: 20,
+          boxHeight: 20,
+          borderRadius: 10,
+          padding: 15,
+          color: "#333",
+          font: { size: 14, weight: "500" },
         },
       },
     },
-  },
-  maintainAspectRatio: false,
-};
+    maintainAspectRatio: false,
+  };
 
-   
-     // Destroy chart on unmount
-     useEffect(() => {
-       return () => {
-         if (chartRef.current) {
-           chartRef.current.destroy();
-         }
-       };
-     }, []);
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
+    };
+  }, []);
+
+  // ✅ Line Chart Data
   const data = {
     labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6", "Week 7"],
     datasets: [
@@ -82,126 +85,119 @@ const options1 = {
         label: "Admitted Patients",
         data: [50, 70, 65, 90, 80, 85, 60],
         fill: true,
-        borderColor: "#3B44B2",
-        tension: 0,
-        backgroundColor: function (context) {
-  const chart = context.chart;
-  const { ctx, chartArea } = chart;
-  if (!chartArea) return null;
-  const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-  gradient.addColorStop(0, "#7F56D9"); // top near the line
-  gradient.addColorStop(1, "rgba(127, 86, 217, 0)"); // bottom transparent
-  return gradient;
-},
-
-
-      }
-    ]
+        borderColor: "#4F46E5",
+        tension: 0.4,
+        backgroundColor: (context) => {
+          const chart = context.chart;
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return null;
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, "rgba(79,70,229,0.3)");
+          gradient.addColorStop(1, "rgba(79,70,229,0)");
+          return gradient;
+        },
+      },
+    ],
   };
 
   const options = {
-    plugins: {
-      legend: { display: false },
-    },
+    plugins: { legend: { display: false } },
     scales: {
-      x: {
-        grid: { display: false },
-        ticks: { display: false },
-      },
-      y: {
-        grid: { color: "transparent" },
-        ticks: { display: false },
-      },
+      x: { grid: { display: false }, ticks: { display: false } },
+      y: { grid: { display: false }, ticks: { display: false } },
     },
-    elements: {
-      line: {
-        borderWidth: 2,
-        fill: true,
-        backgroundColor: "rgba(58,123,213,0.2)", // fill under line
-      },
-      point: {
-        radius: 4,
-        backgroundColor: "#3a7bd5",
-        borderWidth: 2,
-        borderColor: "#fff",
-      },
-    },
-    animation: {
-      onComplete: function () {
-        const chart = this;
-        const ctx = chart.ctx;
-        chart.data.datasets.forEach((dataset, i) => {
-          const meta = chart.getDatasetMeta(i);
-          ctx.save();
-          ctx.shadowColor = "#7F56D9"; // shadow color
-          ctx.shadowBlur = 0;                     // blur radius
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          ctx.beginPath();
-          meta.data.forEach((point, index) => {
-            if (index === 0) {
-              ctx.moveTo(point.x, point.y);
-            } else {
-              ctx.lineTo(point.x, point.y);
-            }
-          });
-          ctx.strokeStyle = dataset.borderColor;
-          ctx.lineWidth = dataset.borderWidth;
-          ctx.stroke();
-          ctx.restore();
-        });
-      }
-    }
   };
 
-
+  // ✅ Light & Clean Stat Cards
+  const stats = [
+    {
+      title: "Total Revenue",
+      value: "$245,000",
+      icon: <DollarSign size={26} className="text-indigo-500" />,
+      bg: "bg-indigo-10",
+    },
+    {
+      title: "Total Appointments",
+      value: "1,280",
+      icon: <Calendar size={26} className="text-green-500" />,
+      bg: "bg-green-50",
+    },
+    {
+      title: "Active Patients",
+      value: "765",
+      icon: <Users size={26} className="text-purple-500" />,
+      bg: "bg-purple-50",
+    },
+    {
+      title: "Available Beds",
+      value: "54",
+      icon: <BedDouble size={26} className="text-orange-500" />,
+      bg: "bg-orange-50",
+    },
+  ];
 
   return (
-    <div className="p-6 ">
+    <div className="p-6">
       <h1 className="text-3xl font-bold mb-8 text-foreground">Overview (Quick Stats)</h1>
-    <div className="flex lg:flex-row md:flex-row flex-col justify-between gap-5">
-      {/* Stat Cards */}
-      <div className="bg-white p-5 rounded-lg shadow-md lg:w-1/2 md:w-1/2 w-full h-100">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Admitted Patients</h3>
-          <div className="flex justify-baseline border p-2 rounded-md">
-            <span className="text-sm text-gray-500">Month</span>
-            <ChevronDown size={18}/>
+
+      {/* ✅ 4 Light Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className={`${stat.bg} p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm text-gray-500 font-medium">{stat.title}</h4>
+                <h2 className="text-2xl font-bold mt-1 text-gray-800">{stat.value}</h2>
+              </div>
+              <div className="p-3 bg-white rounded-full shadow-sm">{stat.icon}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ✅ Chart Section */}
+      <div className="flex lg:flex-row md:flex-row flex-col justify-between gap-5">
+        {/* Line Chart */}
+        <div className="bg-white p-5 rounded-lg shadow-sm lg:w-1/2 md:w-1/2 w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Admitted Patients</h3>
+            <div className="flex items-center border p-2 rounded-md text-sm text-gray-500">
+              <span>Month</span>
+              <ChevronDown size={16} />
+            </div>
+          </div>
+          <div className="flex gap-5 items-center">
+            <div className="text-2xl font-bold text-gray-800">560</div>
+            <p className="text-sm text-gray-500">This month</p>
+          </div>
+          <div className="h-70 w-full">
+            <Line data={data} options={options} className="py-5" />
           </div>
         </div>
-        <div className="flex gap-5 items-center">
-        <div className="text-2xl font-bold">560</div>
-        <div  className="flex items-center gap-2">
-          <div className="bg-[#C7FCD3] flex gap-1 items-center p-1 w-fit rounded-md">
-            <ArrowUpCircle size={18}/>
-            <p className="text-sm">+8.8% </p>
+
+        {/* Doughnut Chart */}
+        <div className="bg-white p-5 rounded-lg shadow-sm lg:w-1/2 md:w-1/2 h-100 relative">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold">Patients Category</h3>
+            <div className="flex items-center border p-2 rounded-md text-sm text-gray-500">
+              <span>Month</span>
+              <ChevronDown size={16} />
+            </div>
           </div>
-          <p className="text-sm">is this month</p>
+          <div className="relative w-90 h-90">
+            <Doughnut ref={chartRef} data={data1} options={options1} />
+            <div className="absolute top-40 left-12 w-1/4 text-center font-semibold text-gray-600">
+              100% Data Recorded
+            </div>
           </div>
-        </div>
-        <div className="h-70 w-full">
-        <Line data={data} options={options} className="py-5" />
         </div>
       </div>
 
-      {/* Stat Cards */}
-    <div className="bg-white p-5 rounded-lg shadow-md lg:w-1/2 md:w-1/2 h-100">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Patients Category</h3>
-          <div className="flex justify-baseline border p-2 rounded-md">
-            <span className="text-sm text-gray-500">Month</span>
-            <ChevronDown size={18}/>
-          </div>
-      </div>
-<div className="w-90 h-90 relative">
-  <Doughnut ref={chartRef} data={data1} options={options1} />
-  <div className="absolute top-40 left-12 w-1/4  text-center">100% Data Recorded</div>
-</div>
-
-
+      {/* ✅ Recent Activities Section */}
+      <RecentActivities />
     </div>
-    </div>
-    <RecentActivities/>
-    </div>
-  )
+  );
 }

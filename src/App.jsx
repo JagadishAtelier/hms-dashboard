@@ -6,7 +6,7 @@ import AdminLayout from "./layout/AdminLayout";
 import "./App.css";
 import { Pages } from "./pages/Pages";
 import AllPageView from "./pages/NewPage/AllPageView";
-import ProductsList from "./pages/ProductsList";
+import ProductsList from "./pages/PatientsList";
 import Login from "./pages/LoginPage/Login";
 import Signup from "./pages/LoginPage/Signup";
 import { SidebarProvider } from "./components/Context/SidebarContext";
@@ -27,6 +27,23 @@ import AppointmentsList from "./pages/ReceptionistPage/AppointmentsList";
 import AppointmentsCreate from "./pages/ReceptionistPage/AppointmentsCreate";
 import LabTestOrder from "./pages/PatientProfile/LabtestOrder";
 import LabTestResults from "./pages/PatientProfile/LabtestResults";
+import PatientsCreate from "./pages/ReceptionistPage/PatientsCreate";
+import AdmissionsList from "./pages/ReceptionistPage/AdmissionsList";
+import AdmissionsCreate from "./pages/ReceptionistPage/AdmissionsCreate";
+import DepartmentList from "./pages/AdminPage/DepartmentList";
+import DepartmentCreate from "./pages/AdminPage/DepartmentCreate"
+import DesignationList from "./pages/AdminPage/DesignationList"
+import DesignationCreate from "./pages/AdminPage/DesignationCreate"
+import DoctorList from "./pages/AdminPage/DoctorList";
+import DoctorCreate from "./pages/AdminPage/DoctorCreate";
+import WardList from "./pages/AdminPage/WardList";
+import WardCreate from "./pages/AdminPage/WardCreate";
+import RoomList from "./pages/AdminPage/RoomList"
+import RoomCreate from "./pages/AdminPage/RoomCreate";
+import BedList from "./pages/AdminPage/BedList";
+import BedCreate from "./pages/AdminPage/BedCreate"
+import LabtestList from "./pages/AdminPage/LabtestList";
+import LabtestCreate from "./pages/AdminPage/LabtestCreate"
 function App() {
   return (
     <SidebarProvider>
@@ -81,6 +98,30 @@ function App() {
                 <AppointmentsCreate />
               </AdminLayout>
             }
+          />
+          <Route
+            path="/admissions"
+            element={
+              <AdminLayout>
+                <AdmissionsList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="admission/create"
+            element={
+              <AdminLayout>
+                <AdmissionsCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+          path="/patients/create"
+          element={
+            <AdminLayout>
+                <PatientsCreate />
+              </AdminLayout>
+          }
           />
           <Route
             path="/doctor-notes/:appointment_id"
@@ -151,6 +192,174 @@ function App() {
             element={
               <AdminLayout>
                 <PharmaPrescriptions />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/department"
+            element={
+              <AdminLayout>
+                <DepartmentList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/departments/create"
+            element={
+              <AdminLayout>
+                <DepartmentCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/departments/edit/:id"
+            element={
+              <AdminLayout>
+                <DepartmentCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/designation"
+            element={
+              <AdminLayout>
+                <DesignationList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/designations/create"
+            element={
+              <AdminLayout>
+                <DesignationCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/designations/edit/:id"
+            element={
+              <AdminLayout>
+                <DesignationCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/doctors"
+            element={
+              <AdminLayout>
+                <DoctorList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/doctors/create"
+            element={
+              <AdminLayout>
+                <DoctorCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/doctors/edit/:id"
+            element={
+              <AdminLayout>
+                <DoctorCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/ward"
+            element={
+              <AdminLayout>
+                <WardList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/wards/create"
+            element={
+              <AdminLayout>
+                <WardCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/wards/edit/:id"
+            element={
+              <AdminLayout>
+                <WardCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/room"
+            element={
+              <AdminLayout>
+                <RoomList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/rooms/create"
+            element={
+              <AdminLayout>
+                <RoomCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/rooms/edit/:id"
+            element={
+              <AdminLayout>
+                <RoomCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/bed"
+            element={
+              <AdminLayout>
+                <BedList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/beds/create"
+            element={
+              <AdminLayout>
+                <BedCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/beds/edit/:id"
+            element={
+              <AdminLayout>
+                <BedCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/labtest"
+            element={
+              <AdminLayout>
+                <LabtestList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/labtests/create"
+            element={
+              <AdminLayout>
+                <LabtestCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/labtests/edit/:id"
+            element={
+              <AdminLayout>
+                <LabtestCreate />
               </AdminLayout>
             }
           />

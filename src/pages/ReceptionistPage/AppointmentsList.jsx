@@ -234,26 +234,6 @@ function AppointmentsList() {
             <option value="Completed">Completed</option>
           </select>
 
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => {
-              setStartDate(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="h-9 w-40"
-            title="Start date"
-          />
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => {
-              setEndDate(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="h-9 w-40"
-            title="End date"
-          />
 
           {/* ADD APPOINTMENT BUTTON */}
           <Button
@@ -299,7 +279,7 @@ function AppointmentsList() {
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Doctor</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Visit</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Action</th>
+                    {/* <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Action</th> */}
                   </tr>
                 </thead>
 
@@ -334,7 +314,7 @@ function AppointmentsList() {
                             item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"
                           }`}>{item.status}</span>
                         </td>
-                        <td className="px-4 py-3">
+                        {/* <td className="px-4 py-3">
                           <div className="flex gap-2">
                             <Button className="bg-[#0E1680] text-white text-xs h-7 px-2 rounded" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
                             <Button variant="outline" size="sm" className="text-xs h-7 px-2" onClick={() => handleEditAppointment(item.id)}>
@@ -346,7 +326,7 @@ function AppointmentsList() {
                               </Button>
                             )}
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   ) : (

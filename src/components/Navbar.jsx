@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Menu, X, User, Moon, Sun } from "lucide-react";
+import { Bell, Menu, LogOut } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -8,23 +8,44 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import authService from "@/service/authService.js";
+import { UserRound } from 'lucide-react';
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // ✅ Fetch logged-in user profile
   useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"));
+    const fetchProfile = async () => {
+      try {
+        const res = await authService.getProfile();
+        setUser(res);
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+        toast.error("Failed to load user profile");
+      }
+    };
+    fetchProfile();
   }, []);
 
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
-    setIsDark(!isDark);
+  // ✅ Handle Logout
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      toast.success("Logged out successfully");
+      navigate("/login");
+    } catch (err) {
+      toast.error("Logout failed");
+    }
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 text-black color-gray-50">
+    <header className="flex items-center justify-between px-6 py-4 text-black bg-white shadow-sm">
       {/* Left section - logo / menu */}
       <div className="flex items-center gap-3">
         {/* Mobile Menu */}
@@ -55,27 +76,36 @@ export default function Navbar() {
 
       {/* Right section - notifications & user */}
       <div className="flex items-center gap-4">
-        <div variant="ghost" size="icon" className="relative">
-          <Bell  />
+        {/* Notifications */}
+        <div className="relative">
+          <Bell />
           <span className="absolute top-0 right-0 block w-2 h-2 bg-red-500 rounded-full" />
         </div>
 
-        {/* <Button
-          onClick={toggleTheme}
-          variant="ghost"
-          className="p-2 rounded-full"
-        >
-          {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-        </Button> */}
-
         <Separator orientation="vertical" className="h-6 hidden md:block" />
 
-        <div className="flex items-center gap-2 cursor-pointer">
-          <img src="https://thvnext.bing.com/th/id/OIP.IGNf7GuQaCqz_RPq5wCkPgHaLH?w=131&h=196&c=7&r=0&o=7&cb=ucfimgc2&dpr=1.3&pid=1.7&rm=3" className="h-10 w-10 object-cover rounded-full"/>
-          <div className="flex flex-col gap-1 text-start">
-          <span className="hidden md:inline text-sm font-medium">Admin</span>
-          <span className="hidden md:inline text-xs font-medium">admin123@gmail.com</span>
+        {/* ✅ User Info */}
+        <div className="flex items-center gap-3 cursor-pointer group">
+          <UserRound className="h-10 w-10 object-cover rounded-full border"/>
+          <div className="flex flex-col gap-0.5 text-start">
+            <span className="hidden md:inline text-sm font-semibold text-gray-800">
+              {user?.role || "Loading..."}
+            </span>
+            <span className="hidden md:inline text-xs text-gray-500">
+              {user?.username || ""}
+            </span>
           </div>
+
+          {/* ✅ Logout button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-2 opacity-0 group-hover:opacity-100 transition"
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut size={18} className="text-red-600" />
+          </Button>
         </div>
       </div>
     </header>
