@@ -17,6 +17,10 @@ import {
   DoorOpen,
   TestTubeDiagonal,
   LogOut,
+  ToolCase,
+  AlignEndVertical,
+  ShoppingBasket,
+  Tractor
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -90,6 +94,10 @@ export default function Sidebar() {
     { to: "/room", label: "Room", icon: HousePlus },
     { to: "/bed", label: "Bed", icon: Bed },
     { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
+    { to: "/category", label: "Category", icon: ToolCase },
+    { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
+    { to: "/product", label: "Product", icon: ShoppingBasket },
+    { to: "/vendor", label: "vendor", icon: Tractor },
   ];
 
   const links =

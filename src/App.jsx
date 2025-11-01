@@ -44,6 +44,14 @@ import BedList from "./pages/AdminPage/BedList";
 import BedCreate from "./pages/AdminPage/BedCreate"
 import LabtestList from "./pages/AdminPage/LabtestList";
 import LabtestCreate from "./pages/AdminPage/LabtestCreate"
+import CategoryList from "./pages/AdminPage/CategoryList";
+import CategoryCreate from "./pages/AdminPage/CategoryCreate";  
+import SubCategoryList from "./pages/AdminPage/SubCategoryList";
+import SubCategoryCreate from "./pages/AdminPage/SubCategoryCreate";
+import ProductList from "./pages/AdminPage/ProductList";
+import ProductCreate from "./pages/AdminPage/ProductCreate";
+import VendorList from "./pages/AdminPage/VendorList";
+import VendorCreate from "./pages/AdminPage/VendorCreate"; 
 function App() {
   return (
     <SidebarProvider>
@@ -364,6 +372,102 @@ function App() {
             }
           />
           <Route
+            path="/category"
+            element={
+              <AdminLayout>
+                <CategoryList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/category/create"
+            element={
+              <AdminLayout>
+                <CategoryCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/category/edit/:id"
+            element={
+              <AdminLayout>
+                <CategoryCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/subcategory"
+            element={
+              <AdminLayout>
+                <SubCategoryList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/subcategory/create"
+            element={
+              <AdminLayout>
+                <SubCategoryCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/subcategory/edit/:id"
+            element={
+              <AdminLayout>
+                <SubCategoryCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/product"
+            element={
+              <AdminLayout>
+                <ProductList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/product/create"
+            element={
+              <AdminLayout>
+                <ProductCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/product/edit/:id"
+            element={
+              <AdminLayout>
+                <ProductCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/vendor"
+            element={
+              <AdminLayout>
+                <VendorList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/vendor/create"
+            element={
+              <AdminLayout>
+                <VendorCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/vendor/edit/:id"
+            element={
+              <AdminLayout>
+                <VendorCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
             path="/stockinventory"
             element={
               <AdminLayout>
@@ -371,6 +475,7 @@ function App() {
               </AdminLayout>
             }
           />
+
           <Route
             path="/pharma-update/:id"
             element={
