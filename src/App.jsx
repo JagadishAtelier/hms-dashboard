@@ -52,6 +52,12 @@ import ProductList from "./pages/AdminPage/ProductList";
 import ProductCreate from "./pages/AdminPage/ProductCreate";
 import VendorList from "./pages/AdminPage/VendorList";
 import VendorCreate from "./pages/AdminPage/VendorCreate"; 
+import OrderList from "./pages/AdminPage/OrderList";
+import OrderCreate from "./pages/AdminPage/OrderCreate";
+import OrderView from "./pages/AdminPage/OrderView";
+import InwardList from "./pages/AdminPage/InwardList";
+import InwardCreate from "./pages/AdminPage/InwardCreate";
+import StockList from "./pages/AdminPage/StockList";
 function App() {
   return (
     <SidebarProvider>
@@ -464,6 +470,70 @@ function App() {
             element={
               <AdminLayout>
                 <VendorCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/order"
+            element={
+              <AdminLayout>
+                <OrderList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/order/create"
+            element={
+              <AdminLayout>
+                <OrderCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/order/edit/:id"
+            element={
+              <AdminLayout>
+                <OrderCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/order/view/:id"
+            element={
+              <AdminLayout>
+                <OrderView />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/inward"
+            element={
+              <AdminLayout>
+                <InwardList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/inward/create"
+            element={
+              <AdminLayout>
+                <InwardCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/inward/edit/:id"
+            element={
+              <AdminLayout>
+                <InwardCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/stock"
+            element={
+              <AdminLayout>
+                <StockList />
               </AdminLayout>
             }
           />

@@ -201,7 +201,7 @@ export default function ProductList() {
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
           <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
-            <div className="min-w-[1000px]">
+            <div className="min-w-[1000px] w-210">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>

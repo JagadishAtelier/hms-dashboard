@@ -20,7 +20,9 @@ import {
   ToolCase,
   AlignEndVertical,
   ShoppingBasket,
-  Tractor
+  Tractor,
+  ShoppingCart,
+  FileInput
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -98,6 +100,8 @@ export default function Sidebar() {
     { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
     { to: "/product", label: "Product", icon: ShoppingBasket },
     { to: "/vendor", label: "vendor", icon: Tractor },
+    { to: "/order", label: "Order", icon: ShoppingCart },
+    { to: "/inward", label: "Inward", icon:FileInput  },
   ];
 
   const links =

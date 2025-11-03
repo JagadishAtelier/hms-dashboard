@@ -138,8 +138,8 @@ export default function VendorList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto w-245 rounded-2xl border border-gray-200 shadow-sm bg-white">
-            <div className="min-w-[1000px]">
+          <div className="overflow-x-auto  rounded-2xl border border-gray-200 shadow-sm bg-white">
+            <div className="min-w-[1000px] w-210">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 bg-[#F6F7FF]">
                   <tr>
