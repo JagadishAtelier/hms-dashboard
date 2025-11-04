@@ -22,7 +22,9 @@ import {
   ShoppingBasket,
   Tractor,
   ShoppingCart,
-  FileInput
+  FileInput,
+  Package,
+  ClipboardCheck
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -73,19 +75,13 @@ export default function Sidebar() {
     { to: "/admissions", label: "Admissions", icon: Bed }
   ];
 
-  const pharmacistSidebarLinks = [
-    { to: "/pharma-dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/prescriptions", label: "Prescriptions", icon: Users },
-    { to: "/stockinventory", label: "Stock & Inventory", icon: Bed },
-  ];
-
   const labtechSidebarLinks = [
     { to: "/labtech-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/lab-tech-prescriptions", label: "Lab Order", icon: Users },
   ];
 
   const superadminSidebarLinks = [
-    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/doctors", label: "Doctors", icon: SquareUser },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
@@ -104,6 +100,25 @@ export default function Sidebar() {
     { to: "/inward", label: "Inward", icon:FileInput  },
   ];
 
+  const pharmacistSidebarLinks = [
+    { to: "/pharma-dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/category", label: "Category", icon: ToolCase },
+    { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
+    { to: "/product", label: "Product", icon: ShoppingBasket },
+    { to: "/vendor", label: "vendor", icon: Tractor },
+    { to: "/order", label: "Order", icon: ShoppingCart },
+    { to: "/inward", label: "Inward", icon:FileInput  },
+    { to: "/stock", label: "Stock & Inventory", icon: Package },
+    { to: "/prescription", label: "Prescriptions", icon: ClipboardCheck },
+  ];
+
+  const nursesSidebarLinks = [
+    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/patient-list", label: "Patient List", icon: Users },
+    { to: "/appointment", label: "Appointments", icon: CalendarDays },
+    { to: "/admissions", label: "Admissions", icon: Bed }
+  ];
+
   const links =
     role === "doctor"
       ? doctorSidebarLinks
@@ -113,6 +128,8 @@ export default function Sidebar() {
       ? labtechSidebarLinks
       : role === "superadmin"
       ? superadminSidebarLinks
+      : role === "nurse"
+      ? nursesSidebarLinks
       : defaultLinks;
 
   return (
@@ -166,13 +183,7 @@ export default function Sidebar() {
 
       {/* ✅ Footer */}
       <div className="p-4 border-t bg-white">
-        <div
-          className="flex items-center justify-start gap-2 w-full text-base font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]"
-          onClick={handleLogout}
-        >
-          <LogOut size={20} />
-          Logout
-        </div>
+        
 
         <div
           className="flex items-center justify-start gap-2 w-full text-base font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]"

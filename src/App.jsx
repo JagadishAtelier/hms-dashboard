@@ -58,6 +58,8 @@ import OrderView from "./pages/AdminPage/OrderView";
 import InwardList from "./pages/AdminPage/InwardList";
 import InwardCreate from "./pages/AdminPage/InwardCreate";
 import StockList from "./pages/AdminPage/StockList";
+import AdminDashboard from "./pages/AdminPage/adminDashboard";
+import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 function App() {
   return (
     <SidebarProvider>
@@ -209,6 +211,15 @@ function App() {
               </AdminLayout>
             }
           />
+          <Route
+            path="/admin-dashboard"
+            element={
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            }
+          />
+          
           <Route
             path="/department"
             element={
@@ -534,6 +545,14 @@ function App() {
             element={
               <AdminLayout>
                 <StockList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/prescription"
+            element={
+              <AdminLayout>
+                <PrescriptionList />
               </AdminLayout>
             }
           />

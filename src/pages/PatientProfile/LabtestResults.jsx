@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, FileText, Upload } from "lucide-react";
 import { toast } from "sonner";
 import labTestOrderService from "../../service/labtestorderService.js";
+import BASE_API from "../../api/baseurl.js";
 
 function LabTestResults() {
   const { encounter_id } = useParams();
@@ -58,7 +59,35 @@ function LabTestResults() {
       setShowModal(false);
       fetchLabTestOrder(encounter_id);
     } catch (err) {
+      console.error(err);
       toast.error(err?.response?.data?.message || "Failed to update result");
+    }
+  };
+
+  // ✅ File Upload Handler
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const toastId = toast.loading("Uploading file...");
+    try {
+      const res = await labTestOrderService.uploadFile(formData);
+      const relativePath = res?.fileUrl || res?.data?.fileUrl;
+      if (relativePath) {
+        // ✅ Store relative path only
+        setResultFileUrl(relativePath);
+        toast.success("File uploaded successfully", { id: toastId });
+      } else {
+        toast.error("Failed to get file URL from server", { id: toastId });
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      toast.error("Failed to upload file", { id: toastId });
+    } finally {
+      toast.dismiss(toastId);
     }
   };
 
@@ -92,34 +121,70 @@ function LabTestResults() {
         <CardContent className="grid grid-cols-3 gap-4 text-sm text-gray-800">
           <div>
             <h3 className="font-semibold text-[#0E1680] mb-2">Patient Details</h3>
-            <p><span className="font-medium">Name:</span> {patient?.first_name} {patient?.last_name}</p>
-            <p><span className="font-medium">Patient Code:</span> {patient?.patient_code}</p>
-            <p><span className="font-medium">Gender / Age:</span> {patient?.gender}, {patient?.age} yrs</p>
-            <p><span className="font-medium">Phone:</span> {patient?.phone}</p>
+            <p>
+              <span className="font-medium">Name:</span> {patient?.first_name}{" "}
+              {patient?.last_name}
+            </p>
+            <p>
+              <span className="font-medium">Patient Code:</span>{" "}
+              {patient?.patient_code}
+            </p>
+            <p>
+              <span className="font-medium">Gender / Age:</span> {patient?.gender},{" "}
+              {patient?.age} yrs
+            </p>
+            <p>
+              <span className="font-medium">Phone:</span> {patient?.phone}
+            </p>
           </div>
 
           <div>
             <h3 className="font-semibold text-[#0E1680] mb-2">Encounter Info</h3>
-            <p><span className="font-medium">Encounter No:</span> {encounter?.encounter_no}</p>
-            <p><span className="font-medium">Date:</span> {new Date(encounter?.encounter_date).toLocaleDateString()}</p>
-            <p><span className="font-medium">Doctor:</span> {encounter?.created_by_name || "-"}</p>
-            <p><span className="font-medium">Status:</span> {encounter?.status || "N/A"}</p>
+            <p>
+              <span className="font-medium">Encounter No:</span>{" "}
+              {encounter?.encounter_no}
+            </p>
+            <p>
+              <span className="font-medium">Date:</span>{" "}
+              {new Date(encounter?.encounter_date).toLocaleDateString()}
+            </p>
+            <p>
+              <span className="font-medium">Doctor:</span>{" "}
+              {encounter?.created_by_name || "-"}
+            </p>
+            <p>
+              <span className="font-medium">Status:</span>{" "}
+              {encounter?.status || "N/A"}
+            </p>
           </div>
 
           <div>
             <h3 className="font-semibold text-[#0E1680] mb-2">Order Info</h3>
-            <p><span className="font-medium">Order No:</span> {order?.order_no}</p>
-            <p><span className="font-medium">Priority:</span> {order?.priority?.toUpperCase()}</p>
-            <p><span className="font-medium">Status:</span> {order?.status?.toUpperCase()}</p>
-            <p><span className="font-medium">Ordered On:</span> {new Date(order?.order_date).toLocaleString()}</p>
+            <p>
+              <span className="font-medium">Order No:</span> {order?.order_no}
+            </p>
+            <p>
+              <span className="font-medium">Priority:</span>{" "}
+              {order?.priority?.toUpperCase()}
+            </p>
+            <p>
+              <span className="font-medium">Status:</span>{" "}
+              {order?.status?.toUpperCase()}
+            </p>
+            <p>
+              <span className="font-medium">Ordered On:</span>{" "}
+              {new Date(order?.order_date).toLocaleString()}
+            </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Test Results */}
+      {/* Test Results Table */}
       <Card>
         <CardContent>
-          <h3 className="text-lg font-semibold text-[#0E1680] mb-4">Test Details</h3>
+          <h3 className="text-lg font-semibold text-[#0E1680] mb-4">
+            Test Details
+          </h3>
 
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200 text-sm">
@@ -147,7 +212,9 @@ function LabTestResults() {
                     <td className="p-3">{it?.sample_type}</td>
                     <td className="p-3">
                       {it?.result_value ? (
-                        <span className="font-medium text-green-700">{it.result_value}</span>
+                        <span className="font-medium text-green-700">
+                          {it.result_value}
+                        </span>
                       ) : (
                         <span className="italic text-gray-400">Pending</span>
                       )}
@@ -157,7 +224,7 @@ function LabTestResults() {
                     <td className="p-3">
                       {it?.result_file_url ? (
                         <a
-                          href={it.result_file_url}
+                          href={`${BASE_API}/hms/${it.result_file_url}`}
                           target="_blank"
                           rel="noreferrer"
                           className="text-blue-600 underline"
@@ -190,14 +257,17 @@ function LabTestResults() {
 
       {/* Modal for Add Result */}
       {showModal && (
-        <div className="fixed h-[100%] inset-0 bg-[#000000a1] bg-opacity-100 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#000000a1] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-[400px] p-6 space-y-4">
             <h2 className="text-lg font-semibold text-[#0E1680] mb-2">
               Add Result – {selectedItem?.test?.name}
             </h2>
 
+            {/* Result Value */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Result Value</label>
+              <label className="text-sm font-medium text-gray-700">
+                Result Value
+              </label>
               <input
                 type="text"
                 value={resultValue}
@@ -206,32 +276,59 @@ function LabTestResults() {
               />
             </div>
 
+            {/* File Upload */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Result File URL</label>
+              <label className="text-sm font-medium text-gray-700">
+                Upload Result File
+              </label>
               <input
-                type="text"
-                value={resultFileUrl}
-                onChange={(e) => setResultFileUrl(e.target.value)}
-                placeholder="Enter file URL"
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={handleFileUpload}
                 className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-[#0E1680]"
               />
+
+              {/* Preview */}
+              {/* {resultFileUrl && (
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500 mb-1">
+                    Uploaded File Preview:
+                  </p>
+                  {resultFileUrl.endsWith(".pdf") ? (
+                    <a
+                      href={`${BASE_API}/hms/${resultFileUrl}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 underline text-sm"
+                    >
+                      View PDF
+                    </a>
+                  ) : (
+                    <img
+                      src={`${BASE_API}/${resultFileUrl}`}
+                      alt="Result preview"
+                      className="w-full h-[180px] object-contain border rounded-md"
+                    />
+                  )}
+                </div>
+              )} */}
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowModal(false)}
-              >
+              <Button variant="outline" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmitResult} className="bg-[#0E1680] text-white">
+              <Button
+                onClick={handleSubmitResult}
+                className="bg-[#0E1680] text-white flex items-center"
+              >
                 <Upload size={16} className="mr-1" /> Submit
               </Button>
             </div>
           </div>
         </div>
       )}
-      
+
       {/* Footer */}
       <div className="text-center text-xs text-gray-500 mt-8">
         <p>

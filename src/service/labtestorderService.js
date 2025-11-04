@@ -110,6 +110,23 @@ const labTestOrderService = {
     });
     return res.data;
   },
+  /**
+ * ✅ Upload Lab Result File
+ */
+async uploadFile(formData) {
+  const res = await axios.post(
+    `${BASE_API}/hms/laboratory/upload`,
+    formData,
+    {
+      headers: {
+        ...authHeader(),
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return res.data;
+},
+
 };
 
 export default labTestOrderService;

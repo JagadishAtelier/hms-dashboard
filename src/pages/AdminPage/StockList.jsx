@@ -302,13 +302,6 @@ export default function StockList() {
             <Upload size={14} /> Bulk Upload
           </Button>
 
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={exportExcel}>
-            <Download size={14} /> Export Excel
-          </Button>
-
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={exportPDF}>
-            Export PDF
-          </Button>
         </div>
       </div>
 
