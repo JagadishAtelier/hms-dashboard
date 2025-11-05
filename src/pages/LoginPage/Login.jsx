@@ -42,7 +42,7 @@ export default function Login() {
       switch (normalizedRole) {
         case "superadmin":
         case "doctor":
-          navigate("/dashboard");
+          navigate("/admin-dashboard");
           break;
         case "pharmacist":
           navigate("/pharma-dashboard");

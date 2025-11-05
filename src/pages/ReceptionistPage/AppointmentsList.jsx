@@ -196,7 +196,7 @@ function AppointmentsList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
@@ -237,7 +237,7 @@ function AppointmentsList() {
 
           {/* ADD APPOINTMENT BUTTON */}
           <Button
-            className="bg-green-600 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-[#fff] h-[36px] flex items-center gap-2 w-[124px] sm:w-auto text-sm"
             onClick={handleAddAppointment}
             aria-label="Add Appointment"
           >
@@ -245,10 +245,10 @@ function AppointmentsList() {
           </Button>
 
           <Button
-            className="bg-[#0E1680] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-[#fff] h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={() => fetchAppointments(1)}
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} />
           </Button>
         </div>
       </div>
@@ -261,24 +261,24 @@ function AppointmentsList() {
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Appt No</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Patient</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Code</th>
+                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Appt No</th>
+                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Patient</th>
+                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Code</th>
                     <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("scheduled_at")}
                     >
                       Date {sortBy === "scheduled_at" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
                     <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("scheduled_time")}
                     >
                       Time {sortBy === "scheduled_time" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Doctor</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Visit</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Status</th>
+                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Doctor</th>
+                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Visit</th>
+                    <th className="px-4 py-3 text-center text-[10px]   font-semibold text-[#475467]">Status</th>
                     {/* <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Action</th> */}
                   </tr>
                 </thead>
@@ -293,22 +293,22 @@ function AppointmentsList() {
                   ) : displayAppointments.length > 0 ? (
                     displayAppointments.map((item) => (
                       <tr key={item.id} className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100">
-                        <td className="px-4 py-3 font-medium text-gray-800 text-xs">{item.appointment_no}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">
+                        <td className="px-4 py-3 text-center font-medium text-gray-800 text-[10px]">{item.appointment_no}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">
                           {item.patient ? `${item.patient.first_name} ${item.patient.last_name}` : "—"}
                         </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.patient?.patient_code || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{formatDate(item.scheduled_at)}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.scheduled_time || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.doctor?.doctor_name || "—"}</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">{item.patient?.patient_code || "—"}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">{formatDate(item.scheduled_at)}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">{item.scheduled_time || "—"}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">{item.doctor?.doctor_name || "—"}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                             item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" :
                             item.visit_type === "teleconsult" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
                           }`}>{item.visit_type}</span>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        <td className="px-4 py-3 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                             item.status === "Pending" ? "bg-yellow-100 text-yellow-700" :
                             item.status === "Confirmed" ? "bg-green-100 text-green-700" :
                             item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"
@@ -331,7 +331,7 @@ function AppointmentsList() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={11} className="py-4 text-center text-gray-500 text-xs">No appointments found.</td>
+                      <td colSpan={11} className="py-4 text-center text-gray-500 text-[10px]">No appointments found.</td>
                     </tr>
                   )}
                 </tbody>

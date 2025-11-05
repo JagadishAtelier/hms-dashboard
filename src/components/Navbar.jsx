@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Menu, LogOut } from "lucide-react";
+import { Bell, Menu, LogOut, UserRound } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import authService from "@/service/authService.js";
-import { UserRound } from 'lucide-react';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -45,28 +44,28 @@ export default function Navbar() {
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 text-black bg-white shadow-sm">
+    <header className="flex items-center justify-between px-5 py-3 text-[13px] text-black bg-white shadow-sm">
       {/* Left section - logo / menu */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Mobile Menu */}
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="md:block lg:hidden">
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <SheetHeader className="p-4 border-b">
-              <SheetTitle>Menu</SheetTitle>
+          <SheetContent side="left" className="w-60 p-0">
+            <SheetHeader className="p-3 border-b">
+              <SheetTitle className="text-sm font-semibold">Menu</SheetTitle>
             </SheetHeader>
-            <nav className="flex flex-col p-4 space-y-2">
-              <Button variant="ghost" className="justify-start">
+            <nav className="flex flex-col p-3 space-y-1.5 text-[13px]">
+              <Button variant="ghost" className="justify-start text-[13px]">
                 Dashboard
               </Button>
-              <Button variant="ghost" className="justify-start">
+              <Button variant="ghost" className="justify-start text-[13px]">
                 Users
               </Button>
-              <Button variant="ghost" className="justify-start">
+              <Button variant="ghost" className="justify-start text-[13px]">
                 Settings
               </Button>
             </nav>
@@ -75,23 +74,23 @@ export default function Navbar() {
       </div>
 
       {/* Right section - notifications & user */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Notifications */}
         <div className="relative">
-          <Bell />
+          <Bell size={16} />
           <span className="absolute top-0 right-0 block w-2 h-2 bg-red-500 rounded-full" />
         </div>
 
-        <Separator orientation="vertical" className="h-6 hidden md:block" />
+        <Separator orientation="vertical" className="h-5 hidden md:block" />
 
         {/* ✅ User Info */}
-        <div className="flex items-center gap-3 cursor-pointer group">
-          <UserRound className="h-10 w-10 object-cover rounded-full border"/>
+        <div className="flex items-center gap-2 cursor-pointer group">
+          <UserRound className="h-8 w-8 object-cover rounded-full border" />
           <div className="flex flex-col gap-0.5 text-start">
-            <span className="hidden md:inline text-sm font-semibold text-gray-800">
+            <span className="hidden md:inline text-[13px] font-semibold text-gray-800 leading-tight">
               {user?.role || "Loading..."}
             </span>
-            <span className="hidden md:inline text-xs text-gray-500">
+            <span className="hidden md:inline text-[12px] text-gray-500 leading-tight">
               {user?.username || ""}
             </span>
           </div>
@@ -100,11 +99,11 @@ export default function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="ml-2 opacity-0 group-hover:opacity-100 transition"
+            className="ml-1 opacity-0 group-hover:opacity-100 transition"
             onClick={handleLogout}
             title="Logout"
           >
-            <LogOut size={18} className="text-red-600" />
+            <LogOut size={16} className="text-red-600" />
           </Button>
         </div>
       </div>

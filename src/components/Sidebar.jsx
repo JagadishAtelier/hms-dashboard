@@ -9,14 +9,12 @@ import {
   CalendarDays,
   LayoutDashboard,
   Bed,
-  UserPlus,
   Building,
   IdCardLanyard,
   SquareUser,
   HousePlus,
   DoorOpen,
   TestTubeDiagonal,
-  LogOut,
   ToolCase,
   AlignEndVertical,
   ShoppingBasket,
@@ -24,7 +22,7 @@ import {
   ShoppingCart,
   FileInput,
   Package,
-  ClipboardCheck
+  ClipboardCheck,
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -41,18 +39,16 @@ export default function Sidebar() {
 
   // ✅ Redirect to login if not logged in
   useEffect(() => {
-  const token = localStorage.getItem("token");
-  const storedRole = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
+    const storedRole = localStorage.getItem("role");
 
-  // ✅ Prevent redirect if already on login page
-  if (!token || !storedRole) {
-    if (pathname !== "/login") navigate("/login");
-    return;
-  }
+    if (!token || !storedRole) {
+      if (pathname !== "/login") navigate("/login");
+      return;
+    }
 
-  setRole(storedRole);
-}, [navigate, pathname]);
-
+    setRole(storedRole);
+  }, [navigate, pathname]);
 
   // ✅ Logout handler
   const handleLogout = () => {
@@ -72,7 +68,7 @@ export default function Sidebar() {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarDays },
-    { to: "/admissions", label: "Admissions", icon: Bed }
+    { to: "/admissions", label: "Admissions", icon: Bed },
   ];
 
   const labtechSidebarLinks = [
@@ -95,9 +91,9 @@ export default function Sidebar() {
     { to: "/category", label: "Category", icon: ToolCase },
     { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
     { to: "/product", label: "Product", icon: ShoppingBasket },
-    { to: "/vendor", label: "vendor", icon: Tractor },
+    { to: "/vendor", label: "Vendor", icon: Tractor },
     { to: "/order", label: "Order", icon: ShoppingCart },
-    { to: "/inward", label: "Inward", icon:FileInput  },
+    { to: "/inward", label: "Inward", icon: FileInput },
   ];
 
   const pharmacistSidebarLinks = [
@@ -105,9 +101,9 @@ export default function Sidebar() {
     { to: "/category", label: "Category", icon: ToolCase },
     { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
     { to: "/product", label: "Product", icon: ShoppingBasket },
-    { to: "/vendor", label: "vendor", icon: Tractor },
+    { to: "/vendor", label: "Vendor", icon: Tractor },
     { to: "/order", label: "Order", icon: ShoppingCart },
-    { to: "/inward", label: "Inward", icon:FileInput  },
+    { to: "/inward", label: "Inward", icon: FileInput },
     { to: "/stock", label: "Stock & Inventory", icon: Package },
     { to: "/prescription", label: "Prescriptions", icon: ClipboardCheck },
   ];
@@ -116,7 +112,7 @@ export default function Sidebar() {
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
-    { to: "/admissions", label: "Admissions", icon: Bed }
+    { to: "/admissions", label: "Admissions", icon: Bed },
   ];
 
   const links =
@@ -133,7 +129,7 @@ export default function Sidebar() {
       : defaultLinks;
 
   return (
-    <aside className="sticky top-0 h-screen hidden md:hidden lg:flex flex-col w-64 bg-[#FCFCFD] shadow-lg">
+    <aside className="sticky top-0 h-screen hidden md:hidden lg:flex flex-col w-58 bg-[#ffffff] shadow-lg text-[14px]">
       {/* Logo Header */}
       <div className="flex items-center gap-2 p-4 border-b bg-white">
         <img src={logo} alt="logo" className="w-8 h-8" />
@@ -151,15 +147,15 @@ export default function Sidebar() {
               <div
                 key={link.to}
                 className={cn(
-                  "w-full justify-start rounded-md text-sm font-medium gap-3 p-2 hover:bg-gray-100",
+                  "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#F2F5FF] transition-colors duration-200",
                   isActive
-                    ? "bg-[#E5E7FB] text-[#011D4A] hover:bg-gray-200"
+                    ? "bg-[#F2F5FF] text-[#011D4A] hover:bg-gray-200"
                     : "text-[#667085]"
                 )}
               >
                 <Link
                   to={link.to}
-                  className="flex items-center gap-2 text-base"
+                  className="flex items-center gap-2 text-[14px]"
                   onClick={(e) => {
                     if (link.label === "Lab Results") {
                       e.preventDefault();
@@ -172,7 +168,7 @@ export default function Sidebar() {
                     }
                   }}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
                   {link.label}
                 </Link>
               </div>
@@ -182,13 +178,9 @@ export default function Sidebar() {
       </ScrollArea>
 
       {/* ✅ Footer */}
-      <div className="p-4 border-t bg-white">
-        
-
-        <div
-          className="flex items-center justify-start gap-2 w-full text-base font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]"
-        >
-          <Settings size={20} />
+      <div className="p-4 border-t bg-white text-[14px]">
+        <div className="flex items-center justify-start gap-2 w-full font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]">
+          <Settings size={16} />
           Settings
         </div>
       </div>
