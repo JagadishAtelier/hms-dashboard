@@ -112,7 +112,7 @@ function AdmissionsList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
@@ -154,17 +154,17 @@ function AdmissionsList() {
           </select>
 
           <Button
-            className="bg-green-600 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-9 flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddAdmission}
           >
             <Plus size={14} /> Add Admission
           </Button>
 
           <Button
-            className="bg-[#0E1680] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-9 flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
             onClick={() => fetchAdmissions(1)}
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} /> 
           </Button>
         </div>
       </div>
@@ -408,7 +408,7 @@ function AdmissionsList() {
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
                 className={`text-xs ${
-                  currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""
+                  currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
                 }`}
               >
                 {i + 1}
