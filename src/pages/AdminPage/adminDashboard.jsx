@@ -28,6 +28,9 @@ import {
 } from "chart.js";
 import adminDashboardService from "../../service/admindashboardService";
 import StatCard from "@/components/StatCard";
+import { Link } from "react-router-dom";
+import AdmittedPatientsChart from "@/components/ui/AdmittedPatientsChart";
+import ChartPieDonutActive from "@/components/ChartPieDonutActive";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -172,12 +175,18 @@ export default function AdminDashboard() {
           </Breadcrumb>
         </div>
         <div className="text-right">
-          <button className="text-sm bg-[#506EE4] cursor-pointer py-2 px-3 text-white shadow-sm rounded-sm ml-2">
+          <Link
+            to="/patients/create"
+            className="text-sm bg-[#506EE4] cursor-pointer py-2 px-3 text-white shadow-sm rounded-sm ml-2"
+          >
             Add Patient
-          </button>
-          <button className="text-sm bg-[#E9EDF4] cursor-pointer py-2 px-3 text-gray-700 shadow-sm rounded-sm ml-2">
+          </Link>
+          <Link
+            to="/admission/create"
+            className="text-sm bg-[#E9EDF4] cursor-pointer py-2 px-3 text-gray-700 shadow-sm rounded-sm ml-2"
+          >
             Add Admission
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -198,65 +207,19 @@ export default function AdminDashboard() {
       </div>
 
       {/* ✅ Bar Chart Section */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-700">
-            Admitted Patients Trend
-          </h3>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-6 ">
+        <div className="lg:col-span-7">
+          <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
         </div>
-        <Bar
-          data={{
-            labels: admitted_day_wise.map((d) =>
-              new Date(d.date).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-              })
-            ),
-            datasets: [
-              {
-                label: "Total Capacity",
-                data: admitted_day_wise.map((d) => d.count + 10), // optional overlay
-                backgroundColor: "rgba(79,70,229,0.15)",
-                borderRadius: 6,
-                barThickness: 25,
-              },
-              {
-                label: "Admitted Patients",
-                data: admitted_day_wise.map((d) => d.count),
-                backgroundColor: "rgba(79,70,229,0.85)",
-                borderRadius: 6,
-                barThickness: 25,
-              },
-            ],
-          }}
-          options={{
-            responsive: true,
-            plugins: {
-              legend: {
-                position: "top",
-                labels: {
-                  usePointStyle: true,
-                  pointStyle: "diamond",
-                  color: "#4B5563",
-                  font: { size: 12 },
-                },
-              },
-            },
-            scales: {
-              x: {
-                grid: { display: false },
-                ticks: { color: "#6B7280", font: { size: 11 } },
-              },
-              y: {
-                grid: { color: "#F3F4F6" },
-                ticks: {
-                  color: "#6B7280",
-                  stepSize: 10,
-                },
-              },
-            },
-          }}
-        />
+        <div className="lg:col-span-3">
+          <ChartPieDonutActive
+            data={[
+              { label: "Male", value: 140, fill: "#6366f1" },
+              { label: "Female", value: 110, fill: "#a5b4fc" },
+              { label: "Children", value: 50, fill: "#c7d2fe" },
+            ]}
+          />
+        </div>
       </div>
 
       {/* ✅ Recent Admissions Table */}
