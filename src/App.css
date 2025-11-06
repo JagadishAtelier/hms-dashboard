@@ -6,3 +6,7 @@ body {
   color: var(--color-foreground);
   transition: background-color 0.3s, color 0.3s;
 }
+[data-highlighted] {
+  background-color: #F4F6FA !important; /* Indigo-200 */
+  color: #1e1b4b !important; /* optional: darker text for contrast */
+}

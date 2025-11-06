@@ -48,26 +48,27 @@ export default function TopNavbar() {
       <div className="flex items-center gap-3">
         {/* Academic Year Dropdown */}
         <Select value={academicYear} onValueChange={setAcademicYear}>
-          <SelectTrigger className="w-[220px] h-[42px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded-lg shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all flex items-center">
+          <SelectTrigger className="w-[220px] h-[42px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded-sm shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all flex items-center">
             <Calendar size={16} className="mr-2 text-gray-500" />
             <SelectValue placeholder="Select Year" />
           </SelectTrigger>
 
-          <SelectContent className="rounded-lg shadow-md border border-gray-100 bg-white">
+          <SelectContent className="rounded-sm shadow-md border border-gray-100 bg-white">
             <SelectItem
               value="2024/2025"
-              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-indigo-50 cursor-pointer rounded-md"
+              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-[#F4F6FA] cursor-pointer rounded-sm"
             >
               Financial Year : 2024 / 2025
             </SelectItem>
             <SelectItem
               value="2023/2024"
-              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-indigo-50 cursor-pointer rounded-md"
+              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-[#F4F6FA] cursor-pointer rounded-sm"
             >
               Financial Year : 2023 / 2024
             </SelectItem>
           </SelectContent>
         </Select>
+        
 
         {/* Flag */}
         <Button
