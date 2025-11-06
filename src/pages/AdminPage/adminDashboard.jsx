@@ -31,6 +31,7 @@ import StatCard from "@/components/StatCard";
 import { Link } from "react-router-dom";
 import AdmittedPatientsChart from "@/components/ui/AdmittedPatientsChart";
 import ChartPieDonutActive from "@/components/ChartPieDonutActive";
+import AdmissionsDonutChart from "@/components/AdmissionsDonutChart";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -117,34 +118,58 @@ export default function AdminDashboard() {
       percentage: 1.2,
       active: 254,
       inactive: 30,
-      icon: <Users size={30} color="#2563EB" />, // blue-600 hex
+      icon: (
+      <img
+        src="/dashoard-icon/activepatients.png"
+        alt="Available Beds"
+        className="w-9 h-9 object-contain"
+      />
+    ),
       color: "#2563EB", // used for badge background
     },
     {
-      title: "Lab Revenue",
+      title: "Total Revenue",
       total: 5000,
       percentage: 0.8,
       active: 40,
       inactive: 10,
-      icon: <TestTubeDiagonal size={30} color="#EA580C" />, // orange-600 hex
+      icon: (
+      <img
+        src="/dashoard-icon/totalrevenue.png"
+        alt="Available Beds"
+        className="w-9 h-9 object-contain"
+      />
+    ), // orange-600 hex
       color: "#EA580C",
     },
     {
-      title: "Doctor Revenue",
+      title: "Appointments",
       total: 12000,
       percentage: 2.5,
       active: 80,
       inactive: 20,
-      icon: <BriefcaseMedical size={30} color="#16A34A" />, // green-600 hex
+      icon: (
+      <img
+        src="/dashoard-icon/totalappointments.png"
+        alt="Available Beds"
+        className="w-9 h-9 object-contain"
+      />
+    ), // green-600 hex
       color: "#16A34A",
     },
     {
-      title: "Pharma Revenue",
+      title: "Available beds",
       total: 7800,
       percentage: 1.1,
       active: 55,
       inactive: 12,
-      icon: <Pill size={30} color="#9333EA" />, // purple-600 hex
+      icon: (
+      <img
+        src="/dashoard-icon/availablebeds.png"
+        alt="Available Beds"
+        className="w-9 h-9 object-contain"
+      />
+    ), // purple-600 hex
       color: "#9333EA",
     },
   ];
@@ -212,11 +237,11 @@ export default function AdminDashboard() {
           <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
         </div>
         <div className="lg:col-span-3">
-          <ChartPieDonutActive
+          <AdmissionsDonutChart
             data={[
               { label: "Male", value: 140, fill: "#6366f1" },
-              { label: "Female", value: 110, fill: "#a5b4fc" },
-              { label: "Children", value: 50, fill: "#c7d2fe" },
+              { label: "Female", value: 110, fill: "#EAB300" },
+              { label: "Children", value: 50, fill: "#E82646" },
             ]}
           />
         </div>

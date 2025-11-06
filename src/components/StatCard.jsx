@@ -22,7 +22,7 @@ export default function StatCard({
         <div className="flex items-center gap-3">
           <div
             className="h-14 w-14 flex items-center justify-center rounded-xl"
-            style={{ backgroundColor: `${color}20` }}
+            style={{ backgroundColor: `${color}10` }}
           >
             {icon}
           </div>

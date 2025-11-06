@@ -131,7 +131,7 @@ export default function Sidebar() {
   return (
     <aside className="sticky top-0 h-screen hidden md:hidden lg:flex flex-col w-58 bg-[#ffffff] shadow-lg text-[14px]">
       {/* Logo Header */}
-      <div className="flex items-center gap-2 p-4 border-b bg-white">
+      <div className="flex items-center gap-2 p-2.5 border-b bg-white">
         <img src={logo} alt="logo" className="w-8 h-8" />
         <h1 className="text-lg font-semibold">Atelier HMS</h1>
       </div>
@@ -147,15 +147,15 @@ export default function Sidebar() {
               <div
                 key={link.to}
                 className={cn(
-                  "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#F2F5FF] transition-colors duration-200",
+                  "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#DDE4FF] transition-colors duration-200",
                   isActive
-                    ? "bg-[#F2F5FF] text-[#011D4A] hover:bg-gray-200"
+                    ? "bg-[#F2F5FF] text-[#3D5EE1]"
                     : "text-[#667085]"
                 )}
               >
                 <Link
                   to={link.to}
-                  className="flex items-center gap-2 text-[14px]"
+                  className="flex items-center gap-3 text-[15px]"
                   onClick={(e) => {
                     if (link.label === "Lab Results") {
                       e.preventDefault();
@@ -168,7 +168,12 @@ export default function Sidebar() {
                     }
                   }}
                 >
-                  <Icon size={18} />
+                  <div className={cn(
+                    " p-1.5 rounded-sm ",
+                    isActive ? "bg-white shadow-sm text-[#3D5EE1]" : "text-[#667085]"
+                  )}>
+                    <Icon size={18} />
+                  </div>
                   {link.label}
                 </Link>
               </div>

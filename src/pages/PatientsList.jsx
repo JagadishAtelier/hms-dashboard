@@ -13,6 +13,7 @@ import {
   Trash2,
   Eye,
   RotateCw,
+  Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/Context/SidebarContext";
@@ -53,7 +54,15 @@ function PatientsList() {
   useEffect(() => {
     fetchPatients(currentPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, limit, filterGender, filterBloodGroup, isActiveFilter, sortBy, sortOrder]);
+  }, [
+    currentPage,
+    limit,
+    filterGender,
+    filterBloodGroup,
+    isActiveFilter,
+    sortBy,
+    sortOrder,
+  ]);
 
   const robustParsePatientsResponse = (res) => {
     // Try common shapes used in your project
@@ -70,7 +79,12 @@ function PatientsList() {
     // case: res.data.data (paginated)
     if (top?.data && Array.isArray(top.data)) {
       const rows = top.data;
-      const totalVal = top.total ?? top.count ?? top.totalItems ?? top.totalRecords ?? rows.length;
+      const totalVal =
+        top.total ??
+        top.count ??
+        top.totalItems ??
+        top.totalRecords ??
+        rows.length;
       return { rows, total: totalVal };
     }
 
@@ -88,7 +102,10 @@ function PatientsList() {
 
     // case: res.data.rows or res.rows
     if (top?.rows && Array.isArray(top.rows)) {
-      return { rows: top.rows, total: top.total ?? top.count ?? top.totalRecords ?? top.rows.length };
+      return {
+        rows: top.rows,
+        total: top.total ?? top.count ?? top.totalRecords ?? top.rows.length,
+      };
     }
 
     // case: res.data is object representing single patient (rare)
@@ -118,7 +135,11 @@ function PatientsList() {
         gender: filterGender || undefined,
         blood_group: filterBloodGroup || undefined,
         is_active:
-          isActiveFilter === "active" ? true : isActiveFilter === "inactive" ? false : undefined,
+          isActiveFilter === "active"
+            ? true
+            : isActiveFilter === "inactive"
+            ? false
+            : undefined,
         sort_by: sortBy,
         sort_order: sortOrder,
       };
@@ -161,7 +182,12 @@ function PatientsList() {
   };
 
   const handleDeletePatient = async (id) => {
-    if (!confirm("Are you sure you want to delete this patient? This will soft-delete the patient.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this patient? This will soft-delete the patient."
+      )
+    )
+      return;
     try {
       setLoading(true);
       await patientService.deletePatient(id);
@@ -217,33 +243,37 @@ function PatientsList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-1 sm:p-1 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">🧾 Patients</h2>
+        <div className="flex items-center gap-2">
+          <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
+            <Users size={20} className="inline-block text-gray-600" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+            {" "}
+            Patients List
+          </h2>
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-          </div>
-
+          <div className="relative w-full sm:w-64"></div>
 
           <Button
-            className="bg-[#506EE4] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            variant="outline"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddPatient}
             aria-label="Add Patient"
           >
             <Plus size={14} /> Add Patient
           </Button>
-
         </div>
       </div>
 
       {/* Table desktop */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-sm border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[800px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
@@ -252,26 +282,49 @@ function PatientsList() {
                       className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("patient_code")}
                     >
-                      Code {sortBy === "patient_code" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
+                      Code{" "}
+                      {sortBy === "patient_code"
+                        ? sortOrder === "ASC"
+                          ? "↑"
+                          : "↓"
+                        : ""}
                     </th>
                     <th
                       className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("last_name")}
                     >
-                      Patient {sortBy === "last_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
+                      Patient{" "}
+                      {sortBy === "last_name"
+                        ? sortOrder === "ASC"
+                          ? "↑"
+                          : "↓"
+                        : ""}
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Phone</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Email</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Gender</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Action</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
+                      Phone
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
+                      Email
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
+                      Gender
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
+                      Action
+                    </th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
+                      <td
+                        colSpan={9}
+                        className="py-4 text-center text-gray-500 text-xs"
+                      >
                         Loading patients...
                       </td>
                     </tr>
@@ -281,17 +334,27 @@ function PatientsList() {
                         key={p.id}
                         className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
                       >
-                        <td className="px-4 py-3 font-medium text-gray-800 text-xs">{p.patient_code || "—"}</td>
+                        <td className="px-4 py-3 font-medium text-gray-800 text-xs">
+                          {p.patient_code || "—"}
+                        </td>
                         <td className="px-4 py-3 text-gray-700 text-xs">
                           {p.first_name} {p.last_name || ""}
                         </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{p.phone || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{p.email || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{p.gender || "—"}</td>
+                        <td className="px-4 py-3 text-gray-700 text-xs">
+                          {p.phone || "—"}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700 text-xs">
+                          {p.email || "—"}
+                        </td>
+                        <td className="px-4 py-3 text-gray-700 text-xs">
+                          {p.gender || "—"}
+                        </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                              p.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+                            className={`px-2.5 py-1.5 rounded-full text-xs font-semibold ${
+                              p.is_active
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
                             }`}
                           >
                             {p.is_active ? "Active" : "Inactive"}
@@ -299,10 +362,10 @@ function PatientsList() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
-
                             <Button
                               variant="outline"
-                              className="text-xs h-7 px-2 rounded"
+                              size="icon"
+                              className="text-xs px-2 rounded-sm"
                               onClick={() => handleEditPatient(p.id)}
                               title="Edit"
                             >
@@ -312,7 +375,8 @@ function PatientsList() {
                             {p.is_active ? (
                               <Button
                                 variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
+                                size="icon"
+                                className="text-xs rounded-sm"
                                 onClick={() => handleDeletePatient(p.id)}
                                 title="Delete"
                               >
@@ -321,7 +385,8 @@ function PatientsList() {
                             ) : (
                               <Button
                                 variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
+                                size="icon"
+                                className="text-xs rounded-sm"
                                 onClick={() => handleRestorePatient(p.id)}
                                 title="Restore"
                               >
@@ -334,7 +399,10 @@ function PatientsList() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
+                      <td
+                        colSpan={9}
+                        className="py-4 text-center text-gray-500 text-xs"
+                      >
                         No patients found.
                       </td>
                     </tr>
@@ -348,21 +416,38 @@ function PatientsList() {
         {/* Mobile card view */}
         <div className="md:hidden space-y-3 mt-3">
           {loading ? (
-            <p className="text-center text-gray-500 text-xs">Loading patients...</p>
+            <p className="text-center text-gray-500 text-xs">
+              Loading patients...
+            </p>
           ) : displayPatients.length > 0 ? (
             displayPatients.map((p) => (
-              <article key={p.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+              <article
+                key={p.id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 p-3"
+              >
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div>
-                    <p className="font-semibold text-[#0E1680] text-sm">{p.first_name} {p.last_name}</p>
-                    <p className="text-xs text-gray-600 mt-1">{p.patient_code || "—"}</p>
+                    <p className="font-semibold text-[#0E1680] text-sm">
+                      {p.first_name} {p.last_name}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {p.patient_code || "—"}
+                    </p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
-                    <span className={`px-2 py-0.5 text-[11px] rounded-full ${p.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+                    <span
+                      className={`px-2 py-0.5 text-[11px] rounded-full ${
+                        p.is_active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
                       {p.is_active ? "Active" : "Inactive"}
                     </span>
-                    <span className="text-[11px] text-gray-500">{p.phone || "—"}</span>
+                    <span className="text-[11px] text-gray-500">
+                      {p.phone || "—"}
+                    </span>
                   </div>
                 </div>
 
@@ -379,23 +464,50 @@ function PatientsList() {
 
                   <div className="col-span-2">
                     <div className="text-[11px] text-gray-500">Address</div>
-                    <div className="text-xs text-gray-700">{p.address || "—"}</div>
+                    <div className="text-xs text-gray-700">
+                      {p.address || "—"}
+                    </div>
                   </div>
 
                   <div className="col-span-2 flex gap-2 mt-2">
-                    <Button className="bg-[#0E1680] text-white w-1/3 text-sm" onClick={() => handleViewPatient(p.id)}>View</Button>
-                    <Button className="w-1/3" variant="outline" onClick={() => handleEditPatient(p.id)}><Edit2 size={14} /></Button>
+                    <Button
+                      className="bg-[#0E1680] text-white w-1/3 text-sm"
+                      onClick={() => handleViewPatient(p.id)}
+                    >
+                      View
+                    </Button>
+                    <Button
+                      className="w-1/3"
+                      variant="outline"
+                      onClick={() => handleEditPatient(p.id)}
+                    >
+                      <Edit2 size={14} />
+                    </Button>
                     {p.is_active ? (
-                      <Button className="w-1/3" variant="ghost" onClick={() => handleDeletePatient(p.id)}><Trash2 size={14} /></Button>
+                      <Button
+                        className="w-1/3"
+                        variant="ghost"
+                        onClick={() => handleDeletePatient(p.id)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
                     ) : (
-                      <Button className="w-1/3" variant="ghost" onClick={() => handleRestorePatient(p.id)}><RotateCw size={14} /></Button>
+                      <Button
+                        className="w-1/3"
+                        variant="ghost"
+                        onClick={() => handleRestorePatient(p.id)}
+                      >
+                        <RotateCw size={14} />
+                      </Button>
                     )}
                   </div>
                 </div>
               </article>
             ))
           ) : (
-            <p className="text-center text-gray-500 text-xs">No patients found.</p>
+            <p className="text-center text-gray-500 text-xs">
+              No patients found.
+            </p>
           )}
         </div>
       </div>
@@ -421,7 +533,15 @@ function PatientsList() {
             <option value={50}>50 / page</option>
           </select>
 
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs"><ChevronLeft /></Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className="text-xs"
+          >
+            <ChevronLeft />
+          </Button>
 
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => (
@@ -430,14 +550,24 @@ function PatientsList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}
+                className={`text-xs ${
+                  currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
+                }`}
               >
                 {i + 1}
               </Button>
             ))}
           </div>
 
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs"><ChevronRight /></Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="text-xs"
+          >
+            <ChevronRight />
+          </Button>
         </div>
       </div>
     </div>

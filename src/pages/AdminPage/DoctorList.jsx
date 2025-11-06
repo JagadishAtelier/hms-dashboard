@@ -9,8 +9,16 @@ import {
   RotateCw,
   RefreshCw,
   Clock,
+  BriefcaseMedical,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import doctorsService from "../../service/doctorsService.js";
 import DoctorScheduleModal from "./DoctorScheduleModal.jsx";
@@ -142,14 +150,24 @@ function DoctorList() {
   const displayDoctors = useMemo(() => doctors || [], [doctors]);
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">🩺 Doctors</h2>
-
+        <div className="flex items-center gap-2">
+          <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
+            <BriefcaseMedical
+              size={20}
+              className="inline-block text-gray-600"
+            />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+            {" "}
+            Doctors
+          </h2>
+        </div>
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
           <Button
-            className="bg-green-600 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddDoctor}
           >
             <Plus size={14} /> Add Doctor
@@ -167,7 +185,7 @@ function DoctorList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[900px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
@@ -177,7 +195,11 @@ function DoctorList() {
                       onClick={() => toggleSort("doctor_name")}
                     >
                       Doctor Name{" "}
-                      {sortBy === "doctor_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
+                      {sortBy === "doctor_name"
+                        ? sortOrder === "ASC"
+                          ? "↑"
+                          : "↓"
+                        : ""}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
                       Email
@@ -208,7 +230,10 @@ function DoctorList() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
+                      <td
+                        colSpan={9}
+                        className="py-4 text-center text-gray-500 text-xs"
+                      >
                         Loading doctors...
                       </td>
                     </tr>
@@ -257,9 +282,9 @@ function DoctorList() {
                             {/* Edit */}
                             <Button
                               variant="outline"
-                              className="text-xs h-7 px-2 rounded"
+                              size="icon"
+                              className="text-xs px-2 rounded border-gray-200 hover:bg-indigo-50 hover:text-indigo-600"
                               onClick={() => handleEditDoctor(d.id)}
-                              title="Edit"
                             >
                               <Edit2 size={14} />
                             </Button>
@@ -267,7 +292,8 @@ function DoctorList() {
                             {/* Schedule */}
                             <Button
                               variant="outline"
-                              className="text-xs h-7 px-2 rounded"
+                              size="icon"
+                              className="text-xs px-2 rounded border-gray-200 hover:bg-indigo-50 hover:text-indigo-600"
                               onClick={() => {
                                 setSelectedDoctor(d);
                                 setShowScheduleModal(true);
@@ -281,7 +307,8 @@ function DoctorList() {
                             {d.is_active ? (
                               <Button
                                 variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
+                                size="icon"
+                                className="text-xs px-2 rounded"
                                 onClick={() => handleDeleteDoctor(d.id)}
                                 title="Delete"
                               >
@@ -290,7 +317,7 @@ function DoctorList() {
                             ) : (
                               <Button
                                 variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
+                                className="text-xs px-2 rounded"
                                 onClick={() => handleRestoreDoctor(d.id)}
                                 title="Restore"
                               >
@@ -303,7 +330,10 @@ function DoctorList() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
+                      <td
+                        colSpan={9}
+                        className="py-4 text-center text-gray-500 text-xs"
+                      >
                         No doctors found.
                       </td>
                     </tr>
@@ -322,18 +352,22 @@ function DoctorList() {
         </p>
 
         <div className="flex items-center gap-2">
-          <select
-            value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => {
+              setLimit(Number(value));
               setCurrentPage(1);
             }}
-            className="h-8 text-xs border rounded px-2 bg-white"
           >
-            <option value={5}>5 / page</option>
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-          </select>
+            <SelectTrigger className="h-8 w-[110px] text-xs bg-white">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 / page</SelectItem>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+            </SelectContent>
+          </Select>
 
           <Button
             variant="outline"
