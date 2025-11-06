@@ -230,7 +230,7 @@ function PatientsList() {
 
 
           <Button
-            className="bg-[#506EE4] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddPatient}
             aria-label="Add Patient"
           >

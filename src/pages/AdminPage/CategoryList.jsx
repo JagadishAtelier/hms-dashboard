@@ -136,7 +136,7 @@ function CategoryList() {
   const displayCategories = useMemo(() => categories || [], [categories]);
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
@@ -153,15 +153,15 @@ function CategoryList() {
             />
             <Button
               variant="outline"
-              className="h-9 flex items-center gap-2 text-sm"
+              className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm"
               onClick={() => fetchCategories(currentPage)}
             >
-              <RefreshCw size={14} /> Refresh
+              <RefreshCw size={14} />
             </Button>
           </div>
 
           <Button
-            className="bg-green-600 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddCategory}
           >
             <Plus size={14} /> Add Category
@@ -325,7 +325,7 @@ function CategoryList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""}`}
+                className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}
               >
                 {i + 1}
               </Button>

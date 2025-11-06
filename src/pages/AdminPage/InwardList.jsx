@@ -166,7 +166,7 @@ export default function InwardList() {
   const displayInwards = useMemo(() => inwards || [], [inwards]);
 
   return (
-    <div className="p-4 sm:p-6 w-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold text-foreground">📥 Inwards</h2>
@@ -204,13 +204,9 @@ export default function InwardList() {
             <option value="cancelled">Cancelled</option>
           </select>
 
-          <Button variant="outline" onClick={exportPDF} disabled={loading}>
-            Export PDF
-          </Button>
-
           <Button
             onClick={() => navigate("/inward/create")}
-            className="bg-[#1C2244] hover:bg-[#2a2f5c]"
+            className="h-[36px] bg-[#506EE4] text-white  flex items-center gap-2 text-sm"
           >
             <Plus className="mr-2 h-4 w-4" /> Add Inward
           </Button>

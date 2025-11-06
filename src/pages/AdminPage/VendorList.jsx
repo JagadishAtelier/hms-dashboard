@@ -104,7 +104,7 @@ export default function VendorList() {
   const displayVendors = useMemo(() => vendors || [], [vendors]);
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold text-foreground">🏢 Vendors</h2>
@@ -119,15 +119,15 @@ export default function VendorList() {
             />
             <Button
               variant="outline"
-              className="h-9 flex items-center gap-2"
+              className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2"
               onClick={() => fetchVendors(currentPage)}
             >
-              <RefreshCw size={14} /> Refresh
+              <RefreshCw size={14} />
             </Button>
           </div>
 
           <Button
-            className="bg-[#0E1680] text-white h-9 flex items-center gap-2"
+            className="h-[36px] bg-[#506EE4] text-white flex items-center gap-2"
             onClick={() => navigate("/vendor/create")}
           >
             <Plus size={14} /> Add Vendor
@@ -139,7 +139,7 @@ export default function VendorList() {
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
           <div className="overflow-x-auto  rounded-2xl border border-gray-200 shadow-sm bg-white">
-            <div className="min-w-[1000px] w-210">
+            <div className="min-w-[600px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 bg-[#F6F7FF]">
                   <tr>
@@ -250,7 +250,7 @@ export default function VendorList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""}`}
+                className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}
               >
                 {i + 1}
               </Button>
