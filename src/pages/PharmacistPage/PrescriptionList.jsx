@@ -401,7 +401,7 @@ export default function PrescriptionList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold">🩺 Prescriptions</h2>
@@ -414,16 +414,16 @@ export default function PrescriptionList() {
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 placeholder="Search by patient, doctor, or prescription no..."
-                className="h-9 text-sm outline-none"
+                className="h-5 text-sm outline-none"
               />
             </div>
 
-            <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => fetchPrescriptions(currentPage, searchQuery)}>
-              <RefreshCw size={14} /> Refresh
+            <Button variant="outline" className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 text-sm" onClick={() => fetchPrescriptions(currentPage, searchQuery)}>
+              <RefreshCw size={14} />
             </Button>
           </div>
 
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => setShowColumnModal(true)}>
+          <Button variant="outline" className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 text-sm" onClick={() => setShowColumnModal(true)}>
             <FileText size={14} /> Columns
           </Button>
         </div>

@@ -154,14 +154,14 @@ function AdmissionsList() {
           </select>
 
           <Button
-            className="bg-[#506EE4] text-white h-9 flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-[36px] flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddAdmission}
           >
             <Plus size={14} /> Add Admission
           </Button>
 
           <Button
-            className="bg-[#506EE4] text-white h-9 flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-[36px] flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
             onClick={() => fetchAdmissions(1)}
           >
             <RefreshCw size={14} /> 

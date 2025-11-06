@@ -268,7 +268,7 @@ export default function StockList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl sm:text-2xl font-bold">📊 Stock</h2>
@@ -281,24 +281,20 @@ export default function StockList() {
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 placeholder="Search by product or code..."
-                className="h-9 text-sm outline-none"
+                className="h-5 text-sm outline-none"
               />
             </div>
 
-            <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => fetchStocks(currentPage, searchQuery)}>
-              <RefreshCw size={14} /> Refresh
+            <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm" onClick={() => fetchStocks(currentPage, searchQuery)}>
+              <RefreshCw size={14} />
             </Button>
           </div>
 
-          <Button className="bg-[#0E1680] text-white h-9 flex items-center gap-2 text-sm" onClick={() => navigate("/stock/create")}>
-            <Plus size={14} /> Add Stock
-          </Button>
-
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => setShowColumnModal(true)}>
+          <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm" onClick={() => setShowColumnModal(true)}>
             <Settings size={14} /> Columns
           </Button>
 
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => setShowUploadModal(true)}>
+          <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm" onClick={() => setShowUploadModal(true)}>
             <Upload size={14} /> Bulk Upload
           </Button>
 
@@ -308,7 +304,7 @@ export default function StockList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
-          <div className="min-w-[1000px]">
+          <div className="min-w-[600px]">
             <table className="w-full table-auto border-collapse text-[#475467]">
               <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                 <tr>
