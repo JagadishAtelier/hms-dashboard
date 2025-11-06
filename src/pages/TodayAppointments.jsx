@@ -43,27 +43,27 @@ function TodayAppointments() {
 
   // Handler: Take for Consultation
   // Handler: Take for Consultation
-const handleTakeForConsultation = (appointment) => {
-  const patientId = appointment?.patient?.id || appointment?.patient_id;
-  const appointmentId = appointment?.id;
+  const handleTakeForConsultation = (appointment) => {
+    const patientId = appointment?.patient?.id || appointment?.patient_id;
+    const appointmentId = appointment?.id;
 
-  if (!patientId || !appointmentId) {
-    console.warn("Missing patient or appointment ID:", appointment);
-    return;
-  }
+    if (!patientId || !appointmentId) {
+      console.warn("Missing patient or appointment ID:", appointment);
+      return;
+    }
 
-  // Set sidebar context for doctor view
-  try {
-    if (setMode) setMode("edit");
-    if (setSelectedPatientId) setSelectedPatientId(patientId);
-    if (setActiveLink) setActiveLink("edit overview");
-  } catch (err) {
-    console.warn("Sidebar context unavailable:", err);
-  }
+    // Set sidebar context for doctor view
+    try {
+      if (setMode) setMode("edit");
+      if (setSelectedPatientId) setSelectedPatientId(patientId);
+      if (setActiveLink) setActiveLink("edit overview");
+    } catch (err) {
+      console.warn("Sidebar context unavailable:", err);
+    }
 
-  // ✅ Navigate with both patient ID & appointment ID
-  navigate(`/overview/${patientId}?appointmentId=${appointmentId}`);
-};
+    // ✅ Navigate with both patient ID & appointment ID
+    navigate(`/overview/${patientId}?appointmentId=${appointmentId}`);
+  };
 
 
   // Filter + Search Logic
@@ -93,7 +93,7 @@ const handleTakeForConsultation = (appointment) => {
 
   return (
     // root text-sm reduces most font sizes; adjust specific elements below as needed
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
@@ -115,7 +115,7 @@ const handleTakeForConsultation = (appointment) => {
           </div>
 
           <select
-            className="h-9 border px-3 rounded-md bg-white w-full sm:w-auto text-sm"
+            className="h-9 border border-gray-200 px-3 rounded-md bg-white w-full sm:w-auto text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             value={filterStatus}
             onChange={(e) => {
               setFilterStatus(e.target.value);
@@ -129,11 +129,12 @@ const handleTakeForConsultation = (appointment) => {
             <option value="Completed">Completed</option>
           </select>
 
+
           <Button
-            className="bg-[#0E1680] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={fetchAppointments}
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} />
           </Button>
         </div>
       </div>
@@ -185,13 +186,12 @@ const handleTakeForConsultation = (appointment) => {
 
                         <td className="px-4 py-3">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                              item.visit_type === "OPD"
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.visit_type === "OPD"
                                 ? "bg-blue-100 text-blue-700"
                                 : item.visit_type === "teleconsult"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                            }`}
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-700"
+                              }`}
                           >
                             {item.visit_type}
                           </span>
@@ -199,15 +199,14 @@ const handleTakeForConsultation = (appointment) => {
 
                         <td className="px-4 py-3">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                              item.status === "Pending"
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.status === "Pending"
                                 ? "bg-yellow-100 text-yellow-700"
                                 : item.status === "Confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : item.status === "Cancelled"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-blue-100 text-blue-700"
-                            }`}
+                                  ? "bg-green-100 text-green-700"
+                                  : item.status === "Cancelled"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-blue-100 text-blue-700"
+                              }`}
                           >
                             {item.status}
                           </span>
@@ -218,10 +217,10 @@ const handleTakeForConsultation = (appointment) => {
 
                         <td className="px-4 py-3">
                           <Button
-                            className="bg-[#0E1680] text-white text-xs h-6 px-2 rounded"
+                            className="bg-[#506EE4] text-white text-xs h-6 px-2 rounded"
                             onClick={() => handleTakeForConsultation(item)}
                           >
-                        Consultation
+                            Consultation
                           </Button>
                         </td>
                       </tr>
@@ -259,15 +258,14 @@ const handleTakeForConsultation = (appointment) => {
 
                   <div className="flex flex-col items-end gap-1">
                     <span
-                      className={`px-2 py-0.5 text-[11px] rounded-full ${
-                        item.status === "Pending"
+                      className={`px-2 py-0.5 text-[11px] rounded-full ${item.status === "Pending"
                           ? "bg-yellow-100 text-yellow-700"
                           : item.status === "Confirmed"
-                          ? "bg-green-100 text-green-700"
-                          : item.status === "Cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
+                            ? "bg-green-100 text-green-700"
+                            : item.status === "Cancelled"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700"
+                        }`}
                     >
                       {item.status}
                     </span>
@@ -285,9 +283,8 @@ const handleTakeForConsultation = (appointment) => {
                     <div className="text-[11px] text-gray-500">Visit</div>
                     <div>
                       <span
-                        className={`px-2 py-0.5 text-[11px] rounded ${
-                          item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
-                        }`}
+                        className={`px-2 py-0.5 text-[11px] rounded ${item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+                          }`}
                       >
                         {item.visit_type}
                       </span>
@@ -312,7 +309,7 @@ const handleTakeForConsultation = (appointment) => {
                       className="bg-[#0E1680] text-white w-full mt-3 text-sm"
                       onClick={() => handleTakeForConsultation(item)}
                     >
-                    Consultation
+                      Consultation
                     </Button>
                   </div>
                 </div>
@@ -348,7 +345,7 @@ const handleTakeForConsultation = (appointment) => {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`${currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""} text-xs`}
+                className={`${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""} text-xs`}
               >
                 {i + 1}
               </Button>
