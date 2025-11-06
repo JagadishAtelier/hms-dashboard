@@ -137,11 +137,11 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-2">
       <h1 className="text-3xl font-bold mb-8 text-foreground">Overview (Quick Stats)</h1>
 
       {/* ✅ 4 Light Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
         {stats.map((stat, index) => (
           <div
             key={index}

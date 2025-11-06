@@ -1,111 +1,149 @@
-import { useEffect, useState } from "react";
-import { Bell, Menu, LogOut, UserRound } from "lucide-react";
+import { useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Search,
+  Calendar,
+  Plus,
+  Bell,
+  MessageSquare,
+  BarChart3,
+  Sun,
+  Maximize,
+  Command,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import authService from "@/service/authService.js";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export default function Navbar() {
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
-
-  // ✅ Fetch logged-in user profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await authService.getProfile();
-        setUser(res);
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-        toast.error("Failed to load user profile");
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  // ✅ Handle Logout
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      toast.success("Logged out successfully");
-      navigate("/login");
-    } catch (err) {
-      toast.error("Logout failed");
-    }
-  };
+export default function TopNavbar() {
+  const [academicYear, setAcademicYear] = useState("2024/2025");
 
   return (
-    <header className="flex items-center justify-between px-5 py-3 text-[13px] text-black bg-white shadow-sm">
-      {/* Left section - logo / menu */}
-      <div className="flex items-center gap-2">
-        {/* Mobile Menu */}
-        <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:block lg:hidden">
-              <Menu className="h-4 w-4" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-60 p-0">
-            <SheetHeader className="p-3 border-b">
-              <SheetTitle className="text-sm font-semibold">Menu</SheetTitle>
-            </SheetHeader>
-            <nav className="flex flex-col p-3 space-y-1.5 text-[13px]">
-              <Button variant="ghost" className="justify-start text-[13px]">
-                Dashboard
-              </Button>
-              <Button variant="ghost" className="justify-start text-[13px]">
-                Users
-              </Button>
-              <Button variant="ghost" className="justify-start text-[13px]">
-                Settings
-              </Button>
-            </nav>
-          </SheetContent>
-        </Sheet>
+    <header className="flex items-center justify-between bg-white px-4 py-2.5 shadow-sm border border-gray-100">
+      {/* 🔍 Left - Search */}
+      <div className="relative w-64">
+        <Input
+          type="text"
+          placeholder="Search"
+          className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 text-sm"
+        />
+        <Search
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 shadow-sm p-1 rounded-sm border border-gray-100 bg-white hover:bg-gray-50 cursor-pointer">
+          <Command
+          size={16}
+          className="text-gray-400"
+        />
+        </div>
       </div>
 
-      {/* Right section - notifications & user */}
+      {/* 🧭 Right Section */}
       <div className="flex items-center gap-3">
-        {/* Notifications */}
+        {/* Academic Year Dropdown */}
+        <Select value={academicYear} onValueChange={setAcademicYear}>
+          <SelectTrigger className="w-[220px] h-[42px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded-lg shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all flex items-center">
+            <Calendar size={16} className="mr-2 text-gray-500" />
+            <SelectValue placeholder="Select Year" />
+          </SelectTrigger>
+
+          <SelectContent className="rounded-lg shadow-md border border-gray-100 bg-white">
+            <SelectItem
+              value="2024/2025"
+              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-indigo-50 cursor-pointer rounded-md"
+            >
+              Financial Year : 2024 / 2025
+            </SelectItem>
+            <SelectItem
+              value="2023/2024"
+              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-indigo-50 cursor-pointer rounded-md"
+            >
+              Financial Year : 2023 / 2024
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Flag */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="border-gray-200 p-2 hover:bg-gray-50"
+        >
+         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqrk2iwS4mgWw1Rtizj0SAL6Rdemr9uD2g-w&s" alt="IN" />
+        </Button>
+
+        {/* Plus */}
+        {/* <Button
+          variant="outline"
+          size="icon"
+          className="border-gray-200 hover:bg-gray-50"
+        >
+          <Plus size={16} />
+        </Button> */}
+
+        {/* Theme Toggle */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="border-gray-200 hover:bg-gray-50"
+        >
+          <Sun size={16} />
+        </Button>
+
+        {/* Notification */}
         <div className="relative">
-          <Bell size={16} />
-          <span className="absolute top-0 right-0 block w-2 h-2 bg-red-500 rounded-full" />
-        </div>
-
-        <Separator orientation="vertical" className="h-5 hidden md:block" />
-
-        {/* ✅ User Info */}
-        <div className="flex items-center gap-2 cursor-pointer group">
-          <UserRound className="h-8 w-8 object-cover rounded-full border" />
-          <div className="flex flex-col gap-0.5 text-start">
-            <span className="hidden md:inline text-[13px] font-semibold text-gray-800 leading-tight">
-              {user?.role || "Loading..."}
-            </span>
-            <span className="hidden md:inline text-[12px] text-gray-500 leading-tight">
-              {user?.username || ""}
-            </span>
-          </div>
-
-          {/* ✅ Logout button */}
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="ml-1 opacity-0 group-hover:opacity-100 transition"
-            onClick={handleLogout}
-            title="Logout"
+            className="border-gray-200 hover:bg-gray-50"
           >
-            <LogOut size={16} className="text-red-600" />
+            <Bell size={16} />
           </Button>
+          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
         </div>
+
+        {/* Chat */}
+        <div className="relative">
+          <Button
+            variant="outline"
+            size="icon"
+            className="border-gray-200 hover:bg-gray-50"
+          >
+            <MessageSquare size={16} />
+          </Button>
+          <span className="absolute top-1 right-1 h-2 w-2 bg-sky-400 rounded-full"></span>
+        </div>
+
+        {/* Stats */}
+        {/* <Button
+          variant="outline"
+          size="icon"
+          className="border-gray-200 hover:bg-gray-50"
+        >
+          <BarChart3 size={16} />
+        </Button> */}
+
+        {/* Fullscreen */}
+        {/* <Button
+          variant="outline"
+          size="icon"
+          className="border-gray-200 hover:bg-gray-50"
+        >
+          <Maximize size={16} />
+        </Button> */}
+
+        {/* Avatar */}
+        <img
+          src="https://static.vecteezy.com/system/resources/thumbnails/049/174/246/small/a-smiling-young-indian-man-with-formal-shirts-outdoors-photo.jpg"
+          alt="user"
+          className="h-9 w-9 rounded-full border border-gray-200 object-cover"
+        />
       </div>
     </header>
   );
