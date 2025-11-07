@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -25,15 +24,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Bar, Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
 import adminDashboardService from "../../service/admindashboardService";
 import StatCard from "@/components/StatCard";
 import { Link } from "react-router-dom";
@@ -42,8 +32,6 @@ import AdmissionsDonutChart from "@/components/AdmissionsDonutChart";
 import { Eye } from "lucide-react";
 import RevenueOverviewCard from "@/components/RevenueOverviewCard";
 import OpdAppointmentsTrend from "@/components/OpdAppointmentsTrend";
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
@@ -69,8 +57,6 @@ export default function AdminDashboard() {
     return (
       <div className="p-4 space-y-8 animate-pulse">
         <div className="h-8 w-1/3 bg-gray-200 rounded"></div>
-
-        {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array(4)
             .fill()
@@ -87,27 +73,6 @@ export default function AdminDashboard() {
               </div>
             ))}
         </div>
-
-        {/* Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <div className="h-5 w-40 bg-gray-200 rounded mb-4"></div>
-          <div className="h-64 bg-gray-100 rounded"></div>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-5 w-32 bg-gray-200 rounded"></div>
-          </div>
-          <div className="h-8 bg-gray-100 rounded mb-2"></div>
-          <div className="space-y-2">
-            {Array(5)
-              .fill()
-              .map((_, i) => (
-                <div key={i} className="h-6 bg-gray-100 rounded"></div>
-              ))}
-          </div>
-        </div>
       </div>
     );
 
@@ -120,7 +85,6 @@ export default function AdminDashboard() {
 
   const { summary, admitted_day_wise, recent_admitted } = data;
 
-  // ✅ Stat Cards Data
   const stats = [
     {
       title: "Total Patients",
@@ -135,7 +99,7 @@ export default function AdminDashboard() {
           className="w-9 h-9 object-contain"
         />
       ),
-      color: "#2563EB", // used for badge background
+      color: "#2563EB",
     },
     {
       title: "Total Revenue",
@@ -149,7 +113,7 @@ export default function AdminDashboard() {
           alt="Available Beds"
           className="w-9 h-9 object-contain"
         />
-      ), // orange-600 hex
+      ),
       color: "#EA580C",
     },
     {
@@ -164,7 +128,7 @@ export default function AdminDashboard() {
           alt="Available Beds"
           className="w-9 h-9 object-contain"
         />
-      ), // green-600 hex
+      ),
       color: "#16A34A",
     },
     {
@@ -179,21 +143,20 @@ export default function AdminDashboard() {
           alt="Available Beds"
           className="w-9 h-9 object-contain"
         />
-      ), // purple-600 hex
+      ),
       color: "#9333EA",
     },
   ];
 
   return (
-    <div className="p-2 space-y-8">
+    <div className="p-3 sm:p-4 space-y-8">
       {/* ✅ Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
             Admin Dashboard
           </h1>
-
-          <Breadcrumb className="mb-4">
+          <Breadcrumb className="mb-2 sm:mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink href="/">Home</BreadcrumbLink>
@@ -209,16 +172,17 @@ export default function AdminDashboard() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div className="text-right">
+
+        <div className="flex flex-wrap gap-2 justify-start md:justify-end">
           <Link
             to="/patients/create"
-            className="text-sm bg-[#506EE4] cursor-pointer py-2 px-3 text-white shadow-sm rounded-sm ml-2"
+            className="text-sm bg-[#506EE4] py-2 px-3 text-white shadow-sm rounded-sm"
           >
             Add Patient
           </Link>
           <Link
             to="/admission/create"
-            className="text-sm bg-[#E9EDF4] cursor-pointer py-2 px-3 text-gray-700 shadow-sm rounded-sm ml-2"
+            className="text-sm bg-[#E9EDF4] py-2 px-3 text-gray-700 shadow-sm rounded-sm"
           >
             Add Admission
           </Link>
@@ -228,23 +192,16 @@ export default function AdminDashboard() {
       {/* ✅ Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((s, i) => (
-          <StatCard
-            key={i}
-            icon={s.icon}
-            title={s.title}
-            total={s.total}
-            percentage={s.percentage}
-            active={s.active}
-            inactive={s.inactive}
-            color={s.color}
-          />
+          <StatCard key={i} {...s} />
         ))}
       </div>
 
-      {/* ✅ Bar Chart Section */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-3 ">
-        <div className="lg:col-span-7">
-          <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
+      {/* ✅ Chart Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-3">
+        <div className="lg:col-span-7 w-full">
+          <div className="overflow-x-auto">
+            <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
+          </div>
         </div>
         <div className="lg:col-span-3">
           <AdmissionsDonutChart
@@ -258,16 +215,14 @@ export default function AdminDashboard() {
       </div>
 
       {/* ✅ Recent Admissions Table */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Recent Admissions
-            </h3>
-          </div>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+            Recent Admissions
+          </h3>
 
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex flex-wrap gap-2 text-sm text-gray-500">
             <Select defaultValue="all-wards">
               <SelectTrigger className="w-[130px] h-9 border-gray-200">
                 <SelectValue placeholder="All Wards" />
@@ -293,43 +248,24 @@ export default function AdminDashboard() {
         </div>
 
         {/* Table */}
-        {recent_admitted.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border border-gray-100">
-            <Table>
+        <div className="overflow-x-auto">
+          {recent_admitted.length > 0 ? (
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow className="bg-gray-50 hover:bg-gray-50">
-                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
-                    ID
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
-                    Name
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
-                    Reason
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
-                    Admission Date
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
-                    Action
-                  </TableHead>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Admission Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {recent_admitted.map((item, idx) => (
-                  <TableRow
-                    key={idx}
-                    className="hover:bg-gray-50 transition-all duration-150"
-                  >
-                    <TableCell className="py-3 text-gray-600">
-                      {item.patient.patient_code}
-                    </TableCell>
-
-                    <TableCell className="py-3">
+                  <TableRow key={idx}>
+                    <TableCell>{item.patient.patient_code}</TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         <img
                           src={
@@ -344,77 +280,71 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                     </TableCell>
-
-                    <TableCell className="text-gray-700">
-                      {item.reason || "—"}
+                    <TableCell>{item.reason || "—"}</TableCell>
+                    <TableCell>
+                      {new Date(item.admission_date).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </TableCell>
-
-                    <TableCell className="text-gray-600">
-                      {new Date(item.admission_date).toLocaleDateString(
-                        "en-GB",
-                        {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        }
-                      )}
-                    </TableCell>
-
                     <TableCell>
                       <Badge
-                        variant={
-                          item.status === "admitted" ? "success" : "destructive"
-                        }
                         className={`${
                           item.status === "admitted"
-                            ? "bg-green-100 text-green-700 hover:bg-green-100"
-                            : "bg-red-100 text-red-600 hover:bg-red-100"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-600"
                         } text-xs px-3 py-1 rounded-full font-semibold`}
                       >
                         {item.status === "admitted" ? "Admitted" : "Discharged"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="items-center">
+                    <TableCell>
                       <Link
                         to={`/admission/${item.id}`}
-                        className="text-blue-600 hover:underline text-sm font-medium"><Eye size={18}/></Link>
+                        className="text-blue-600 hover:underline text-sm font-medium"
+                      >
+                        <Eye size={18} />
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
-        ) : (
-          <div className="text-gray-500 text-center py-6">
-            No recent admissions found
-          </div>
-        )}
+          ) : (
+            <div className="text-gray-500 text-center py-6">
+              No recent admissions found
+            </div>
+          )}
+        </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center text-sm text-gray-500 mt-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500 mt-4 gap-3">
           <p>Showing {recent_admitted.length} Entries</p>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" className='rounded'>
+            <Button variant="outline" size="sm" className="rounded">
               Prev
             </Button>
             <Button className="bg-blue-800 hover:bg-blue-900 rounded text-white h-8 px-3 text-xs">
               1
             </Button>
-            <Button variant="outline" size="sm" className='rounded'>
+            <Button variant="outline" size="sm" className="rounded">
               2
             </Button>
-            <Button variant="outline" size="sm" className='rounded'>
+            <Button variant="outline" size="sm" className="rounded">
               Next
             </Button>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-3 ">
+
+      {/* ✅ Revenue & OPD Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-3">
         <div className="lg:col-span-3">
           <RevenueOverviewCard />
         </div>
         <div className="lg:col-span-7">
-         <OpdAppointmentsTrend/>
+          <OpdAppointmentsTrend />
         </div>
       </div>
     </div>

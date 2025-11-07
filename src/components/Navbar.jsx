@@ -2,12 +2,10 @@ import { useState } from "react";
 import {
   Search,
   Calendar,
-  Plus,
+  Menu,
   Bell,
   MessageSquare,
-  BarChart3,
   Sun,
-  Maximize,
   Command,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -20,90 +18,60 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function TopNavbar() {
+export default function TopNavbar({ onMenuClick }) {
   const [academicYear, setAcademicYear] = useState("2024/2025");
 
   return (
-    <header className="flex items-center justify-between bg-white px-4 h-[60px] shadow-b-sm border-b border-gray-200">
-      {/* 🔍 Left - Search */}
-      <div className="relative w-64">
-        <Input
-          type="text"
-          placeholder="Search"
-          className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 text-sm"
-        />
-        <Search
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 shadow-sm p-1 rounded-sm border border-gray-100 bg-white hover:bg-gray-50 cursor-pointer">
-          <Command
-          size={16}
-          className="text-gray-400"
-        />
+    <header className="flex items-center justify-between bg-white px-4 h-[60px] shadow-sm border-b border-gray-200">
+      {/* Left - Search + Hamburger */}
+      <div className="flex items-center gap-3">
+        {/* Hamburger for mobile */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden flex items-center justify-center p-2 border border-gray-200 rounded hover:bg-gray-50"
+        >
+          <Menu size={18} />
+        </button>
+
+        {/* Search */}
+        <div className="relative w-56 sm:w-64 hidden sm:block">
+          <Input
+            type="text"
+            placeholder="Search"
+            className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 text-sm"
+          />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 shadow-sm p-1 rounded-sm border border-gray-100 bg-white hover:bg-gray-50 cursor-pointer">
+            <Command size={16} className="text-gray-400" />
+          </div>
         </div>
       </div>
 
-      {/* 🧭 Right Section */}
-      <div className="flex items-center gap-3">
+      {/* Right Section */}
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Academic Year Dropdown */}
         <Select value={academicYear} onValueChange={setAcademicYear}>
-          <SelectTrigger className="w-[250px] h-[42px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded-sm shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all flex items-center">
+          <SelectTrigger className="hidden sm:flex w-[200px] h-[40px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded shadow-sm hover:bg-gray-50">
             <Calendar size={16} className="mr-2 text-gray-500" />
             <SelectValue placeholder="Select Year" />
           </SelectTrigger>
-
-          <SelectContent className="rounded-sm shadow-md border border-gray-100 bg-white">
-            <SelectItem
-              value="2024/2025"
-              className="py-2 px-2 text-[14px] text-gray-700 hover:bg-[#F4F6FA] cursor-pointer rounded-sm"
-            >
-              Financial Year : 2024 / 2025
-            </SelectItem>
-            <SelectItem
-              value="2023/2024"
-              className="py-2 px-3 text-[14px] text-gray-700 hover:bg-[#F4F6FA] cursor-pointer rounded-sm"
-            >
-              Financial Year : 2023 / 2024
-            </SelectItem>
+          <SelectContent>
+            <SelectItem value="2024/2025">Financial Year : 2024 / 2025</SelectItem>
+            <SelectItem value="2023/2024">Financial Year : 2023 / 2024</SelectItem>
           </SelectContent>
         </Select>
-        
-
-        {/* Flag */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="border-gray-200 p-2 hover:bg-gray-50"
-        >
-         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqrk2iwS4mgWw1Rtizj0SAL6Rdemr9uD2g-w&s" alt="IN" />
-        </Button>
-
-        {/* Plus */}
-        {/* <Button
-          variant="outline"
-          size="icon"
-          className="border-gray-200 hover:bg-gray-50"
-        >
-          <Plus size={16} />
-        </Button> */}
 
         {/* Theme Toggle */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="border-gray-200 hover:bg-gray-50"
-        >
+        <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
           <Sun size={16} />
         </Button>
 
         {/* Notification */}
         <div className="relative">
-          <Button
-            variant="outline"
-            size="icon"
-            className="border-gray-200 hover:bg-gray-50"
-          >
+          <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
             <Bell size={16} />
           </Button>
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
@@ -111,33 +79,11 @@ export default function TopNavbar() {
 
         {/* Chat */}
         <div className="relative">
-          <Button
-            variant="outline"
-            size="icon"
-            className="border-gray-200 hover:bg-gray-50"
-          >
+          <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
             <MessageSquare size={16} />
           </Button>
           <span className="absolute top-1 right-1 h-2 w-2 bg-sky-400 rounded-full"></span>
         </div>
-
-        {/* Stats */}
-        {/* <Button
-          variant="outline"
-          size="icon"
-          className="border-gray-200 hover:bg-gray-50"
-        >
-          <BarChart3 size={16} />
-        </Button> */}
-
-        {/* Fullscreen */}
-        {/* <Button
-          variant="outline"
-          size="icon"
-          className="border-gray-200 hover:bg-gray-50"
-        >
-          <Maximize size={16} />
-        </Button> */}
 
         {/* Avatar */}
         <img

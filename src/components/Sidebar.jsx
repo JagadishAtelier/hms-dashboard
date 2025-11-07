@@ -28,7 +28,7 @@ import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
 import AddPatientModal from "./Context/AddPatientModal";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [openLabModal, setOpenLabModal] = useState(false);
@@ -50,13 +50,6 @@ export default function Sidebar() {
     setRole(storedRole);
   }, [navigate, pathname]);
 
-  // ✅ Logout handler
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
-
-  // ✅ Sidebar links by role
   const defaultLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
@@ -133,72 +126,86 @@ export default function Sidebar() {
       : defaultLinks;
 
   return (
-    <aside className="sticky top-0 z-50 h-screen hidden md:hidden lg:flex flex-col w-58 bg-[#ffffff] shadow-lg text-[14px]">
-      {/* Logo Header */}
-      <div className="flex items-center gap-2 px-4 h-[60px] border-b border-r bg-white">
-        <img src={logo} alt="logo" className="w-8 h-8" />
-        <h1 className="text-lg font-semibold">Atelier HMS</h1>
-      </div>
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        ></div>
+      )}
 
-      {/* ✅ Scrollable Navigation Section */}
-      <ScrollArea className="flex-1 overflow-y-auto">
-        <nav className="p-4 space-y-2">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.to;
-
-            return (
-              <div
-                key={link.to}
-                className={cn(
-                  "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#DDE4FF] transition-colors duration-200",
-                  isActive ? "bg-[#F2F5FF] text-[#3D5EE1]" : "text-[#667085]"
-                )}
-              >
-                <Link
-                  to={link.to}
-                  className="flex items-center gap-3 text-[15px]"
-                  onClick={(e) => {
-                    if (link.label === "Lab Results") {
-                      e.preventDefault();
-                      setOpenLabModal(true);
-                    } else if (link.label === "Add Patient") {
-                      e.preventDefault();
-                      setOpen(true);
-                    } else {
-                      setActiveLink(link.label.toLowerCase());
-                    }
-                  }}
-                >
-                  <div
-                    className={cn(
-                      " p-1.5 rounded-sm ",
-                      isActive
-                        ? "bg-white shadow-sm text-[#3D5EE1]"
-                        : "text-[#667085]"
-                    )}
-                  >
-                    <Icon size={18} />
-                  </div>
-                  {link.label}
-                </Link>
-              </div>
-            );
-          })}
-        </nav>
-      </ScrollArea>
-
-      {/* ✅ Footer */}
-      <div className="p-4 border-t bg-white text-[14px]">
-        <div className="flex items-center justify-start gap-2 w-full font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]">
-          <Settings size={16} />
-          Settings
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:flex`}
+      >
+        {/* Logo Header */}
+        <div className="flex items-center gap-2 px-4 h-[60px] border-b border-r bg-white">
+          <img src={logo} alt="logo" className="w-8 h-8" />
+          <h1 className="text-lg font-semibold">Atelier HMS</h1>
         </div>
-      </div>
 
-      {/* Modals */}
-      <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
-      <AddPatientModal open={open} setOpen={setOpen} />
-    </aside>
+        {/* ✅ Scrollable Navigation Section */}
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <nav className="p-4 space-y-2">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname === link.to;
+
+              return (
+                <div
+                  key={link.to}
+                  className={cn(
+                    "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#DDE4FF] transition-colors duration-200",
+                    isActive ? "bg-[#F2F5FF] text-[#3D5EE1]" : "text-[#667085]"
+                  )}
+                >
+                  <Link
+                    to={link.to}
+                    className="flex items-center gap-3 text-[15px]"
+                    onClick={(e) => {
+                      if (link.label === "Lab Results") {
+                        e.preventDefault();
+                        setOpenLabModal(true);
+                      } else if (link.label === "Add Patient") {
+                        e.preventDefault();
+                        setOpen(true);
+                      } else {
+                        setActiveLink(link.label.toLowerCase());
+                        onClose?.(); // ✅ Close sidebar when a link is clicked
+                      }
+                    }}
+                  >
+                    <div
+                      className={cn(
+                        "p-1.5 rounded-sm",
+                        isActive
+                          ? "bg-white shadow-sm text-[#3D5EE1]"
+                          : "text-[#667085]"
+                      )}
+                    >
+                      <Icon size={18} />
+                    </div>
+                    {link.label}
+                  </Link>
+                </div>
+              );
+            })}
+          </nav>
+        </ScrollArea>
+
+        {/* ✅ Footer */}
+        <div className="p-4 border-t bg-white text-[14px]">
+          <div className="flex items-center justify-start gap-2 w-full font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]">
+            <Settings size={16} />
+            Settings
+          </div>
+        </div>
+
+        {/* Modals */}
+        <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
+        <AddPatientModal open={open} setOpen={setOpen} />
+      </aside>
+    </>
   );
 }
