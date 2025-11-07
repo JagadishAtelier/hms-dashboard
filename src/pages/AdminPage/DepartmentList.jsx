@@ -8,6 +8,7 @@ import {
   Trash2,
   RotateCw,
   RefreshCw,
+  Building,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -138,7 +139,7 @@ function DepartmentList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">🏢 Departments</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2"><Building className="inline-block text-gray-500"/> Departments</h2>
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
@@ -161,7 +162,7 @@ function DepartmentList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[600px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">

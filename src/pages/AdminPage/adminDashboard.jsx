@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from "react";
 import {
-  DollarSign,
-  BedDouble,
-  Activity,
-  Users,
-  Calendar,
-  TestTubeDiagonal,
-  Pill,
-  BriefcaseMedical,
-} from "lucide-react";
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,8 +38,10 @@ import adminDashboardService from "../../service/admindashboardService";
 import StatCard from "@/components/StatCard";
 import { Link } from "react-router-dom";
 import AdmittedPatientsChart from "@/components/ui/AdmittedPatientsChart";
-import ChartPieDonutActive from "@/components/ChartPieDonutActive";
 import AdmissionsDonutChart from "@/components/AdmissionsDonutChart";
+import { Eye } from "lucide-react";
+import RevenueOverviewCard from "@/components/RevenueOverviewCard";
+import OpdAppointmentsTrend from "@/components/OpdAppointmentsTrend";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -119,12 +129,12 @@ export default function AdminDashboard() {
       active: 254,
       inactive: 30,
       icon: (
-      <img
-        src="/dashoard-icon/activepatients.png"
-        alt="Available Beds"
-        className="w-9 h-9 object-contain"
-      />
-    ),
+        <img
+          src="/dashoard-icon/activepatients.png"
+          alt="Available Beds"
+          className="w-9 h-9 object-contain"
+        />
+      ),
       color: "#2563EB", // used for badge background
     },
     {
@@ -134,12 +144,12 @@ export default function AdminDashboard() {
       active: 40,
       inactive: 10,
       icon: (
-      <img
-        src="/dashoard-icon/totalrevenue.png"
-        alt="Available Beds"
-        className="w-9 h-9 object-contain"
-      />
-    ), // orange-600 hex
+        <img
+          src="/dashoard-icon/totalrevenue.png"
+          alt="Available Beds"
+          className="w-9 h-9 object-contain"
+        />
+      ), // orange-600 hex
       color: "#EA580C",
     },
     {
@@ -149,12 +159,12 @@ export default function AdminDashboard() {
       active: 80,
       inactive: 20,
       icon: (
-      <img
-        src="/dashoard-icon/totalappointments.png"
-        alt="Available Beds"
-        className="w-9 h-9 object-contain"
-      />
-    ), // green-600 hex
+        <img
+          src="/dashoard-icon/totalappointments.png"
+          alt="Available Beds"
+          className="w-9 h-9 object-contain"
+        />
+      ), // green-600 hex
       color: "#16A34A",
     },
     {
@@ -164,12 +174,12 @@ export default function AdminDashboard() {
       active: 55,
       inactive: 12,
       icon: (
-      <img
-        src="/dashoard-icon/availablebeds.png"
-        alt="Available Beds"
-        className="w-9 h-9 object-contain"
-      />
-    ), // purple-600 hex
+        <img
+          src="/dashoard-icon/availablebeds.png"
+          alt="Available Beds"
+          className="w-9 h-9 object-contain"
+        />
+      ), // purple-600 hex
       color: "#9333EA",
     },
   ];
@@ -232,7 +242,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ✅ Bar Chart Section */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-6 ">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-3 ">
         <div className="lg:col-span-7">
           <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
         </div>
@@ -248,7 +258,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ✅ Recent Admissions Table */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
@@ -256,57 +266,90 @@ export default function AdminDashboard() {
               Recent Admissions
             </h3>
           </div>
+
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <button className="cursor-pointer flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-md hover:bg-gray-50 transition">
-              All Wards
-            </button>
-            <button className="cursor-pointer flex items-center gap-1 border border-gray-200 px-3 py-1.5 rounded-md hover:bg-gray-50 transition">
-              All Status
-            </button>
+            <Select defaultValue="all-wards">
+              <SelectTrigger className="w-[130px] h-9 border-gray-200">
+                <SelectValue placeholder="All Wards" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all-wards">All Wards</SelectItem>
+                <SelectItem value="ward-a">Ward A</SelectItem>
+                <SelectItem value="ward-b">Ward B</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select defaultValue="all-status">
+              <SelectTrigger className="w-[130px] h-9 border-gray-200">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all-status">All Status</SelectItem>
+                <SelectItem value="admitted">Admitted</SelectItem>
+                <SelectItem value="discharged">Discharged</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         {/* Table */}
         {recent_admitted.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-gray-700">
-              <thead>
-                <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
-                  <th className="py-3 px-4 text-left font-semibold">ID</th>
-                  <th className="py-3 px-4 text-left font-semibold">Name</th>
-                  <th className="py-3 px-4 text-left font-semibold">Ward</th>
-                  <th className="py-3 px-4 text-left font-semibold">
+          <div className="overflow-x-auto rounded-md border border-gray-100">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50 hover:bg-gray-50">
+                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
+                    ID
+                  </TableHead>
+                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
+                    Name
+                  </TableHead>
+                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
+                    Reason
+                  </TableHead>
+                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
                     Admission Date
-                  </th>
-                  <th className="py-3 px-4 text-left font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
+                  </TableHead>
+                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-gray-600 font-semibold text-xs uppercase">
+                    Action
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
                 {recent_admitted.map((item, idx) => (
-                  <tr
+                  <TableRow
                     key={idx}
                     className="hover:bg-gray-50 transition-all duration-150"
                   >
-                    <td className="py-3 px-4 text-gray-600">
+                    <TableCell className="py-3 text-gray-600">
                       {item.patient.patient_code}
-                    </td>
-                    <td className="py-3 px-4 flex items-center gap-3">
-                      <img
-                        src={
-                          item.patient.avatar ||
-                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj8LgZC5q9DKpw9Ueip9qKZM7I3A_1H0WyiA&s"
-                        }
-                        alt={item.patient.first_name}
-                        className="w-8 h-8 rounded-full object-cover border"
-                      />
-                      <span className="font-medium text-gray-800">
-                        {item.patient.first_name} {item.patient.last_name}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-700">
-                      {item.ward || "—"}
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">
+                    </TableCell>
+
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={
+                            item.patient.avatar ||
+                            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj8LgZC5q9DKpw9Ueip9qKZM7I3A_1H0WyiA&s"
+                          }
+                          alt={item.patient.first_name}
+                          className="w-8 h-8 rounded-full object-cover border"
+                        />
+                        <span className="font-medium text-gray-800">
+                          {item.patient.first_name} {item.patient.last_name}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-gray-700">
+                      {item.reason || "—"}
+                    </TableCell>
+
+                    <TableCell className="text-gray-600">
                       {new Date(item.admission_date).toLocaleDateString(
                         "en-GB",
                         {
@@ -315,22 +358,31 @@ export default function AdminDashboard() {
                           year: "numeric",
                         }
                       )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-3 py-2 text-xs font-semibold rounded-full ${
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge
+                        variant={
+                          item.status === "admitted" ? "success" : "destructive"
+                        }
+                        className={`${
                           item.status === "admitted"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-600"
-                        }`}
+                            ? "bg-green-100 text-green-700 hover:bg-green-100"
+                            : "bg-red-100 text-red-600 hover:bg-red-100"
+                        } text-xs px-3 py-1 rounded-full font-semibold`}
                       >
                         {item.status === "admitted" ? "Admitted" : "Discharged"}
-                      </span>
-                    </td>
-                  </tr>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="items-center">
+                      <Link
+                        to={`/admission/${item.id}`}
+                        className="text-blue-600 hover:underline text-sm font-medium"><Eye size={18}/></Link>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="text-gray-500 text-center py-6">
@@ -342,19 +394,27 @@ export default function AdminDashboard() {
         <div className="flex justify-between items-center text-sm text-gray-500 mt-4">
           <p>Showing {recent_admitted.length} Entries</p>
           <div className="flex items-center gap-1">
-            <button className="px-2 py-1 cursor-pointer rounded-md hover:bg-gray-100">
+            <Button variant="outline" size="sm" className='rounded'>
               Prev
-            </button>
-            <button className="px-3 py-1 cursor-pointer bg-blue-600 text-white rounded-md">
+            </Button>
+            <Button className="bg-blue-800 hover:bg-blue-900 rounded text-white h-8 px-3 text-xs">
               1
-            </button>
-            <button className="px-2 py-1 cursor-pointer rounded-md hover:bg-gray-100">
+            </Button>
+            <Button variant="outline" size="sm" className='rounded'>
               2
-            </button>
-            <button className="px-2 py-1 cursor-pointer rounded-md hover:bg-gray-100">
+            </Button>
+            <Button variant="outline" size="sm" className='rounded'>
               Next
-            </button>
+            </Button>
           </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-10 gap-3 ">
+        <div className="lg:col-span-3">
+          <RevenueOverviewCard />
+        </div>
+        <div className="lg:col-span-7">
+         <OpdAppointmentsTrend/>
         </div>
       </div>
     </div>

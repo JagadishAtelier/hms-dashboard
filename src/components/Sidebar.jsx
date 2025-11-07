@@ -67,7 +67,11 @@ export default function Sidebar() {
   const doctorSidebarLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/patient-list", label: "Patient List", icon: Users },
-    { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarDays },
+    {
+      to: "/today-appoinments",
+      label: "Today's Appointments",
+      icon: CalendarDays,
+    },
     { to: "/admissions", label: "Admissions", icon: Bed },
   ];
 
@@ -129,9 +133,9 @@ export default function Sidebar() {
       : defaultLinks;
 
   return (
-    <aside className="sticky top-0 h-screen hidden md:hidden lg:flex flex-col w-58 bg-[#ffffff] shadow-lg text-[14px]">
+    <aside className="sticky top-0 z-50 h-screen hidden md:hidden lg:flex flex-col w-58 bg-[#ffffff] shadow-lg text-[14px]">
       {/* Logo Header */}
-      <div className="flex items-center gap-2 p-2.5 border-b bg-white">
+      <div className="flex items-center gap-2 px-4 h-[60px] border-b border-r bg-white">
         <img src={logo} alt="logo" className="w-8 h-8" />
         <h1 className="text-lg font-semibold">Atelier HMS</h1>
       </div>
@@ -148,9 +152,7 @@ export default function Sidebar() {
                 key={link.to}
                 className={cn(
                   "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#DDE4FF] transition-colors duration-200",
-                  isActive
-                    ? "bg-[#F2F5FF] text-[#3D5EE1]"
-                    : "text-[#667085]"
+                  isActive ? "bg-[#F2F5FF] text-[#3D5EE1]" : "text-[#667085]"
                 )}
               >
                 <Link
@@ -168,10 +170,14 @@ export default function Sidebar() {
                     }
                   }}
                 >
-                  <div className={cn(
-                    " p-1.5 rounded-sm ",
-                    isActive ? "bg-white shadow-sm text-[#3D5EE1]" : "text-[#667085]"
-                  )}>
+                  <div
+                    className={cn(
+                      " p-1.5 rounded-sm ",
+                      isActive
+                        ? "bg-white shadow-sm text-[#3D5EE1]"
+                        : "text-[#667085]"
+                    )}
+                  >
                     <Icon size={18} />
                   </div>
                   {link.label}

@@ -3,6 +3,13 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export default function AdmissionsDonutChart() {
   const data = [
@@ -25,11 +32,16 @@ export default function AdmissionsDonutChart() {
               This Month
             </CardDescription>
           </div>
-          <select className="border border-gray-200 rounded-md text-sm px-2 py-1 text-gray-600">
-            <option>Today</option>
-            <option>This Week</option>
-            <option>This Month</option>
-          </select>
+          <Select defaultValue="today">
+      <SelectTrigger className="w-[140px] h-9 border-gray-200 text-sm text-gray-600">
+        <SelectValue placeholder="Select Range" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="today">Today</SelectItem>
+        <SelectItem value="week">This Week</SelectItem>
+        <SelectItem value="month">This Month</SelectItem>
+      </SelectContent>
+    </Select>
         </div>
 
         <div className="flex justify-between space-x-4 mt-4 text-center">

@@ -9,11 +9,19 @@ import {
   Plus,
   LogOut,
   X,
+  BedDouble,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import admissionsService from "../../service/addmissionsService.js";
 import DischargedPatients from "./DischargedPatients.jsx"; // ✅ Import discharge form
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select"
 
 const DEFAULT_LIMIT = 10;
 
@@ -112,13 +120,20 @@ function AdmissionsList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm ">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-            🏥 Admissions
+        <div className="flex items-center justify-center">
+          <div className="w-10 h-10 rounded-sm bg-white border border-gray-200 flex items-center justify-center mr-3 shadow">
+            <BedDouble className="text-gray-500"/>
+          </div>
+          <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground"> Admissions
           </h2>
+          <p className="text-xs text-gray-400 font-normal">
+            Manage patient admissions, transfers, and discharges.
+          </p>
+        </div>
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
@@ -139,32 +154,36 @@ function AdmissionsList() {
             />
           </div>
 
-          <select
-            className="h-9 border px-3 rounded-md bg-white w-full sm:w-auto text-sm"
-            value={filterStatus}
-            onChange={(e) => {
-              setFilterStatus(e.target.value);
+          <Select
+            value={filterStatus || "all"}
+            onValueChange={(value) => {
+              setFilterStatus(value === "all" ? "" : value);
               setCurrentPage(1);
             }}
           >
-            <option value="">All Status</option>
-            <option value="admitted">Admitted</option>
-            <option value="transferred">Transferred</option>
-            <option value="discharged">Discharged</option>
-          </select>
+            <SelectTrigger className="h-9 text-sm w-[150px] bg-white border border-gray-200 rounded-md">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="admitted">Admitted</SelectItem>
+              <SelectItem value="transferred">Transferred</SelectItem>
+              <SelectItem value="discharged">Discharged</SelectItem>
+            </SelectContent>
+          </Select>
 
           <Button
-            className="bg-[#506EE4] text-white h-[36px] flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3e56b6] text-white h-[36px] flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddAdmission}
           >
             <Plus size={14} /> Add Admission
           </Button>
 
           <Button
-            className="bg-[#506EE4] text-white h-[36px] flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3e56b6] text-white h-[36px] flex justify-center items-center gap-2 w-full sm:w-auto text-sm"
             onClick={() => fetchAdmissions(1)}
           >
-            <RefreshCw size={14} /> 
+            <RefreshCw size={14} />
           </Button>
         </div>
       </div>
@@ -172,7 +191,7 @@ function AdmissionsList() {
       {/* Table View */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <table className="w-full table-auto border-collapse">
               <thead className="sticky top-0 bg-[#F6F7FF] z-10">
                 <tr>
@@ -249,7 +268,7 @@ function AdmissionsList() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          className={`px-2.5 py-1.5 uppercase rounded-full text-xs font-semibold ${
                             item.status === "admitted"
                               ? "bg-blue-100 text-blue-700"
                               : item.status === "transferred"
@@ -353,7 +372,7 @@ function AdmissionsList() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="w-full mt-2 text-xs"
+                    className="w-full mt-2 text-xs rounded"
                     onClick={() => handleDischarge(item.id)}
                   >
                     <LogOut size={12} className="mr-1" /> Discharge
@@ -372,30 +391,35 @@ function AdmissionsList() {
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">
-          Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} admissions
+          Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total}{" "}
+          admissions
         </p>
 
         <div className="flex items-center gap-2">
-          <select
-            value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
+          <Select
+            value={limit.toString()}
+            onValueChange={(value) => {
+              setLimit(Number(value));
               setCurrentPage(1);
             }}
-            className="h-8 text-xs border rounded px-2 bg-white"
           >
-            <option value={5}>5 / page</option>
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-            <option value={50}>50 / page</option>
-          </select>
+            <SelectTrigger className="h-8 w-[110px] text-xs bg-white border border-gray-200 rounded">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 / page</SelectItem>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
 
           <Button
             variant="outline"
             size="sm"
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
-            className="text-xs"
+            className="text-x rounded"
           >
             <ChevronLeft />
           </Button>
@@ -407,7 +431,7 @@ function AdmissionsList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${
+                className={`text-xs rounded ${
                   currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
                 }`}
               >
@@ -421,7 +445,7 @@ function AdmissionsList() {
             size="sm"
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="text-xs"
+            className="text-xs rounded"
           >
             <ChevronRight />
           </Button>

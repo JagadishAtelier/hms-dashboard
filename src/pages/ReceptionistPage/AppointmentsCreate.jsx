@@ -7,6 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import appointmentsService from "../../service/appointmentsService.js";
 import patientService from "../../service/patientService.js";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronLeft } from "lucide-react";
 
 /**
  * AppointmentsCreate.jsx
@@ -169,7 +177,9 @@ export default function AppointmentsCreate() {
       }
     } catch (err) {
       console.error("Failed to fetch available slots", err);
-      toast.error(err?.response?.data?.message || "Failed to fetch available slots");
+      toast.error(
+        err?.response?.data?.message || "Failed to fetch available slots"
+      );
     } finally {
       setLoadingSlots(false);
     }
@@ -184,7 +194,9 @@ export default function AppointmentsCreate() {
     }
     const doc = doctors.find((d) => d.doctor_id === selectedDoctorId);
     if (!doc) return;
-    const firstDateObj = doc.dates.find((d) => (d.available_slots || []).length > 0);
+    const firstDateObj = doc.dates.find(
+      (d) => (d.available_slots || []).length > 0
+    );
     if (firstDateObj) {
       setSelectedDate(firstDateObj.date);
       setSelectedSlot(firstDateObj.available_slots[0] || "");
@@ -210,11 +222,16 @@ export default function AppointmentsCreate() {
     const dateObj = doc?.dates?.find((dd) => dd.date === selectedDate);
     const slot = dateObj?.available_slots?.[0] ?? "";
     setSelectedSlot(slot);
-    setForm((prev) => ({ ...prev, scheduled_at: selectedDate, scheduled_time: slot || "" }));
+    setForm((prev) => ({
+      ...prev,
+      scheduled_at: selectedDate,
+      scheduled_time: slot || "",
+    }));
   }, [selectedDate]);
 
   useEffect(() => {
-    if (selectedSlot) setForm((prev) => ({ ...prev, scheduled_time: selectedSlot }));
+    if (selectedSlot)
+      setForm((prev) => ({ ...prev, scheduled_time: selectedSlot }));
   }, [selectedSlot]);
 
   const handleChange = (e) => {
@@ -274,7 +291,9 @@ export default function AppointmentsCreate() {
       navigate("/appointment");
     } catch (err) {
       console.error("Create appointment error:", err);
-      toast.error(err?.response?.data?.message || "Failed to create appointment");
+      toast.error(
+        err?.response?.data?.message || "Failed to create appointment"
+      );
       if (err?.response?.data?.errors) setErrors(err.response.data.errors);
     } finally {
       setLoading(false);
@@ -292,10 +311,15 @@ export default function AppointmentsCreate() {
   }, [dateOptions, selectedDate]);
 
   return (
-    <div className="p-6 w-full max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold text-[#0E1680] mb-4">
+    <div className="p-6 w-full max-w-4xl mx-auto bg-white rounded-lg shadow-md border border-gray-200">
+      <div className="flex items-center mb-4 gap-3">
+        <div className="bg-white rounded-full p-1 shadow-sm border border-gray-100" title="Go Back">
+          <ChevronLeft size={22} className="cursor-pointer" onClick={() => navigate(-1)} />
+        </div>
+        <h2 className="text-2xl text-right font-semibold text-[#0E1680]">
         Add Appointment
       </h2>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* ✅ Patient Search + Add New */}
@@ -305,7 +329,7 @@ export default function AppointmentsCreate() {
           </label>
 
           {selectedPatient ? (
-            <div className="flex items-center justify-between gap-2 border rounded p-2 mt-1">
+            <div className="flex items-center justify-between gap-2 border bg-white rounded p-2 mt-1">
               <div>
                 <div className="font-medium">
                   {selectedPatient.first_name} {selectedPatient.last_name || ""}
@@ -318,7 +342,7 @@ export default function AppointmentsCreate() {
               <button
                 type="button"
                 onClick={clearSelectedPatient}
-                className="text-xs px-2 py-1 border rounded"
+                className="text-xs px-2 cursor-pointer py-1 border rounded"
               >
                 Change
               </button>
@@ -337,17 +361,18 @@ export default function AppointmentsCreate() {
                       ? "Loading patients..."
                       : "Search patient by name / phone / code"
                   }
-                  className="flex-1"
+                  className="flex-1 bg-white rounded"
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/patients/create?returnTo=/appointment/create")}
-                  className="whitespace-nowrap"
+                  onClick={() =>
+                    navigate("/patients/create?returnTo=/appointment/create")
+                  }
+                  className="whitespace-nowrap rounded"
                 >
                   + Add New
                 </Button>
-
               </div>
 
               {showPatientList && (
@@ -404,28 +429,38 @@ export default function AppointmentsCreate() {
           <label className="text-sm font-medium">
             Doctor <span className="text-red-500">*</span>
           </label>
-          <select
-            value={selectedDoctorId}
-            onChange={(e) => {
-              const did = e.target.value;
+          <Select
+            value={selectedDoctorId || "none"}
+            onValueChange={(value) => {
+              const did = value === "none" ? "" : value;
               setSelectedDoctorId(did);
               setForm((prev) => ({ ...prev, doctor_id: did }));
             }}
-            className="w-full h-10 border rounded px-2 mt-1"
           >
-            <option value="">
-              {loadingSlots ? "Loading doctors..." : "Select doctor"}
-            </option>
-            {doctorOptions.map((d) => (
-              <option key={d.doctor_id} value={d.doctor_id}>
-                {d.doctor_name} {d.department_name ? `— ${d.department_name}` : ""}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full h-10 mt-1 border border-gray-200 rounded bg-white text-sm shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+              <SelectValue
+                placeholder={
+                  loadingSlots ? "Loading doctors..." : "Select doctor"
+                }
+              />
+            </SelectTrigger>
+
+            <SelectContent className="rounded-md shadow-md border border-gray-100 bg-white text-sm max-h-60 overflow-auto">
+              <SelectItem value="none">
+                {loadingSlots ? "Loading doctors..." : "Select doctor"}
+              </SelectItem>
+
+              {doctorOptions.map((d) => (
+                <SelectItem key={d.doctor_id} value={d.doctor_id}>
+                  {d.doctor_name}{" "}
+                  {d.department_name ? `— ${d.department_name}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {errors.doctor_id && (
-            <div className="text-xs text-red-500 mt-1">
-              {errors.doctor_id}
-            </div>
+            <div className="text-xs text-red-500 mt-1">{errors.doctor_id}</div>
           )}
         </div>
 
@@ -435,18 +470,24 @@ export default function AppointmentsCreate() {
             <label className="text-sm font-medium">
               Available Date <span className="text-red-500">*</span>
             </label>
-            <select
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full h-10 border rounded px-2 mt-1"
+            <Select
+              value={selectedDate || "none"}
+              onValueChange={(value) =>
+                setSelectedDate(value === "none" ? "" : value)
+              }
             >
-              <option value="">Select date</option>
-              {dateOptions.map((d) => (
-                <option key={d.date} value={d.date}>
-                  {d.date} ({(d.available_slots || []).length} slots)
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full h-10 mt-1 rounded text-sm bg-white">
+                <SelectValue placeholder="Select date" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Select date</SelectItem>
+                {dateOptions.map((d) => (
+                  <SelectItem key={d.date} value={d.date}>
+                    {d.date} ({(d.available_slots || []).length} slots)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.scheduled_at && (
               <div className="text-xs text-red-500 mt-1">
                 {errors.scheduled_at}
@@ -458,21 +499,39 @@ export default function AppointmentsCreate() {
             <label className="text-sm font-medium">
               Available Slot <span className="text-red-500">*</span>
             </label>
-            <select
-              value={selectedSlot}
-              onChange={(e) => setSelectedSlot(e.target.value)}
-              className="w-full h-10 border rounded px-2 mt-1"
+            <Select
+              value={selectedSlot || "none"}
+              onValueChange={(value) =>
+                setSelectedSlot(value === "none" ? "" : value)
+              }
               disabled={!selectedDate || slotOptions.length === 0}
             >
-              <option value="">
-                {selectedDate ? "Select slot" : "Choose date first"}
-              </option>
-              {slotOptions.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                className={`w-full h-10 mt-1 text-sm rounded bg-white ${
+                  !selectedDate || slotOptions.length === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                <SelectValue
+                  placeholder={
+                    selectedDate ? "Select slot" : "Choose date first"
+                  }
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="none">
+                  {selectedDate ? "Select slot" : "Choose date first"}
+                </SelectItem>
+
+                {slotOptions.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.scheduled_time && (
               <div className="text-xs text-red-500 mt-1">
                 {errors.scheduled_time}
@@ -486,18 +545,24 @@ export default function AppointmentsCreate() {
           <label className="text-sm font-medium">
             Visit Type <span className="text-red-500">*</span>
           </label>
-          <select
-            name="visit_type"
-            value={form.visit_type}
-            onChange={handleChange}
-            className="w-full h-10 border rounded px-2 mt-1"
+          <Select
+            value={form.visit_type || "none"}
+            onValueChange={(value) =>
+              handleChange({ target: { name: "visit_type", value } })
+            }
           >
-            {visitTypes.map((v) => (
-              <option key={v.value} value={v.value}>
-                {v.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full h-10 mt-1 border border-gray-200 rounded bg-white text-sm shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+              <SelectValue placeholder="Select visit type" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {visitTypes.map((v) => (
+                <SelectItem key={v.value} value={v.value}>
+                  {v.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Reason */}
@@ -508,7 +573,7 @@ export default function AppointmentsCreate() {
             value={form.reason}
             onChange={handleChange}
             placeholder="Reason for appointment (max 255 chars)"
-            className="mt-1"
+            className="mt-1 bg-white rounded"
           />
         </div>
 
@@ -520,25 +585,31 @@ export default function AppointmentsCreate() {
             value={form.notes}
             onChange={handleChange}
             placeholder="Any notes"
-            className="mt-1"
+            className="mt-1 bg-white rounded"
           />
         </div>
 
         {/* Source */}
         <div>
           <label className="text-sm font-medium">Source</label>
-          <select
-            name="source"
-            value={form.source}
-            onChange={handleChange}
-            className="w-full h-10 border rounded px-2 mt-1"
+          <Select
+            value={form.source || "none"}
+            onValueChange={(value) =>
+              handleChange({ target: { name: "source", value } })
+            }
           >
-            {sources.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full h-10 mt-1 border border-gray-200 rounded bg-white text-sm shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+              <SelectValue placeholder="Select source" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {sources.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Buttons */}
@@ -546,15 +617,16 @@ export default function AppointmentsCreate() {
           <Button
             type="button"
             variant="outline"
+            size="lg"
             onClick={() => navigate("/appointments")}
-            className="h-10"
+            className="h-10 rounded"
             disabled={loading}
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="bg-[#0E1680] text-white h-10"
+            className="bg-[#0E1680] hover:bg-[#1823c2] rounded text-white h-10"
             disabled={loading || loadingSlots}
           >
             {loading ? "Saving..." : "Create Appointment"}
