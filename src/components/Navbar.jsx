@@ -7,6 +7,9 @@ import {
   MessageSquare,
   Sun,
   Command,
+  User,
+  Settings,
+  LogOut,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,9 +20,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function TopNavbar({ onMenuClick }) {
   const [academicYear, setAcademicYear] = useState("2024/2025");
+
+  const handleLogout = () => {
+    console.log("User logged out");
+  };
 
   return (
     <header className="flex items-center justify-between bg-white px-4 h-[60px] shadow-sm border-b border-gray-200">
@@ -86,11 +101,32 @@ export default function TopNavbar({ onMenuClick }) {
         </div>
 
         {/* Avatar */}
-        <img
-          src="https://static.vecteezy.com/system/resources/thumbnails/049/174/246/small/a-smiling-young-indian-man-with-formal-shirts-outdoors-photo.jpg"
-          alt="user"
-          className="h-9 w-9 rounded-full border border-gray-200 object-cover"
-        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <img
+              src="https://static.vecteezy.com/system/resources/thumbnails/049/174/246/small/a-smiling-young-indian-man-with-formal-shirts-outdoors-photo.jpg"
+              alt="user"
+              className="h-9 w-9 rounded-full border border-gray-200 object-cover cursor-pointer hover:ring-2 hover:ring-indigo-100"
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel className="text-sm">My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="w-4 h-4 mr-2 text-gray-500" /> Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="w-4 h-4 mr-2 text-gray-500" /> Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-red-600 focus:text-red-600"
+            >
+              <LogOut className="w-4 h-4 mr-2 text-red-500" /> Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
