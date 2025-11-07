@@ -23,6 +23,7 @@ import {
   FileInput,
   Package,
   ClipboardCheck,
+  X,
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -37,7 +38,6 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const [role, setRole] = useState(localStorage.getItem("role") || "");
 
-  // ✅ Redirect to login if not logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
@@ -50,6 +50,12 @@ export default function Sidebar({ isOpen, onClose }) {
     setRole(storedRole);
   }, [navigate, pathname]);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  // Sidebar links by role
   const defaultLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
@@ -60,11 +66,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const doctorSidebarLinks = [
     { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/patient-list", label: "Patient List", icon: Users },
-    {
-      to: "/today-appoinments",
-      label: "Today's Appointments",
-      icon: CalendarDays,
-    },
+    { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarDays },
     { to: "/admissions", label: "Admissions", icon: Bed },
   ];
 
@@ -125,86 +127,107 @@ export default function Sidebar({ isOpen, onClose }) {
       ? nursesSidebarLinks
       : defaultLinks;
 
+  // ✅ Shared Sidebar Content
+  const SidebarContent = () => (
+    <>
+      <div className="flex items-center justify-between gap-2 px-4 h-[60px] border-b bg-white">
+        <div className="flex items-center gap-2">
+          <img src={logo} alt="logo" className="w-8 h-8" />
+          <h1 className="text-lg font-semibold">Atelier HMS</h1>
+        </div>
+        {/* Mobile close button */}
+        <button
+          onClick={onClose}
+          className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <ScrollArea className="flex-1 overflow-y-auto">
+        <nav className="p-4 space-y-2">
+          {links.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.to;
+            return (
+              <div
+                key={link.to}
+                className={cn(
+                  "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#DDE4FF] transition-colors duration-200",
+                  isActive ? "bg-[#F2F5FF] text-[#3D5EE1]" : "text-[#667085]"
+                )}
+              >
+                <Link
+                  to={link.to}
+                  className="flex items-center gap-3 text-[15px]"
+                  onClick={(e) => {
+                    if (link.label === "Lab Results") {
+                      e.preventDefault();
+                      setOpenLabModal(true);
+                    } else if (link.label === "Add Patient") {
+                      e.preventDefault();
+                      setOpen(true);
+                    } else {
+                      setActiveLink(link.label.toLowerCase());
+                      onClose?.();
+                    }
+                  }}
+                >
+                  <div
+                    className={cn(
+                      "p-1.5 rounded-sm",
+                      isActive
+                        ? "bg-white shadow-sm text-[#3D5EE1]"
+                        : "text-[#667085]"
+                    )}
+                  >
+                    <Icon size={18} />
+                  </div>
+                  {link.label}
+                </Link>
+              </div>
+            );
+          })}
+        </nav>
+      </ScrollArea>
+
+      <div className="p-4 border-t bg-white text-[14px]">
+        <div
+          onClick={handleLogout}
+          className="flex items-center justify-start gap-2 w-full font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]"
+        >
+          <Settings size={16} />
+          Logout
+        </div>
+      </div>
+
+      <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
+      <AddPatientModal open={open} setOpen={setOpen} />
+    </>
+  );
+
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* ✅ Desktop Sidebar (always visible) */}
+      <aside className="hidden lg:flex flex-col w-64 h-screen bg-white shadow-lg sticky top-0">
+        <SidebarContent />
+      </aside>
+
+      {/* ✅ Mobile Sidebar (slides in/out) */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={onClose}
         ></div>
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:flex`}
+        className={cn(
+          "fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 lg:hidden",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
       >
-        {/* Logo Header */}
-        <div className="flex items-center gap-2 px-4 h-[60px] border-b border-r bg-white">
-          <img src={logo} alt="logo" className="w-8 h-8" />
-          <h1 className="text-lg font-semibold">Atelier HMS</h1>
-        </div>
-
-        {/* ✅ Scrollable Navigation Section */}
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <nav className="p-4 space-y-2">
-            {links.map((link) => {
-              const Icon = link.icon;
-              const isActive = pathname === link.to;
-
-              return (
-                <div
-                  key={link.to}
-                  className={cn(
-                    "w-full justify-start rounded-md text-[14px] font-medium gap-3 p-2 hover:bg-[#DDE4FF] transition-colors duration-200",
-                    isActive ? "bg-[#F2F5FF] text-[#3D5EE1]" : "text-[#667085]"
-                  )}
-                >
-                  <Link
-                    to={link.to}
-                    className="flex items-center gap-3 text-[15px]"
-                    onClick={(e) => {
-                      if (link.label === "Lab Results") {
-                        e.preventDefault();
-                        setOpenLabModal(true);
-                      } else if (link.label === "Add Patient") {
-                        e.preventDefault();
-                        setOpen(true);
-                      } else {
-                        setActiveLink(link.label.toLowerCase());
-                        onClose?.(); // ✅ Close sidebar when a link is clicked
-                      }
-                    }}
-                  >
-                    <div
-                      className={cn(
-                        "p-1.5 rounded-sm",
-                        isActive
-                          ? "bg-white shadow-sm text-[#3D5EE1]"
-                          : "text-[#667085]"
-                      )}
-                    >
-                      <Icon size={18} />
-                    </div>
-                    {link.label}
-                  </Link>
-                </div>
-              );
-            })}
-          </nav>
-        </ScrollArea>
-
-        {/* ✅ Footer */}
-        <div className="p-4 border-t bg-white text-[14px]">
-          <div className="flex items-center justify-start gap-2 w-full font-medium p-2 rounded-md cursor-pointer hover:bg-gray-100 text-[#667085]">
-            <Settings size={16} />
-            Settings
-          </div>
-        </div>
-
-        {/* Modals */}
-        <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
-        <AddPatientModal open={open} setOpen={setOpen} />
+        <SidebarContent />
       </aside>
     </>
   );
