@@ -1,58 +1,159 @@
-import React, { useEffect, useState } from "react";
+// src/prescription/pages/TodayAppointments.jsx
+import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Search,
+  CalendarRange,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/Context/SidebarContext";
 import appointmentsService from "../service/appointmentsService";
+import { toast } from "sonner";
+import Loading from "./Loading.jsx";
+
+const DEFAULT_LIMIT = 7;
 
 function TodayAppointments() {
   const navigate = useNavigate();
-  const { setMode, setSelectedPatientId, setActiveLink } = useSidebar();
+  const { setMode, setSelectedPatientId, setActiveLink } = useSidebar?.() ?? {};
 
+  // Data + UI
   const [appointments, setAppointments] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // Filters / pagination / sorting
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(DEFAULT_LIMIT);
+  const [sortBy, setSortBy] = useState("scheduled_time");
+  const [sortOrder, setSortOrder] = useState("ASC");
 
-  const rowsPerPage = 7;
+  // debounce search
+  useEffect(() => {
+    const t = setTimeout(() => fetchAppointments(1), 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
-  // Fetch Today's Appointments
-  const fetchAppointments = async () => {
+  // fetch on mount / when deps change
+  useEffect(() => {
+    fetchAppointments(currentPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, limit, filterStatus, sortBy, sortOrder]);
+
+  // robust parser to accept different API shapes
+  const robustParseAppointmentsResponse = (res) => {
+    if (!res) return { rows: [], total: 0, page: 1, limit };
+    const top = res?.data ?? res;
+
+    // common paginated shape: { data: { data: rows, total, page, limit } }
+    if (top?.data && Array.isArray(top.data)) {
+      const rows = top.data;
+      const totalVal = top.total ?? top.count ?? rows.length;
+      return { rows, total: totalVal, page: top.page ?? 1, limit: top.limit ?? limit };
+    }
+
+    // nested: res.data.data
+    if (res?.data?.data && Array.isArray(res.data.data)) {
+      const rows = res.data.data;
+      const totalVal = res.data.total ?? res.total ?? rows.length;
+      return { rows, total: totalVal, page: res.data.page ?? 1, limit: res.data.limit ?? limit };
+    }
+
+    // raw array
+    if (Array.isArray(top)) {
+      return { rows: top, total: top.length, page: 1, limit };
+    }
+
+    // shape: { rows:[], total }
+    if (top?.rows && Array.isArray(top.rows)) {
+      return { rows: top.rows, total: top.total ?? top.count ?? top.rows.length, page: top.page ?? 1, limit: top.limit ?? limit };
+    }
+
+    // fallback single item
+    if (top?.id) {
+      return { rows: [top], total: 1, page: 1, limit };
+    }
+
+    return { rows: [], total: 0, page: 1, limit };
+  };
+
+  // main fetch
+  const fetchAppointments = async (page = 1) => {
     setLoading(true);
     try {
-      const res = await appointmentsService.getTodaysAppointmentsByDoctor();
-      if (res?.status === "success" && Array.isArray(res.data)) {
-        setAppointments(res.data);
-        setCurrentPage(1);
+      // try specialized API for today's appointments first, then fallback to general endpoints
+      let res = null;
+      if (appointmentsService.getTodaysAppointmentsByDoctor) {
+        res = await appointmentsService.getTodaysAppointmentsByDoctor();
+      } else if (appointmentsService.getTodaysAppointments) {
+        res = await appointmentsService.getTodaysAppointments();
+      } else if (appointmentsService.getAllAppointments) {
+        // if only generic endpoint exists, pass date filters (service may ignore)
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        const start_date = `${yyyy}-${mm}-${dd}`;
+        const end_date = start_date;
+        res = await appointmentsService.getAllAppointments({
+          page,
+          limit,
+          status: filterStatus || undefined,
+          search: searchQuery || undefined,
+          start_date,
+          end_date,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+        });
+      } else if (appointmentsService.list) {
+        res = await appointmentsService.list({ page, limit });
       } else {
-        setAppointments([]);
+        throw new Error("No suitable appointmentsService method found");
       }
+
+      const { rows, total: t, page: p, limit: l } = robustParseAppointmentsResponse(res);
+      let mapped = (rows || []).map((r) => ({
+        ...r,
+        appointment_no: r.appointment_no ?? r.id ?? "-",
+        patient: r.patient ?? r.patient_info ?? r.customer ?? null,
+        scheduled_time: r.scheduled_time ?? r.time ?? r.slot ?? "-",
+        scheduled_at: r.scheduled_at ?? r.date ?? null,
+        visit_type: r.visit_type ?? r.type ?? "OPD",
+        status: r.status ?? "Pending",
+      }));
+
+      setAppointments(mapped || []);
+      setTotal(Number(t || mapped.length || 0));
+      setCurrentPage(Number(p ?? page));
+      setLimit(Number(l ?? limit));
     } catch (err) {
-      console.error("Error fetching appointments:", err);
+      console.error("Error fetching today's appointments:", err);
+      toast.error(err?.response?.data?.message || "Failed to fetch today's appointments");
       setAppointments([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
-  // Handler: Take for Consultation
-  // Handler: Take for Consultation
+  // Action: Take for Consultation
   const handleTakeForConsultation = (appointment) => {
     const patientId = appointment?.patient?.id || appointment?.patient_id;
     const appointmentId = appointment?.id;
 
     if (!patientId || !appointmentId) {
       console.warn("Missing patient or appointment ID:", appointment);
+      toast.error("Missing patient or appointment data");
       return;
     }
 
-    // Set sidebar context for doctor view
     try {
       if (setMode) setMode("edit");
       if (setSelectedPatientId) setSelectedPatientId(patientId);
@@ -61,44 +162,65 @@ function TodayAppointments() {
       console.warn("Sidebar context unavailable:", err);
     }
 
-    // ✅ Navigate with both patient ID & appointment ID
     navigate(`/overview/${patientId}?appointmentId=${appointmentId}`);
   };
 
+  // local filtering (search + status) — happens on already-fetched today's list
+  const filteredData = useMemo(() => {
+    const q = (searchQuery || "").trim().toLowerCase();
+    return (appointments || []).filter((item) => {
+      const matchesSearch =
+        !q ||
+        (item?.patient?.first_name && item.patient.first_name.toLowerCase().includes(q)) ||
+        (item?.patient?.last_name && item.patient.last_name.toLowerCase().includes(q)) ||
+        (item?.appointment_no && item.appointment_no.toLowerCase().includes(q)) ||
+        (item?.patient?.patient_code && item.patient.patient_code.toLowerCase().includes(q));
+      const matchesFilter = !filterStatus || item.status === filterStatus;
+      return matchesSearch && matchesFilter;
+    });
+  }, [appointments, searchQuery, filterStatus]);
 
-  // Filter + Search Logic
-  const filteredData = appointments.filter((item) => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch =
-      !q ||
-      item?.patient?.first_name?.toLowerCase().includes(q) ||
-      item?.patient?.last_name?.toLowerCase().includes(q) ||
-      item?.appointment_no?.toLowerCase().includes(q) ||
-      item?.patient?.patient_code?.toLowerCase().includes(q);
+  // pagination math (client-side paging for today's list)
+  const totalPages = Math.max(1, Math.ceil((total || filteredData.length) / limit));
+  const startIndex = total === 0 ? 0 : (currentPage - 1) * limit + 1;
+  const endIndex = Math.min(filteredData.length || total, currentPage * limit);
+  const currentData = filteredData.slice((currentPage - 1) * limit, (currentPage - 1) * limit + limit);
 
-    const matchesFilter = filterStatus ? item.status === filterStatus : true;
-
-    return matchesSearch && matchesFilter;
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
-
-  // Guard currentPage when filtered length changes
+  // guard currentPage
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [totalPages, currentPage]);
 
+  const formatDate = (iso) => {
+    if (!iso) return "—";
+    try {
+      return new Date(iso).toLocaleDateString();
+    } catch {
+      return iso;
+    }
+  };
+
+  const toggleSort = (field) => {
+    if (sortBy === field) setSortOrder((o) => (o === "ASC" ? "DESC" : "ASC"));
+    else {
+      setSortBy(field);
+      setSortOrder("ASC");
+    }
+  };
+
   return (
-    // root text-sm reduces most font sizes; adjust specific elements below as needed
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm ">
+      {loading && <Loading />}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          {/* reduced heading sizes */}
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">🩺 Today’s Appointments</h2>
+          <div className="flex items-center gap-2">
+            <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
+              <CalendarRange size={20} className="inline-block text-gray-600" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Today’s Appointments</h2>
+          </div>
           <p className="text-xs text-gray-500">Showing all appointments scheduled for today</p>
         </div>
 
@@ -109,7 +231,10 @@ function TodayAppointments() {
               type="search"
               placeholder="Search by name, ID or appointment no"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="bg-white h-9 pl-9 text-sm"
             />
           </div>
@@ -129,30 +254,33 @@ function TodayAppointments() {
             <option value="Completed">Completed</option>
           </select>
 
-
           <Button
             className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 w-full sm:w-auto text-sm"
-            onClick={fetchAppointments}
+            onClick={() => fetchAppointments(1)}
           >
             <RefreshCw size={14} />
           </Button>
         </div>
       </div>
 
-      {/* Main content: table (desktop) + cards (mobile) */}
+      {/* Main */}
       <div className="flex-1 overflow-y-auto">
-        {/* Advanced Desktop Table */}
+        {/* Desktop Table */}
         <div className="hidden md:block">
           <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[900px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
-                    {/* smaller header font sizes */}
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Appointment No</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Patient Name</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Patient Code</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Scheduled Time</th>
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer flex items-center gap-1"
+                      onClick={() => toggleSort("scheduled_time")}
+                    >
+                      Scheduled Time {sortBy === "scheduled_time" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
+                    </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Visit Type</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Status</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Reason</th>
@@ -164,72 +292,31 @@ function TodayAppointments() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
-                        Loading appointments...
-                      </td>
+                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">Loading appointments...</td>
                     </tr>
                   ) : currentData.length > 0 ? (
                     currentData.map((item, idx) => (
-                      <tr
-                        key={item.id ?? idx}
-                        className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
-                      >
+                      <tr key={item.id ?? idx} className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100">
                         <td className="px-4 py-3 font-medium text-gray-800 text-xs">{item.appointment_no}</td>
-
-                        <td className="px-4 py-3 text-gray-700 text-xs">
-                          {item.patient ? `${item.patient.first_name} ${item.patient.last_name}` : "—"}
-                        </td>
-
+                        <td className="px-4 py-3 text-gray-700 text-xs">{item.patient ? `${item.patient.first_name || ""} ${item.patient.last_name || ""}`.trim() : "—"}</td>
                         <td className="px-4 py-3 text-gray-700 text-xs">{item.patient?.patient_code || "—"}</td>
-
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.scheduled_time || "—"}</td>
-
+                        <td className="px-4 py-3 text-gray-700 text-xs">{item.scheduled_time || formatDate(item.scheduled_at) || "—"}</td>
                         <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.visit_type === "OPD"
-                                ? "bg-blue-100 text-blue-700"
-                                : item.visit_type === "teleconsult"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-gray-100 text-gray-700"
-                              }`}
-                          >
-                            {item.visit_type}
-                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : item.visit_type === "teleconsult" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{item.visit_type}</span>
                         </td>
-
                         <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : item.status === "Confirmed"
-                                  ? "bg-green-100 text-green-700"
-                                  : item.status === "Cancelled"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-blue-100 text-blue-700"
-                              }`}
-                          >
-                            {item.status}
-                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.status === "Pending" ? "bg-yellow-100 text-yellow-700" : item.status === "Confirmed" ? "bg-green-100 text-green-700" : item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>{item.status}</span>
                         </td>
-
                         <td className="px-4 py-3 text-gray-600 text-xs">{item.reason || "—"}</td>
                         <td className="px-4 py-3 text-gray-600 text-xs">{item.notes || "—"}</td>
-
                         <td className="px-4 py-3">
-                          <Button
-                            className="bg-[#506EE4] text-white text-xs h-6 px-2 rounded"
-                            onClick={() => handleTakeForConsultation(item)}
-                          >
-                            Consultation
-                          </Button>
+                          <Button className="bg-[#506EE4] text-white text-xs h-6 px-2 rounded" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
-                        No appointments found for today.
-                      </td>
+                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">No appointments found for today.</td>
                     </tr>
                   )}
                 </tbody>
@@ -244,32 +331,16 @@ function TodayAppointments() {
             <p className="text-center text-gray-500 text-xs">Loading appointments...</p>
           ) : currentData.length > 0 ? (
             currentData.map((item, idx) => (
-              <article
-                key={item.id ?? idx}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-3"
-              >
+              <article key={item.id ?? idx} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div>
                     <p className="font-semibold text-[#0E1680] text-sm">{item.appointment_no}</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {item.patient ? `${item.patient.first_name} ${item.patient.last_name}` : "—"}
-                    </p>
+                    <p className="text-xs text-gray-600 mt-1">{item.patient ? `${item.patient.first_name || ""} ${item.patient.last_name || ""}`.trim() : "—"}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`px-2 py-0.5 text-[11px] rounded-full ${item.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : item.status === "Confirmed"
-                            ? "bg-green-100 text-green-700"
-                            : item.status === "Cancelled"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-blue-100 text-blue-700"
-                        }`}
-                    >
-                      {item.status}
-                    </span>
-                    <span className="text-[11px] text-gray-500">{item.scheduled_time || "—"}</span>
+                    <span className={`px-2 py-0.5 text-[11px] rounded-full ${item.status === "Pending" ? "bg-yellow-100 text-yellow-700" : item.status === "Confirmed" ? "bg-green-100 text-green-700" : item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>{item.status}</span>
+                    <span className="text-[11px] text-gray-500">{item.scheduled_time || formatDate(item.scheduled_at) || "—"}</span>
                   </div>
                 </div>
 
@@ -282,12 +353,7 @@ function TodayAppointments() {
                   <div>
                     <div className="text-[11px] text-gray-500">Visit</div>
                     <div>
-                      <span
-                        className={`px-2 py-0.5 text-[11px] rounded ${item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
-                          }`}
-                      >
-                        {item.visit_type}
-                      </span>
+                      <span className={`px-2 py-0.5 text-[11px] rounded ${item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"}`}>{item.visit_type}</span>
                     </div>
                   </div>
 
@@ -303,14 +369,8 @@ function TodayAppointments() {
                     </div>
                   )}
 
-                  {/* Take for Consultation button on mobile */}
                   <div className="col-span-2">
-                    <Button
-                      className="bg-[#0E1680] text-white w-full mt-3 text-sm"
-                      onClick={() => handleTakeForConsultation(item)}
-                    >
-                      Consultation
-                    </Button>
+                    <Button className="bg-[#0E1680] text-white w-full mt-3 text-sm" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
                   </div>
                 </div>
               </article>
@@ -324,40 +384,29 @@ function TodayAppointments() {
       {/* Pagination */}
       {filteredData.length > 0 && (
         <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
-          <p className="text-xs text-gray-500">
-            Showing {filteredData.length === 0 ? 0 : startIndex + 1}–{Math.min(endIndex, filteredData.length)} of {filteredData.length} appointments
-          </p>
+          <p className="text-xs text-gray-500">Showing {filteredData.length === 0 ? 0 : startIndex}-{endIndex} of {filteredData.length} appointments</p>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="text-xs"
-            >
+            <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setCurrentPage(1); }} className="h-8 text-xs border rounded px-2 bg-white">
+              <option value={5}>5 / page</option>
+              <option value={7}>7 / page</option>
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+            </select>
+
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs">
               <ChevronLeft />
             </Button>
 
-            {Array.from({ length: totalPages }, (_, i) => (
-              <Button
-                key={i}
-                size="sm"
-                variant={currentPage === i + 1 ? "default" : "outline"}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""} text-xs`}
-              >
-                {i + 1}
-              </Button>
-            ))}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <Button key={i} size="sm" variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)} className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}>
+                  {i + 1}
+                </Button>
+              ))}
+            </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="text-xs"
-            >
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs">
               <ChevronRight />
             </Button>
           </div>

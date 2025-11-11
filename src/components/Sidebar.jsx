@@ -87,6 +87,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { to: "/room", label: "Room", icon: HousePlus },
     { to: "/bed", label: "Bed", icon: Bed },
     { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
+    { to: "/stock", label: "Stock & Inventory", icon: Package },
     { to: "/category", label: "Category", icon: ToolCase },
     { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
     { to: "/product", label: "Product", icon: ShoppingBasket },

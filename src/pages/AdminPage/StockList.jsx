@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Plus,
   RefreshCw,
@@ -10,13 +11,21 @@ import {
   Download,
   Upload,
   Settings,
-  Search as SearchIcon,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import stockService from "../../service/stockService.js";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
+import Loading from "../Loading.jsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const DEFAULT_LIMIT = 10;
 
@@ -47,7 +56,9 @@ export default function StockList() {
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
 
   // columns & modals
-  const [selectedColumns, setSelectedColumns] = useState(ALL_COLUMNS.map((c) => c.key));
+  const [selectedColumns, setSelectedColumns] = useState(
+    ALL_COLUMNS.map((c) => c.key)
+  );
   const [showColumnModal, setShowColumnModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
@@ -58,10 +69,6 @@ export default function StockList() {
   // --- Robust parser for varying API shapes ---
   const robustParseResponse = (res) => {
     if (!res) return { rows: [], total: 0, page: 1, limit };
-    // common shapes:
-    // 1) res.data.data = { data: [...], total, page, limit }
-    // 2) res.data = [...]; res.total
-    // 3) res = { data: [...], total }
     const top = res?.data?.data ?? res?.data ?? res;
     let rows = [];
     let t = 0;
@@ -88,7 +95,12 @@ export default function StockList() {
       t = res?.total ?? 0;
     }
 
-    return { rows: Array.isArray(rows) ? rows : [], total: Number(t || 0), page: Number(p || 1), limit: Number(l || limit) };
+    return {
+      rows: Array.isArray(rows) ? rows : [],
+      total: Number(t || 0),
+      page: Number(p || 1),
+      limit: Number(l || limit),
+    };
   };
 
   // --- Fetch stocks ---
@@ -139,9 +151,10 @@ export default function StockList() {
   const displayItems = useMemo(() => items || [], [items]);
 
   const getCellValue = (row, key) => {
-    if (key === "product_name") return row?.product?.product_name ?? row.product_name ?? "-";
-    if (key === "product_code") return row?.product?.product_code ?? row.product_code ?? "-";
-    // numeric fields may be string, convert when possible
+    if (key === "product_name")
+      return row?.product?.product_name ?? row.product_name ?? "-";
+    if (key === "product_code")
+      return row?.product?.product_code ?? row.product_code ?? "-";
     const val = row?.[key];
     if (val === 0) return 0;
     if (val === undefined || val === null || val === "") return "-";
@@ -173,11 +186,13 @@ export default function StockList() {
       doc.text("Stock List", 14, 16);
 
       const head = [selectedColumns.map((c) => ALL_COLUMNS.find((a) => a.key === c).title)];
-      const body = displayItems.map((r) => selectedColumns.map((c) => {
-        const v = getCellValue(r, c);
-        if (c.toLowerCase().includes("price") && v !== "-" ) return `₹${v}`;
-        return typeof v === "number" ? v.toString() : (v ?? "-");
-      }));
+      const body = displayItems.map((r) =>
+        selectedColumns.map((c) => {
+          const v = getCellValue(r, c);
+          if (c.toLowerCase().includes("price") && v !== "-") return `₹${v}`;
+          return typeof v === "number" ? v.toString() : v ?? "-";
+        })
+      );
 
       doc.autoTable({
         startY: 22,
@@ -268,55 +283,90 @@ export default function StockList() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
+      {loading && <Loading />}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold">📊 Stock</h2>
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
+              <Search size={20} className="text-gray-600" />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+                Stock
+              </h2>
+              <p className="text-xs text-gray-500">Manage inventory — search, export or bulk upload</p>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto items-center">
-            <div className="flex items-center gap-2 border rounded px-3 py-2 bg-white">
-              <SearchIcon size={16} />
-              <input
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                placeholder="Search by product or code..."
-                className="h-5 text-sm outline-none"
-              />
-            </div>
-
-            <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm" onClick={() => fetchStocks(currentPage, searchQuery)}>
-              <RefreshCw size={14} />
-            </Button>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+            <Input
+              type="search"
+              placeholder="Search by product or code..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-white h-9 pl-9 text-sm"
+            />
           </div>
 
-          <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm" onClick={() => setShowColumnModal(true)}>
+          <Button
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            onClick={() => fetchStocks(1, searchQuery)}
+          >
+            <RefreshCw size={14} />
+          </Button>
+
+          <Button
+            variant="outline"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm border border-gray-200"
+            onClick={() => setShowColumnModal(true)}
+          >
             <Settings size={14} /> Columns
           </Button>
 
-          <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm" onClick={() => setShowUploadModal(true)}>
+          <Button
+            variant="outline"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm border border-gray-200"
+            onClick={() => setShowUploadModal(true)}
+          >
             <Upload size={14} /> Bulk Upload
           </Button>
 
+          <Button
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            onClick={exportExcel}
+            title="Export Excel"
+          >
+            <Download size={14} /> Export
+          </Button>
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table (desktop) */}
       <div className="flex-1 overflow-y-auto">
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+        <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
           <div className="min-w-[600px]">
-            <table className="w-full table-auto border-collapse text-[#475467]">
+            <table className="w-full table-auto border-collapse">
               <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold">S.No</th>
+                  <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">S.No</th>
                   {selectedColumns.map((col) => (
-                    <th key={col} className="px-4 py-3 text-left text-xs font-semibold">
+                    <th key={col} className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">
                       {ALL_COLUMNS.find((a) => a.key === col)?.title ?? col}
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left text-xs font-semibold">Actions</th>
+                  <th className="px-4 py-3 text-center text-[12px] font-semibold text-[#475467]">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
                   <tr>
@@ -326,10 +376,10 @@ export default function StockList() {
                   </tr>
                 ) : displayItems.length > 0 ? (
                   displayItems.map((row, idx) => (
-                    <tr key={row.id ?? idx} className="hover:bg-[#FBFBFF] border-t border-gray-100">
-                      <td className="px-4 py-3 text-xs">{(currentPage - 1) * limit + idx + 1}</td>
+                    <tr key={row.id ?? idx} className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100">
+                      <td className="px-4 py-3 text-[12px] text-center">{(currentPage - 1) * limit + idx + 1}</td>
                       {selectedColumns.map((col) => (
-                        <td key={col} className="px-4 py-3 text-xs">
+                        <td key={col} className="px-4 py-3 text-[12px]">
                           {(() => {
                             const v = getCellValue(row, col);
                             if (v === "-" || v === undefined || v === null) return "—";
@@ -338,13 +388,16 @@ export default function StockList() {
                           })()}
                         </td>
                       ))}
-                      <td className="px-4 py-3 text-xs">
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => navigate(`/stock/view/${row.id}`)}>
+                      <td className="px-4 py-3 text-xs text-center">
+                        <div className="flex justify-center gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => navigate(`/stock/view/${row.id}`)} title="View">
                             <Download size={14} />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(row.id)}>
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(row.id)} title="Edit">
                             <RefreshCw size={14} />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)} title="Delete">
+                            <Plus style={{ transform: "rotate(45deg)" }} /> {/* subtle icon for delete fallback */}
                           </Button>
                         </div>
                       </td>
@@ -352,7 +405,7 @@ export default function StockList() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={selectedColumns.length + 2} className="py-6 text-center text-gray-500 text-xs">
+                    <td colSpan={selectedColumns.length + 2} className="py-6 text-center text-gray-500 text-[12px]">
                       No products found.
                     </td>
                   </tr>
@@ -361,20 +414,97 @@ export default function StockList() {
             </table>
           </div>
         </div>
+
+        {/* Mobile card view */}
+        <div className="md:hidden space-y-3 mt-3">
+          {loading ? (
+            <p className="text-center text-gray-500 text-xs">Loading...</p>
+          ) : displayItems.length > 0 ? (
+            displayItems.map((row, idx) => (
+              <article key={row.id ?? idx} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+                <div className="flex justify-between items-start mb-2 gap-2">
+                  <div>
+                    <p className="font-semibold text-[#0E1680] text-sm">
+                      {getCellValue(row, "product_name")}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">{getCellValue(row, "product_code")}</p>
+                    <p className="text-xs text-gray-600 mt-1">Qty: {getCellValue(row, "quantity")}</p>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="text-[11px] text-gray-500">₹{getCellValue(row, "selling_price")}</div>
+                    <div className="flex gap-1 mt-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(row.id)}>Edit</Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)}>Delete</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
+                  {selectedColumns
+                    .filter((c) => !["product_name", "product_code"].includes(c))
+                    .slice(0, 4)
+                    .map((c) => (
+                      <div key={c}>
+                        <div className="text-[11px] text-gray-500">{ALL_COLUMNS.find((a) => a.key === c)?.title}</div>
+                        <div className="text-sm">{getCellValue(row, c)}</div>
+                      </div>
+                    ))}
+                </div>
+              </article>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 text-xs">No products found.</p>
+          )}
+        </div>
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-5 flex-wrap gap-3">
-        <p className="text-xs text-gray-600">
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
+        <p className="text-xs text-gray-500">
           Showing {startIndex}-{endIndex} of {total} items
         </p>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={currentPage <= 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}>
-            <ChevronLeft size={14} /> Prev
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => {
+              setLimit(Number(value));
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="h-8 w-[110px] text-xs border border-gray-200 bg-white rounded shadow-sm">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+
+            <SelectContent className="rounded-md shadow-md border border-gray-100 bg-white text-xs">
+              <SelectItem value="5">5 / page</SelectItem>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs">
+            <ChevronLeft />
           </Button>
-          <span className="text-xs">Page {currentPage} / {totalPages}</span>
-          <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}>
-            Next <ChevronRight size={14} />
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <Button
+                key={i}
+                size="sm"
+                variant={currentPage === i + 1 ? "default" : "outline"}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`text-xs ${currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""}`}
+              >
+                {i + 1}
+              </Button>
+            ))}
+          </div>
+
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs">
+            <ChevronRight />
           </Button>
         </div>
       </div>

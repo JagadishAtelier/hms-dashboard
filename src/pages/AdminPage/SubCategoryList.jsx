@@ -1,16 +1,29 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
-  Edit2,
-  Trash2,
-  RotateCw,
   RefreshCw,
+  Search,
+  Edit2,
+  Plus,
+  RotateCw,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  FolderOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Loading from "../Loading.jsx";
 import subcategoryService from "../../service/subcategoryService.js";
 
 const DEFAULT_LIMIT = 10;
@@ -23,32 +36,23 @@ export default function SubCategoryList() {
   const [loading, setLoading] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
 
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
 
-  // debounce search to mirror BedList behavior
+  // Debounce search
   useEffect(() => {
     const t = setTimeout(() => fetchSubcategories(1), 350);
     return () => clearTimeout(t);
   }, [searchQuery]);
 
+  // Fetch data when dependencies change
   useEffect(() => {
     fetchSubcategories(currentPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, limit, sortBy, sortOrder]);
-
-  const robustParseSubcategoryResponse = (res) => {
-    if (!res) return { rows: [], total: 0 };
-    // many APIs wrap results differently; handle common shapes
-    const top = res?.data?.data ?? res?.data ?? res;
-    if (Array.isArray(top?.data)) return { rows: top.data, total: top.total ?? top.data.length ?? 0 };
-    if (Array.isArray(top)) return { rows: top, total: top.length ?? 0 };
-    if (Array.isArray(res?.data)) return { rows: res.data, total: res.total ?? res.data.length ?? 0 };
-    return { rows: [], total: 0 };
-  };
+  }, [currentPage, limit, sortBy, sortOrder, filterStatus]);
 
   const fetchSubcategories = async (page = 1) => {
     setLoading(true);
@@ -59,23 +63,35 @@ export default function SubCategoryList() {
         search: searchQuery || undefined,
         sort_by: sortBy,
         sort_order: sortOrder,
+        is_active:
+          filterStatus === "Active"
+            ? true
+            : filterStatus === "Inactive"
+            ? false
+            : undefined,
       };
 
-      // try common method name
       const res =
-        (subcategoryService.getAllSubcategories && await subcategoryService.getAllSubcategories(params)) ||
-        (subcategoryService.getAll && await subcategoryService.getAll(params)) ||
+        (subcategoryService.getAllSubcategories &&
+          (await subcategoryService.getAllSubcategories(params))) ||
+        (subcategoryService.getAll && (await subcategoryService.getAll(params))) ||
         (await subcategoryService.getAll(params));
 
-      const { rows, total: totalVal } = robustParseSubcategoryResponse(res);
-      setSubcategories(rows || []);
-      setTotal(Number(totalVal || 0));
+      const data = res?.data?.data || res?.data || res;
+      const rows = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data)
+        ? data
+        : [];
+      const totalVal =
+        data?.total || data?.totalItems || data?.totalRecords || rows.length;
+
+      setSubcategories(rows);
+      setTotal(totalVal);
       setCurrentPage(page);
     } catch (err) {
-      console.error("Error fetching subcategories:", err);
-      toast.error(err?.response?.data?.message || "Failed to fetch subcategories");
-      setSubcategories([]);
-      setTotal(0);
+      console.error(err);
+      toast.error("Failed to fetch subcategories");
     } finally {
       setLoading(false);
     }
@@ -85,19 +101,17 @@ export default function SubCategoryList() {
   const handleEdit = (id) => navigate(`/subcategory/edit/${id}`);
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this subcategory?")) return;
+    if (!confirm("Delete this subcategory?")) return;
     try {
       setLoading(true);
-      if (subcategoryService.deleteSubcategory) await subcategoryService.deleteSubcategory(id);
+      if (subcategoryService.deleteSubcategory)
+        await subcategoryService.deleteSubcategory(id);
       else if (subcategoryService.remove) await subcategoryService.remove(id);
       else if (subcategoryService.delete) await subcategoryService.delete(id);
-      else throw new Error("Delete method not found on subcategoryService");
-
-      toast.success("Subcategory deleted successfully");
+      toast.success("Subcategory deleted");
       fetchSubcategories(currentPage);
     } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to delete subcategory");
+      toast.error("Failed to delete subcategory");
     } finally {
       setLoading(false);
     }
@@ -107,15 +121,13 @@ export default function SubCategoryList() {
     if (!confirm("Restore this subcategory?")) return;
     try {
       setLoading(true);
-      if (subcategoryService.restoreSubcategory) await subcategoryService.restoreSubcategory(id);
+      if (subcategoryService.restoreSubcategory)
+        await subcategoryService.restoreSubcategory(id);
       else if (subcategoryService.restore) await subcategoryService.restore(id);
-      else throw new Error("Restore method not found on subcategoryService");
-
-      toast.success("Subcategory restored successfully");
+      toast.success("Subcategory restored");
       fetchSubcategories(currentPage);
     } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to restore subcategory");
+      toast.error("Failed to restore subcategory");
     } finally {
       setLoading(false);
     }
@@ -123,50 +135,87 @@ export default function SubCategoryList() {
 
   const toggleSort = (field) => {
     if (sortBy === field) {
-      setSortOrder((o) => (o === "ASC" ? "DESC" : "ASC"));
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
     } else {
       setSortBy(field);
       setSortOrder("ASC");
     }
   };
 
-  // derived values for pagination UI
-  const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
-  const startIndex = total === 0 ? 0 : (currentPage - 1) * limit + 1;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const startIndex = (currentPage - 1) * limit + 1;
   const endIndex = Math.min(total, currentPage * limit);
   const displaySubcategories = useMemo(() => subcategories || [], [subcategories]);
 
-  // small helper for showing category name safely
   const categoryName = (rec) => rec?.category_name ?? rec?.category?.name ?? "—";
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-3 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg relative">
+      {loading && <Loading />}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">📂 Subcategories</h2>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
+            <FolderOpen className="text-gray-600" size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">
+              Subcategories
+            </h2>
+            <p className="text-xs text-gray-500">
+              Manage and organize product/service subcategories
+            </p>
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search subcategories..."
-              className="h-9 px-3 border rounded w-60 text-sm"
+          <div className="relative w-full sm:w-64">
+            <Search
+              className="absolute left-3 top-2.5 text-gray-400"
+              size={16}
             />
-            <Button
-              variant="outline"
-              className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 w-full sm:w-auto text-sm"
-              onClick={() => fetchSubcategories(currentPage)}
-            >
-              <RefreshCw size={14} />
-            </Button>
+            <Input
+              type="search"
+              placeholder="Search subcategories..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-white h-9 pl-9 text-sm"
+            />
           </div>
 
+          <Select
+            value={filterStatus || "all"}
+            onValueChange={(value) => {
+              setFilterStatus(value === "all" ? "" : value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="h-9 w-full sm:w-auto text-sm border border-gray-200 bg-white rounded-md shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent className="rounded-md shadow-md border border-gray-100 bg-white text-sm">
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Button
-            className="h-[36px] bg-[#506EE4] text-white flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAdd}
           >
             <Plus size={14} /> Add Subcategory
+          </Button>
+
+          <Button
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            onClick={() => fetchSubcategories(1)}
+          >
+            <RefreshCw size={14} />
           </Button>
         </div>
       </div>
@@ -174,138 +223,166 @@ export default function SubCategoryList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
-            <div className="min-w-[600px]">
-              <table className="w-full table-auto border-collapse">
-                <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
+            <table className="w-full table-auto border-collapse">
+              <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
+                <tr>
+                  <th
+                    className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
+                    onClick={() => toggleSort("subcategory_name")}
+                  >
+                    Subcategory{" "}
+                    {sortBy === "subcategory_name" &&
+                      (sortOrder === "ASC" ? (
+                        <ChevronUp size={12} className="inline-block" />
+                      ) : (
+                        <ChevronDown size={12} className="inline-block" />
+                      ))}
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
+                    onClick={() => toggleSort("category_name")}
+                  >
+                    Category{" "}
+                    {sortBy === "category_name" &&
+                      (sortOrder === "ASC" ? (
+                        <ChevronUp size={12} className="inline-block" />
+                      ) : (
+                        <ChevronDown size={12} className="inline-block" />
+                      ))}
+                  </th>
+                  <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
                   <tr>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("subcategory_name")}
-                    >
-                      Subcategory {sortBy === "subcategory_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("category_name")}
-                    >
-                      Category {sortBy === "category_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Description</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Status</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Actions</th>
+                    <td colSpan={5} className="py-4 text-center text-gray-500 text-[12px]">
+                      Loading subcategories...
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-center text-gray-500 text-xs">
-                        Loading subcategories...
+                ) : displaySubcategories.length > 0 ? (
+                  displaySubcategories.map((s) => (
+                    <tr
+                      key={s.id}
+                      className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
+                    >
+                      <td className="px-4 py-3 text-[12px] font-medium text-gray-800">
+                        {s.subcategory_name || "—"}
                       </td>
-                    </tr>
-                  ) : displaySubcategories.length > 0 ? (
-                    displaySubcategories.map((s) => (
-                      <tr
-                        key={s.id}
-                        className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
-                      >
-                        <td className="px-4 py-3 text-xs font-medium text-gray-800">
-                          {s.subcategory_name || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-700">{categoryName(s)}</td>
-                        <td className="px-4 py-3 text-xs text-gray-700">{s.description || "—"}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                              s.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                            }`}
+                      <td className="px-4 py-3 text-[12px] text-gray-700">
+                        {categoryName(s)}
+                      </td>
+                      <td className="px-4 py-3 text-[12px] text-gray-700">
+                        {s.description || "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[12px] font-semibold ${
+                            s.is_active
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {s.is_active ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7 px-2"
+                            onClick={() => handleEdit(s.id)}
                           >
-                            {s.is_active ? "Active" : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex gap-2">
+                            <Edit2 size={14} />
+                          </Button>
+                          {s.is_active ? (
                             <Button
-                              variant="outline"
-                              className="text-xs h-7 px-2 rounded"
-                              onClick={() => handleEdit(s.id)}
-                              title="Edit"
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs h-7 px-2"
+                              onClick={() => handleDelete(s.id)}
                             >
-                              <Edit2 size={14} />
+                              <Trash2 size={14} />
                             </Button>
-
-                            {s.is_active ? (
-                              <Button
-                                variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
-                                onClick={() => handleDelete(s.id)}
-                                title="Delete"
-                              >
-                                <Trash2 size={14} />
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
-                                onClick={() => handleRestore(s.id)}
-                                title="Restore"
-                              >
-                                <RotateCw size={14} />
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-center text-gray-500 text-xs">
-                        No subcategories found.
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs h-7 px-2"
+                              onClick={() => handleRestore(s.id)}
+                            >
+                              <RotateCw size={14} />
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-center text-gray-500 text-[12px]">
+                      No subcategories found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Mobile fallback */}
-        <div className="md:hidden">
-          <div className="space-y-3">
-            {loading ? (
-              <div className="py-4 text-center text-gray-500 text-xs">Loading subcategories...</div>
-            ) : displaySubcategories.length > 0 ? (
-              displaySubcategories.map((s) => (
-                <div key={s.id} className="p-3 bg-white rounded-lg border shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-sm font-medium">{s.subcategory_name || "—"}</div>
-                      <div className="text-xs text-gray-600">{categoryName(s)}</div>
-                      <div className="text-xs text-gray-600 mt-1">{s.description || "—"}</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(s.id)}>
-                        <Edit2 size={14} />
+        {/* Mobile cards */}
+        <div className="md:hidden space-y-3 mt-3">
+          {displaySubcategories.map((s) => (
+            <div key={s.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-sm text-[#0E1680]">
+                    {s.subcategory_name}
+                  </p>
+                  <p className="text-xs text-gray-600">{categoryName(s)}</p>
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    {s.description || "—"}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      s.is_active
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {s.is_active ? "Active" : "Inactive"}
+                  </span>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(s.id)}>
+                      <Edit2 size={12} />
+                    </Button>
+                    {s.is_active ? (
+                      <Button size="sm" variant="ghost" onClick={() => handleDelete(s.id)}>
+                        <Trash2 size={12} />
                       </Button>
-                      {s.is_active ? (
-                        <Button size="sm" variant="ghost" onClick={() => handleDelete(s.id)}>
-                          <Trash2 size={14} />
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="ghost" onClick={() => handleRestore(s.id)}>
-                          <RotateCw size={14} />
-                        </Button>
-                      )}
-                    </div>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={() => handleRestore(s.id)}>
+                        <RotateCw size={12} />
+                      </Button>
+                    )}
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="py-4 text-center text-gray-500 text-xs">No subcategories found.</div>
-            )}
-          </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -346,7 +423,9 @@ export default function SubCategoryList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}
+                className={`text-xs ${
+                  currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
+                }`}
               >
                 {i + 1}
               </Button>

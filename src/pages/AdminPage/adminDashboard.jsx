@@ -32,11 +32,14 @@ import AdmissionsDonutChart from "@/components/AdmissionsDonutChart";
 import { Eye } from "lucide-react";
 import RevenueOverviewCard from "@/components/RevenueOverviewCard";
 import OpdAppointmentsTrend from "@/components/OpdAppointmentsTrend";
+import Loading from "../Loading"; 
+import { motion } from "framer-motion"; // ✅ Import Framer Motion
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Fetch Dashboard API
   const fetchDashboard = async () => {
     try {
       setLoading(true);
@@ -53,35 +56,41 @@ export default function AdminDashboard() {
     fetchDashboard();
   }, []);
 
-  if (loading)
+  // ✅ Animation Variants
+  const slideUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const slideRight = {
+    hidden: { opacity: 0, x: -40 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
+  const staggerContainer = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.15 },
+    },
+  };
+
+  // ✅ Display Loading Component
+  if (loading) {
     return (
-      <div className="p-4 space-y-8 animate-pulse">
-        <div className="h-8 w-1/3 bg-gray-200 rounded"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array(4)
-            .fill()
-            .map((_, i) => (
-              <div
-                key={i}
-                className="bg-white shadow-sm p-5 rounded-xl flex items-center justify-between border-l-4 border-gray-200"
-              >
-                <div>
-                  <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-6 w-16 bg-gray-300 rounded"></div>
-                </div>
-                <div className="p-3 bg-gray-100 rounded-full h-10 w-10"></div>
-              </div>
-            ))}
-        </div>
+      <div className="flex justify-center items-center h-[80vh] bg-gray-50">
+        <Loading />
       </div>
     );
+  }
 
-  if (!data)
+  // ✅ If no data
+  if (!data) {
     return (
       <div className="flex justify-center items-center h-64 text-gray-400 text-lg">
         No dashboard data found
       </div>
     );
+  }
 
   const { summary, admitted_day_wise, recent_admitted } = data;
 
@@ -95,7 +104,7 @@ export default function AdminDashboard() {
       icon: (
         <img
           src="/dashoard-icon/activepatients.png"
-          alt="Available Beds"
+          alt="Patients"
           className="w-9 h-9 object-contain"
         />
       ),
@@ -110,7 +119,7 @@ export default function AdminDashboard() {
       icon: (
         <img
           src="/dashoard-icon/totalrevenue.png"
-          alt="Available Beds"
+          alt="Revenue"
           className="w-9 h-9 object-contain"
         />
       ),
@@ -125,14 +134,14 @@ export default function AdminDashboard() {
       icon: (
         <img
           src="/dashoard-icon/totalappointments.png"
-          alt="Available Beds"
+          alt="Appointments"
           className="w-9 h-9 object-contain"
         />
       ),
       color: "#16A34A",
     },
     {
-      title: "Available beds",
+      title: "Available Beds",
       total: 7800,
       percentage: 1.1,
       active: 55,
@@ -140,7 +149,7 @@ export default function AdminDashboard() {
       icon: (
         <img
           src="/dashoard-icon/availablebeds.png"
-          alt="Available Beds"
+          alt="Beds"
           className="w-9 h-9 object-contain"
         />
       ),
@@ -149,61 +158,71 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="p-3 sm:p-4 space-y-8">
+    <motion.div
+      className="p-3 sm:p-4 space-y-8"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
       {/* ✅ Header */}
-      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
-            Admin Dashboard
-          </h1>
-          <Breadcrumb className="mb-2 sm:mb-4">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+      <motion.div variants={slideRight}>
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
+              Admin Dashboard
+            </h1>
+            <Breadcrumb className="mb-2 sm:mb-4">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
 
-        <div className="flex flex-wrap gap-2 justify-start md:justify-end">
-          <Link
-            to="/patients/create"
-            className="text-sm bg-[#506EE4] py-2 px-3 text-white shadow-sm rounded-sm"
-          >
-            Add Patient
-          </Link>
-          <Link
-            to="/admission/create"
-            className="text-sm bg-[#E9EDF4] py-2 px-3 text-gray-700 shadow-sm rounded-sm"
-          >
-            Add Admission
-          </Link>
-        </div>
-      </div>
-
-      {/* ✅ Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {stats.map((s, i) => (
-          <StatCard key={i} {...s} />
-        ))}
-      </div>
-
-      {/* ✅ Chart Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-3">
-        <div className="lg:col-span-7 w-full">
-          <div className="overflow-x-auto">
-            <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
+          <div className="flex flex-wrap gap-2 justify-start md:justify-end">
+            <Link
+              to="/patients/create"
+              className="text-sm bg-[#506EE4] py-2 px-3 text-white shadow-sm rounded-sm"
+            >
+              Add Patient
+            </Link>
+            <Link
+              to="/admission/create"
+              className="text-sm bg-[#E9EDF4] py-2 px-3 text-gray-700 shadow-sm rounded-sm"
+            >
+              Add Admission
+            </Link>
           </div>
         </div>
-        <div className="lg:col-span-3">
+      </motion.div>
+
+      {/* ✅ Stat Cards */}
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+        variants={staggerContainer}
+      >
+        {stats.map((s, i) => (
+          <motion.div key={i} variants={slideUp}>
+            <StatCard {...s} />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* ✅ Chart Section */}
+      <motion.div className="grid grid-cols-1 lg:grid-cols-10 gap-3" variants={slideUp}>
+        <motion.div className="lg:col-span-7 w-full" variants={slideRight}>
+          <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
+        </motion.div>
+        <motion.div className="lg:col-span-3" variants={slideUp}>
           <AdmissionsDonutChart
             data={[
               { label: "Male", value: 140, fill: "#6366f1" },
@@ -211,12 +230,14 @@ export default function AdminDashboard() {
               { label: "Children", value: 50, fill: "#E82646" },
             ]}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* ✅ Recent Admissions Table */}
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-        {/* Header */}
+      <motion.div
+        className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200"
+        variants={slideUp}
+      >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800">
             Recent Admissions
@@ -282,11 +303,10 @@ export default function AdminDashboard() {
                     </TableCell>
                     <TableCell>{item.reason || "—"}</TableCell>
                     <TableCell>
-                      {new Date(item.admission_date).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {new Date(item.admission_date).toLocaleDateString(
+                        "en-GB",
+                        { day: "2-digit", month: "short", year: "numeric" }
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -296,7 +316,9 @@ export default function AdminDashboard() {
                             : "bg-red-100 text-red-600"
                         } text-xs px-3 py-1 rounded-full font-semibold`}
                       >
-                        {item.status === "admitted" ? "Admitted" : "Discharged"}
+                        {item.status === "admitted"
+                          ? "Admitted"
+                          : "Discharged"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -318,7 +340,6 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500 mt-4 gap-3">
           <p>Showing {recent_admitted.length} Entries</p>
           <div className="flex items-center gap-1">
@@ -336,17 +357,17 @@ export default function AdminDashboard() {
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ✅ Revenue & OPD Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-3">
-        <div className="lg:col-span-3">
+      <motion.div className="grid grid-cols-1 lg:grid-cols-10 gap-3" variants={slideUp}>
+        <motion.div className="lg:col-span-3" variants={slideUp}>
           <RevenueOverviewCard />
-        </div>
-        <div className="lg:col-span-7">
+        </motion.div>
+        <motion.div className="lg:col-span-7" variants={slideRight}>
           <OpdAppointmentsTrend />
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

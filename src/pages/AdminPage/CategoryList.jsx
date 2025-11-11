@@ -1,4 +1,3 @@
-// src/pages/categories/CategoryList.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,10 +8,19 @@ import {
   Trash2,
   RotateCw,
   RefreshCw,
+  FolderOpen,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import categoryService from "../../service/categoryService.js";
+import Loading from "../Loading.jsx";
 
 const DEFAULT_LIMIT = 10;
 
@@ -30,34 +38,37 @@ function CategoryList() {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
 
+  // 🔍 Fetch on search
   useEffect(() => {
     const t = setTimeout(() => fetchCategories(1), 350);
     return () => clearTimeout(t);
   }, [searchQuery]);
 
+  // 📄 Fetch on pagination or sorting
   useEffect(() => {
     fetchCategories(currentPage);
   }, [currentPage, limit, sortBy, sortOrder]);
 
-  // Normalize different shapes of response safely
+  // ✅ Safe response parser
   const robustParseCategoryResponse = (res) => {
     if (!res) return { rows: [], total: 0 };
-    const top = res.data.data ?? res;
-    // case: { data: { data: [...], total } }
+    const top = res.data?.data ?? res;
     if (top?.data?.data && Array.isArray(top.data.data)) {
       return { rows: top.data.data, total: top.data.total ?? 0 };
     }
-    // case: { data: [...] , total }
-    if (Array.isArray(top?.data)) {
+    if (top?.data && Array.isArray(top.data)) {
       return { rows: top.data, total: top.total ?? top.data.length ?? 0 };
     }
-    // case: direct { data: [...], total } or { rows: [...], total }
+    if (Array.isArray(top)) {
+      return { rows: top, total: top.length };
+    }
     if (Array.isArray(top?.rows)) {
       return { rows: top.rows, total: top.total ?? top.rows.length ?? 0 };
     }
     return { rows: [], total: 0 };
   };
 
+  // ✅ Fetch Categories
   const fetchCategories = async (page = 1) => {
     setLoading(true);
     try {
@@ -70,6 +81,7 @@ function CategoryList() {
       };
       const res = await categoryService.getAll(params);
       const { rows, total: totalVal } = robustParseCategoryResponse(res);
+
       setCategories(rows || []);
       setTotal(Number(totalVal || 0));
       setCurrentPage(page);
@@ -83,15 +95,15 @@ function CategoryList() {
     }
   };
 
-  // Handlers
+  // 🧭 Navigation handlers
   const handleAddCategory = () => navigate("/category/create");
   const handleEditCategory = (id) => navigate(`/category/edit/${id}`);
 
+  // 🗑️ Delete & Restore
   const handleDeleteCategory = async (id) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
     try {
       setLoading(true);
-      // original service used remove; keep same
       if (categoryService.remove) await categoryService.remove(id);
       else if (categoryService.delete) await categoryService.delete(id);
       else throw new Error("Delete method not found on categoryService");
@@ -130,41 +142,48 @@ function CategoryList() {
     }
   };
 
+  // 📊 Pagination logic
   const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
   const startIndex = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const endIndex = Math.min(total, currentPage * limit);
   const displayCategories = useMemo(() => categories || [], [categories]);
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm">
+      {loading && <Loading />}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">📂 Categories</h2>
+        <div className="flex items-center gap-2">
+          <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
+            <FolderOpen size={20} className="inline-block text-gray-600" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+            Categories
+          </h2>
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search categories..."
-              className="h-9 px-3 border rounded w-60 text-sm"
-            />
-            <Button
-              variant="outline"
-              className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 text-sm"
-              onClick={() => fetchCategories(currentPage)}
-            >
-              <RefreshCw size={14} />
-            </Button>
-          </div>
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search categories..."
+            className="h-9 px-3 border rounded w-60 text-sm"
+          />
 
           <Button
-            className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddCategory}
           >
             <Plus size={14} /> Add Category
+          </Button>
+
+          <Button
+            variant="outline"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            onClick={() => fetchCategories(currentPage)}
+          >
+            <RefreshCw size={14} /> Refresh
           </Button>
         </div>
       </div>
@@ -172,45 +191,50 @@ function CategoryList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[800px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
                     <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("category_name")}
                     >
-                      Name {sortBy === "category_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
+                      Category Name{" "}
+                      {sortBy === "category_name"
+                        ? sortOrder === "ASC"
+                          ? "↑"
+                          : "↓"
+                        : ""}
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Description</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Actions</th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">
+                      Description
+                    </th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={3} className="py-4 text-center text-gray-500 text-xs">
-                        Loading categories...
-                      </td>
-                    </tr>
-                  ) : displayCategories.length > 0 ? (
+                  {displayCategories.length > 0 ? (
                     displayCategories.map((c) => (
                       <tr
                         key={c.id}
                         className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
                       >
-                        <td className="px-4 py-3 text-xs font-medium text-gray-800">
-                          {c.category_name || c.name || "-"}
+                        <td className="px-4 py-3 text-[12px] font-medium text-gray-800">
+                          {c.category_name || c.name || "—"}
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-700">{c.description || "-"}</td>
+                        <td className="px-4 py-3 text-[12px] text-gray-700">
+                          {c.description || "—"}
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
                             <Button
                               variant="outline"
-                              className="text-xs h-7 px-2 rounded"
+                              size="icon"
+                              className="text-xs px-2 rounded border-gray-200 hover:bg-indigo-50 hover:text-indigo-600"
                               onClick={() => handleEditCategory(c.id)}
-                              title="Edit"
                             >
                               <Edit2 size={14} />
                             </Button>
@@ -218,7 +242,8 @@ function CategoryList() {
                             {c.is_active === false || c.deleted_at ? (
                               <Button
                                 variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
+                                size="icon"
+                                className="text-xs px-2 rounded"
                                 onClick={() => handleRestoreCategory(c.id)}
                                 title="Restore"
                               >
@@ -227,7 +252,8 @@ function CategoryList() {
                             ) : (
                               <Button
                                 variant="ghost"
-                                className="text-xs h-7 px-2 rounded"
+                                size="icon"
+                                className="text-xs px-2 rounded"
                                 onClick={() => handleDeleteCategory(c.id)}
                                 title="Delete"
                               >
@@ -240,7 +266,10 @@ function CategoryList() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3} className="py-4 text-center text-gray-500 text-xs">
+                      <td
+                        colSpan={3}
+                        className="py-4 text-center text-gray-500 text-[12px]"
+                      >
                         No categories found.
                       </td>
                     </tr>
@@ -248,42 +277,6 @@ function CategoryList() {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-
-        {/* Mobile fallback: simple list */}
-        <div className="md:hidden">
-          <div className="space-y-3">
-            {loading ? (
-              <div className="py-4 text-center text-gray-500 text-xs">Loading categories...</div>
-            ) : displayCategories.length > 0 ? (
-              displayCategories.map((c) => (
-                <div key={c.id} className="p-3 bg-white rounded-lg border shadow-sm">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="text-sm font-medium">{c.category_name || c.name || "-"}</div>
-                      <div className="text-xs text-gray-600">{c.description || "-"}</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEditCategory(c.id)}>
-                        <Edit2 size={14} />
-                      </Button>
-                      {c.is_active === false || c.deleted_at ? (
-                        <Button size="sm" variant="ghost" onClick={() => handleRestoreCategory(c.id)}>
-                          <RotateCw size={14} />
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteCategory(c.id)}>
-                          <Trash2 size={14} />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="py-4 text-center text-gray-500 text-xs">No categories found.</div>
-            )}
           </div>
         </div>
       </div>
@@ -295,18 +288,22 @@ function CategoryList() {
         </p>
 
         <div className="flex items-center gap-2">
-          <select
-            value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
+          <Select
+            value={String(limit)}
+            onValueChange={(value) => {
+              setLimit(Number(value));
               setCurrentPage(1);
             }}
-            className="h-8 text-xs border rounded px-2 bg-white"
           >
-            <option value={5}>5 / page</option>
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-          </select>
+            <SelectTrigger className="h-8 w-[110px] text-xs bg-white">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 / page</SelectItem>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+            </SelectContent>
+          </Select>
 
           <Button
             variant="outline"
@@ -325,7 +322,9 @@ function CategoryList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}
+                className={`text-xs ${
+                  currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""
+                }`}
               >
                 {i + 1}
               </Button>

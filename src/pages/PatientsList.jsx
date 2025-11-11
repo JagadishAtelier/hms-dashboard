@@ -19,6 +19,8 @@ import { useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/Context/SidebarContext";
 import patientService from "../service/patientService.js";
 import { toast } from "sonner";
+import Loading from "./Loading.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 
 const DEFAULT_LIMIT = 10;
 
@@ -44,6 +46,14 @@ function PatientsList() {
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
 
+  // Animation control: key increments when loading finishes so animations replay after loader
+  const [animateKey, setAnimateKey] = useState(0);
+  useEffect(() => {
+    if (!loading) {
+      setAnimateKey((k) => k + 1);
+    }
+  }, [loading]);
+
   // debounce search
   useEffect(() => {
     const t = setTimeout(() => fetchPatients(1), 350);
@@ -65,18 +75,9 @@ function PatientsList() {
   ]);
 
   const robustParsePatientsResponse = (res) => {
-    // Try common shapes used in your project
-    // 1) { status: 'success', data: { data: rows, total } }
-    // 2) { data: { data: rows, total } }
-    // 3) { data: rows, total }
-    // 4) array
-    // 5) { total, data }
     if (!res) return { rows: [], total: 0 };
-
-    // prefer res.data
     const top = res?.data ?? res;
 
-    // case: res.data.data (paginated)
     if (top?.data && Array.isArray(top.data)) {
       const rows = top.data;
       const totalVal =
@@ -88,19 +89,16 @@ function PatientsList() {
       return { rows, total: totalVal };
     }
 
-    // case: res.data = { data: { data: [], total } } (double-nested)
     if (top?.data?.data && Array.isArray(top.data.data)) {
       const rows = top.data.data;
       const totalVal = top.data.total ?? top.total ?? rows.length;
       return { rows, total: totalVal };
     }
 
-    // case: res.data is array
     if (Array.isArray(top)) {
       return { rows: top, total: top.length };
     }
 
-    // case: res.data.rows or res.rows
     if (top?.rows && Array.isArray(top.rows)) {
       return {
         rows: top.rows,
@@ -108,14 +106,11 @@ function PatientsList() {
       };
     }
 
-    // case: res.data is object representing single patient (rare)
     if (top?.id && top?.first_name) {
       return { rows: [top], total: 1 };
     }
 
-    // fallback: if top.data is object with keys
     if (top?.data && !Array.isArray(top.data) && typeof top.data === "object") {
-      // try to extract nested arrays
       const possible = top.data.data || top.data.rows || top.data.patients;
       if (Array.isArray(possible)) {
         return { rows: possible, total: top.data.total ?? possible.length };
@@ -170,7 +165,6 @@ function PatientsList() {
   };
 
   const handleViewPatient = (id) => {
-    // try to open overview on right context if sidebar available
     try {
       if (setMode) setMode("view");
       if (setSelectedPatientId) setSelectedPatientId(id);
@@ -224,15 +218,6 @@ function PatientsList() {
   // derived friendly list
   const displayPatients = useMemo(() => patients || [], [patients]);
 
-  const formatDate = (iso) => {
-    if (!iso) return "—";
-    try {
-      return new Date(iso).toLocaleDateString();
-    } catch {
-      return iso;
-    }
-  };
-
   const toggleSort = (field) => {
     if (sortBy === field) {
       setSortOrder((o) => (o === "ASC" ? "DESC" : "ASC"));
@@ -242,22 +227,72 @@ function PatientsList() {
     }
   };
 
+  // Animation variants
+  const pageVariant = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+  };
+
+  const tableTbodyVariant = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+    },
+  };
+
+  const rowVariant = {
+    hidden: { opacity: 0, y: 18 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+  };
+
+  const mobileListVariant = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+  };
+
+  const mobileCardVariant = {
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+  };
+
+  // -------------------------
+  // Full-screen loader so animations only run after loading finishes
+  // -------------------------
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[80vh] bg-gray-50">
+        <Loading />
+      </div>
+    );
+  }
+
+  // Main animated UI mounts after loader finishes
   return (
-    <div className="p-1 sm:p-1 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
+    <motion.div
+      key={animateKey}
+      initial="hidden"
+      animate="visible"
+      variants={pageVariant}
+      className="p-1 sm:p-1 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+    >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+      >
         <div className="flex items-center gap-2">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
             <Users size={20} className="inline-block text-gray-600" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-            {" "}
-            Patients List
-          </h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Patients List</h2>
         </div>
 
-        <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64"></div>
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45 }} className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            {/* If you have a search input you can place it here. kept empty to match original */}
+          </div>
 
           <Button
             variant="outline"
@@ -267,11 +302,11 @@ function PatientsList() {
           >
             <Plus size={14} /> Add Patient
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Table desktop */}
-      <div className="flex-1 overflow-y-auto">
+      <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
           <div className="overflow-x-auto rounded-sm border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[800px]">
@@ -279,175 +314,91 @@ function PatientsList() {
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
                     <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("patient_code")}
                     >
                       Code{" "}
-                      {sortBy === "patient_code"
-                        ? sortOrder === "ASC"
-                          ? "↑"
-                          : "↓"
-                        : ""}
+                      {sortBy === "patient_code" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
                     <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
                       onClick={() => toggleSort("last_name")}
                     >
                       Patient{" "}
-                      {sortBy === "last_name"
-                        ? sortOrder === "ASC"
-                          ? "↑"
-                          : "↓"
-                        : ""}
+                      {sortBy === "last_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
-                      Phone
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
-                      Gender
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">
-                      Action
-                    </th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Phone</th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Email</th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Gender</th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Status</th>
+                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Action</th>
                   </tr>
                 </thead>
 
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="py-4 text-center text-gray-500 text-xs"
-                      >
-                        Loading patients...
-                      </td>
-                    </tr>
-                  ) : displayPatients.length > 0 ? (
-                    displayPatients.map((p) => (
-                      <tr
+                <motion.tbody variants={tableTbodyVariant} initial="hidden" animate="visible">
+                  {displayPatients.length > 0 ? (
+                    displayPatients.map((p, i) => (
+                      <motion.tr
                         key={p.id}
+                        variants={rowVariant}
                         className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
                       >
-                        <td className="px-4 py-3 font-medium text-gray-800 text-xs">
-                          {p.patient_code || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">
-                          {p.first_name} {p.last_name || ""}
-                        </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">
-                          {p.phone || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">
-                          {p.email || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">
-                          {p.gender || "—"}
-                        </td>
+                        <td className="px-4 py-3 font-medium text-gray-800 text-[12px]">{p.patient_code || "—"}</td>
+                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.first_name} {p.last_name || ""}</td>
+                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.phone || "—"}</td>
+                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.email || "—"}</td>
+                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.gender || "—"}</td>
                         <td className="px-4 py-3">
-                          <span
-                            className={`px-2.5 py-1.5 rounded-full text-xs font-semibold ${
-                              p.is_active
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
+                          <span className={`px-2.5 py-1.5 rounded-full text-[12px] font-semibold ${p.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
                             {p.is_active ? "Active" : "Inactive"}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="text-xs px-2 rounded-sm"
-                              onClick={() => handleEditPatient(p.id)}
-                              title="Edit"
-                            >
+                            <Button variant="outline" size="icon" className="text-xs px-2 rounded-sm" onClick={() => handleEditPatient(p.id)} title="Edit">
                               <Edit2 size={14} />
                             </Button>
 
                             {p.is_active ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-xs rounded-sm"
-                                onClick={() => handleDeletePatient(p.id)}
-                                title="Delete"
-                              >
+                              <Button variant="ghost" size="icon" className="text-xs rounded-sm" onClick={() => handleDeletePatient(p.id)} title="Delete">
                                 <Trash2 size={14} />
                               </Button>
                             ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-xs rounded-sm"
-                                onClick={() => handleRestorePatient(p.id)}
-                                title="Restore"
-                              >
+                              <Button variant="ghost" size="icon" className="text-xs rounded-sm" onClick={() => handleRestorePatient(p.id)} title="Restore">
                                 <RotateCw size={14} />
                               </Button>
                             )}
                           </div>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))
                   ) : (
-                    <tr>
-                      <td
-                        colSpan={9}
-                        className="py-4 text-center text-gray-500 text-xs"
-                      >
-                        No patients found.
-                      </td>
-                    </tr>
+                    <motion.tr initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <td colSpan={9} className="py-4 text-center text-gray-500 text-[12px]">No patients found.</td>
+                    </motion.tr>
                   )}
-                </tbody>
+                </motion.tbody>
               </table>
             </div>
           </div>
         </div>
 
         {/* Mobile card view */}
-        <div className="md:hidden space-y-3 mt-3">
-          {loading ? (
-            <p className="text-center text-gray-500 text-xs">
-              Loading patients...
-            </p>
-          ) : displayPatients.length > 0 ? (
+        <motion.div className="md:hidden space-y-3 mt-3" variants={mobileListVariant} initial="hidden" animate="visible">
+          {displayPatients.length > 0 ? (
             displayPatients.map((p) => (
-              <article
-                key={p.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-3"
-              >
+              <motion.article key={p.id} variants={mobileCardVariant} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div>
-                    <p className="font-semibold text-[#0E1680] text-sm">
-                      {p.first_name} {p.last_name}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {p.patient_code || "—"}
-                    </p>
+                    <p className="font-semibold text-[#0E1680] text-sm">{p.first_name} {p.last_name}</p>
+                    <p className="text-xs text-gray-600 mt-1">{p.patient_code || "—"}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`px-2 py-0.5 text-[11px] rounded-full ${
-                        p.is_active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
+                    <span className={`px-2 py-0.5 text-[11px] rounded-full ${p.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
                       {p.is_active ? "Active" : "Inactive"}
                     </span>
-                    <span className="text-[11px] text-gray-500">
-                      {p.phone || "—"}
-                    </span>
+                    <span className="text-[11px] text-gray-500">{p.phone || "—"}</span>
                   </div>
                 </div>
 
@@ -464,113 +415,57 @@ function PatientsList() {
 
                   <div className="col-span-2">
                     <div className="text-[11px] text-gray-500">Address</div>
-                    <div className="text-xs text-gray-700">
-                      {p.address || "—"}
-                    </div>
+                    <div className="text-xs text-gray-700">{p.address || "—"}</div>
                   </div>
 
                   <div className="col-span-2 flex gap-2 mt-2">
-                    <Button
-                      className="bg-[#0E1680] text-white w-1/3 text-sm"
-                      onClick={() => handleViewPatient(p.id)}
-                    >
-                      View
-                    </Button>
-                    <Button
-                      className="w-1/3"
-                      variant="outline"
-                      onClick={() => handleEditPatient(p.id)}
-                    >
-                      <Edit2 size={14} />
-                    </Button>
+                    <Button className="bg-[#0E1680] text-white w-1/3 text-sm" onClick={() => handleViewPatient(p.id)}>View</Button>
+                    <Button className="w-1/3" variant="outline" onClick={() => handleEditPatient(p.id)}><Edit2 size={14} /></Button>
                     {p.is_active ? (
-                      <Button
-                        className="w-1/3"
-                        variant="ghost"
-                        onClick={() => handleDeletePatient(p.id)}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
+                      <Button className="w-1/3" variant="ghost" onClick={() => handleDeletePatient(p.id)}><Trash2 size={14} /></Button>
                     ) : (
-                      <Button
-                        className="w-1/3"
-                        variant="ghost"
-                        onClick={() => handleRestorePatient(p.id)}
-                      >
-                        <RotateCw size={14} />
-                      </Button>
+                      <Button className="w-1/3" variant="ghost" onClick={() => handleRestorePatient(p.id)}><RotateCw size={14} /></Button>
                     )}
                   </div>
                 </div>
-              </article>
+              </motion.article>
             ))
           ) : (
-            <p className="text-center text-gray-500 text-xs">
-              No patients found.
-            </p>
+            <p className="text-center text-gray-500 text-xs">No patients found.</p>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
-        <p className="text-xs text-gray-500">
-          Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} patients
-        </p>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
+        <p className="text-xs text-gray-500">Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} patients</p>
 
         <div className="flex items-center gap-2">
-          <select
-            value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-            className="h-8 text-xs border rounded px-2 bg-white"
-          >
+          <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setCurrentPage(1); }} className="h-8 text-xs border rounded px-2 bg-white">
             <option value={5}>5 / page</option>
             <option value={10}>10 / page</option>
             <option value={20}>20 / page</option>
             <option value={50}>50 / page</option>
           </select>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs">
             <ChevronLeft />
           </Button>
 
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => (
-              <Button
-                key={i}
-                size="sm"
-                variant={currentPage === i + 1 ? "default" : "outline"}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${
-                  currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
-                }`}
-              >
+              <Button key={i} size="sm" variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)} className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}>
                 {i + 1}
               </Button>
             ))}
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs">
             <ChevronRight />
           </Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

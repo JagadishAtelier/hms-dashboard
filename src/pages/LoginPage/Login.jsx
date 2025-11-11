@@ -41,8 +41,11 @@ export default function Login() {
 
       switch (normalizedRole) {
         case "superadmin":
-        case "doctor":
+        
           navigate("/admin-dashboard");
+          break;
+        case "doctor":
+          navigate("/dashboard");
           break;
         case "pharmacist":
           navigate("/pharma-dashboard");
@@ -72,11 +75,11 @@ export default function Login() {
   return (
     <div className="h-screen w-full overflow-hidden flex bg-gray-50">
       {/* Left Side Illustration */}
-      <div className="hidden pl-1 lg:flex lg:flex-1 items-center  bg-white/0 ">
+      <div className="hidden lg:flex lg:flex-1 items-center  bg-white/0 ">
         <img
           src="/login_hms.svg"
           alt="HMS Illustration"
-          className="max-w-[820px] w-full h-[95%] object-contain"
+          className="max-w-[820px] ml-26 w-full h-[95%] object-contain"
         />
       </div>
 

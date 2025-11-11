@@ -1,3 +1,4 @@
+// src/pages/appointments/AppointmentsList.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Loading from "../Loading.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * AppointmentsList.jsx
@@ -41,6 +44,14 @@ function AppointmentsList() {
   const [appointments, setAppointments] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // Animation control: key increments when loading finishes so animations replay after loader
+  const [animateKey, setAnimateKey] = useState(0);
+  useEffect(() => {
+    if (!loading) {
+      setAnimateKey((k) => k + 1);
+    }
+  }, [loading]);
 
   // Filters & pagination
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,7 +91,7 @@ function AppointmentsList() {
     sortOrder,
   ]);
 
-  // Main fetch function
+  // Main fetch function (kept unchanged)
   const fetchAppointments = async (page = 1) => {
     setLoading(true);
     try {
@@ -141,9 +152,7 @@ function AppointmentsList() {
       setCurrentPage(page);
     } catch (err) {
       console.error("Error fetching appointments:", err);
-      toast.error(
-        err.response?.data?.message || "Failed to fetch appointments"
-      );
+      toast.error(err.response?.data?.message || "Failed to fetch appointments");
       setAppointments([]);
       setTotal(0);
     } finally {
@@ -188,9 +197,7 @@ function AppointmentsList() {
       fetchAppointments(currentPage);
     } catch (err) {
       console.error(err);
-      toast.error(
-        err.response?.data?.message || "Failed to cancel appointment"
-      );
+      toast.error(err.response?.data?.message || "Failed to cancel appointment");
     } finally {
       setLoading(false);
     }
@@ -229,10 +236,61 @@ function AppointmentsList() {
     }
   };
 
+  // Animation variants (match PatientsList style)
+  const pageVariant = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+  };
+
+  const tableTbodyVariant = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+    },
+  };
+
+  const rowVariant = {
+    hidden: { opacity: 0, y: 18 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+  };
+
+  const mobileListVariant = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+  };
+
+  const mobileCardVariant = {
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+  };
+
+  // -------------------------
+  // Full-screen loader so animations only run after loading finishes
+  // -------------------------
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[80vh] bg-gray-50">
+        <Loading />
+      </div>
+    );
+  }
+
+  // Main animated UI mounts after loader finishes
   return (
-    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-smrounded-lg">
+    <motion.div
+      key={animateKey}
+      initial="hidden"
+      animate="visible"
+      variants={pageVariant}
+      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+    >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+      >
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
@@ -249,12 +307,9 @@ function AppointmentsList() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45 }} className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
-            <Search
-              className="absolute left-3 top-2.5 text-gray-400"
-              size={16}
-            />
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
               placeholder="Search name, ID or appointment no"
@@ -302,227 +357,103 @@ function AppointmentsList() {
           >
             <RefreshCw size={14} />
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Table (desktop) */}
-      <div className="flex-1 overflow-y-auto">
+      <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
             <div className="min-w-[600px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">
-                      Appt No
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">
-                      Patient
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">
-                      Code
-                    </th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Appt No</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Patient</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Code</th>
                     <th
-                      className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467] cursor-pointer flex items-center justify-center"
+                      className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467] cursor-pointer flex items-center justify-center"
                       onClick={() => toggleSort("scheduled_at")}
-                      title={`Sort by ${
-                        sortOrder === "ASC" ? "descending" : "ascending"
-                      }`}
+                      title={`Sort by ${sortOrder === "ASC" ? "descending" : "ascending"}`}
                     >
                       Date{" "}
-                      {sortBy === "scheduled_at" ? (
-                        sortOrder === "ASC" ? (
-                          <ChevronUp size={12} className="inline-block" />
-                        ) : (
-                          <ChevronDown size={12} className="inline-block" />
-                        )
-                      ) : (
-                        ""
-                      )}
+                      {sortBy === "scheduled_at" ? (sortOrder === "ASC" ? <ChevronUp size={12} className="inline-block" /> : <ChevronDown size={12} className="inline-block" />) : ""}
                     </th>
-                    <th
-                      className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("scheduled_time")}
-                    >
-                      Time{" "}
-                      {sortBy === "scheduled_time"
-                        ? sortOrder === "ASC"
-                          ? "↑"
-                          : "↓"
-                        : ""}
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467] cursor-pointer" onClick={() => toggleSort("scheduled_time")}>
+                      Time {sortBy === "scheduled_time" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">
-                      Doctor
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">
-                      Visit
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px]   font-semibold text-[#475467]">
-                      Status
-                    </th>
-                    {/* <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Action</th> */}
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Doctor</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Visit</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Status</th>
                   </tr>
                 </thead>
 
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td
-                        colSpan={11}
-                        className="py-4 text-center text-gray-500 text-xs"
-                      >
-                        Loading appointments...
-                      </td>
-                    </tr>
-                  ) : displayAppointments.length > 0 ? (
+                <motion.tbody variants={tableTbodyVariant} initial="hidden" animate="visible">
+                  {displayAppointments.length > 0 ? (
                     displayAppointments.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
-                      >
-                        <td className="px-4 py-3 text-center font-medium text-gray-800 text-[10px]">
-                          {item.appointment_no}
-                        </td>
-                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">
-                          {item.patient
-                            ? `${item.patient.first_name} ${item.patient.last_name}`
-                            : "—"}
-                        </td>
-                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">
-                          {item.patient?.patient_code || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">
-                          {formatDate(item.scheduled_at)}
-                        </td>
-                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">
-                          {item.scheduled_time || "—"}
-                        </td>
-                        <td className="px-4 py-3 text-center text-gray-700 text-[10px]">
-                          {item.doctor?.doctor_name || "—"}
-                        </td>
+                      <motion.tr key={item.id} variants={rowVariant} className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100">
+                        <td className="px-4 py-3 text-center font-medium text-gray-800 text-[12px]">{item.appointment_no}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[12px]">{item.patient ? `${item.patient.first_name} ${item.patient.last_name}` : "—"}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[12px]">{item.patient?.patient_code || "—"}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[12px]">{formatDate(item.scheduled_at)}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[12px]">{item.scheduled_time || "—"}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 text-[12px]">{item.doctor?.doctor_name || "—"}</td>
                         <td className="px-4 py-3 text-center">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                              item.visit_type === "OPD"
-                                ? "bg-blue-100 text-blue-700"
-                                : item.visit_type === "teleconsult"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
+                          <span className={`px-2 py-0.5 rounded-full text-[12px] font-semibold ${item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : item.visit_type === "teleconsult" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
                             {item.visit_type}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                              item.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : item.status === "Confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : item.status === "Cancelled"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-blue-100 text-blue-700"
-                            }`}
-                          >
+                          <span className={`px-2 py-0.5 rounded-full text-[12px] font-semibold ${item.status === "Pending" ? "bg-yellow-100 text-yellow-700" : item.status === "Confirmed" ? "bg-green-100 text-green-700" : item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
                             {item.status}
                           </span>
                         </td>
-                        {/* <td className="px-4 py-3">
-                          <div className="flex gap-2">
-                            <Button className="bg-[#0E1680] text-white text-xs h-7 px-2 rounded" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
-                            <Button variant="outline" size="sm" className="text-xs h-7 px-2" onClick={() => handleEditAppointment(item.id)}>
-                              <Edit2 size={14} />
-                            </Button>
-                            {item.status !== "Cancelled" && (
-                              <Button variant="ghost" size="sm" className="text-xs h-7 px-2" onClick={() => handleCancelAppointment(item.id)} title="Cancel appointment">
-                                <X size={14} />
-                              </Button>
-                            )}
-                          </div>
-                        </td> */}
-                      </tr>
+                      </motion.tr>
                     ))
                   ) : (
                     <tr>
-                      <td
-                        colSpan={11}
-                        className="py-4 text-center text-gray-500 text-[10px]"
-                      >
-                        No appointments found.
-                      </td>
+                      <td colSpan={11} className="py-4 text-center text-gray-500 text-[10px]">No appointments found.</td>
                     </tr>
                   )}
-                </tbody>
+                </motion.tbody>
               </table>
             </div>
           </div>
         </div>
 
         {/* Mobile card view */}
-        <div className="md:hidden space-y-3 mt-3">
-          {loading ? (
-            <p className="text-center text-gray-500 text-xs">
-              Loading appointments...
-            </p>
-          ) : displayAppointments.length > 0 ? (
+        <motion.div className="md:hidden space-y-3 mt-3" variants={mobileListVariant} initial="hidden" animate="visible">
+          {displayAppointments.length > 0 ? (
             displayAppointments.map((item) => (
-              <article
-                key={item.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-3"
-              >
+              <motion.article key={item.id} variants={mobileCardVariant} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div>
-                    <p className="font-semibold text-[#0E1680] text-sm">
-                      {item.appointment_no}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {item.patient
-                        ? `${item.patient.first_name} ${item.patient.last_name}`
-                        : "—"}
-                    </p>
+                    <p className="font-semibold text-[#0E1680] text-sm">{item.appointment_no}</p>
+                    <p className="text-xs text-gray-600 mt-1">{item.patient ? `${item.patient.first_name} ${item.patient.last_name}` : "—"}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`px-2 py-0.5 text-[11px] rounded-full ${
-                        item.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : item.status === "Confirmed"
-                          ? "bg-green-100 text-green-700"
-                          : item.status === "Cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
-                    >
+                    <span className={`px-2 py-0.5 text-[11px] rounded-full ${item.status === "Pending" ? "bg-yellow-100 text-yellow-700" : item.status === "Confirmed" ? "bg-green-100 text-green-700" : item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>
                       {item.status}
                     </span>
-                    <span className="text-[11px] text-gray-500">
-                      {item.scheduled_time || "—"}
-                    </span>
+                    <span className="text-[11px] text-gray-500">{item.scheduled_time || "—"}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
                   <div>
                     <div className="text-[11px] text-gray-500">Code</div>
-                    <div className="text-sm">
-                      {item.patient?.patient_code || "—"}
-                    </div>
+                    <div className="text-sm">{item.patient?.patient_code || "—"}</div>
                   </div>
 
                   <div>
                     <div className="text-[11px] text-gray-500">Doctor</div>
-                    <div className="text-sm">
-                      {item.doctor?.doctor_name || "—"}
-                    </div>
+                    <div className="text-sm">{item.doctor?.doctor_name || "—"}</div>
                   </div>
 
                   <div className="col-span-2">
                     <div className="text-[11px] text-gray-500">Reason</div>
-                    <div className="text-xs text-gray-700">
-                      {item.reason || "—"}
-                    </div>
+                    <div className="text-xs text-gray-700">{item.reason || "—"}</div>
                   </div>
 
                   {item.notes && (
@@ -533,39 +464,25 @@ function AppointmentsList() {
                   )}
 
                   <div className="col-span-2">
-                    <Button
-                      className="bg-[#0E1680] text-white w-full mt-3 text-sm"
-                      onClick={() => handleTakeForConsultation(item)}
-                    >
+                    <Button className="bg-[#0E1680] text-white w-full mt-3 text-sm" onClick={() => handleTakeForConsultation(item)}>
                       Consultation
                     </Button>
                   </div>
                 </div>
-              </article>
+              </motion.article>
             ))
           ) : (
-            <p className="text-center text-gray-500 text-xs">
-              No appointments found.
-            </p>
+            <p className="text-center text-gray-500 text-xs">No appointments found.</p>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
-        <p className="text-xs text-gray-500">
-          Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total}{" "}
-          appointments
-        </p>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
+        <p className="text-xs text-gray-500">Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} appointments</p>
 
         <div className="flex items-center gap-2">
-          <Select
-            value={String(limit)}
-            onValueChange={(value) => {
-              setLimit(Number(value));
-              setCurrentPage(1);
-            }}
-          >
+          <Select value={String(limit)} onValueChange={(value) => { setLimit(Number(value)); setCurrentPage(1); }}>
             <SelectTrigger className="h-8 w-[110px] text-xs border border-gray-200 bg-white rounded shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
               <SelectValue placeholder="Items per page" />
             </SelectTrigger>
@@ -578,44 +495,24 @@ function AppointmentsList() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs">
             <ChevronLeft />
           </Button>
 
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => (
-              <Button
-                key={i}
-                size="sm"
-                variant={currentPage === i + 1 ? "default" : "outline"}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs ${
-                  currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""
-                }`}
-              >
+              <Button key={i} size="sm" variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)} className={`text-xs ${currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""}`}>
                 {i + 1}
               </Button>
             ))}
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="text-xs"
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs">
             <ChevronRight />
           </Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

@@ -2,19 +2,25 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
+  RefreshCw,
+  Search,
   Edit2,
   Trash2,
-  RefreshCw,
+  Plus,
   DownloadCloud,
+  ChevronUp,
+  ChevronDown,
+  Package,
 } from "lucide-react";
 import { toast } from "sonner";
 import productService from "../../service/productService.js";
 import { QRCodeCanvas } from "qrcode.react";
 import { jsPDF } from "jspdf";
+import Loading from "../Loading.jsx";
 
 const DEFAULT_LIMIT = 10;
 
@@ -25,6 +31,7 @@ export default function ProductList() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // filters + pagination
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
@@ -34,17 +41,19 @@ export default function ProductList() {
 
   const qrRefs = useRef({});
 
-  // Robustly parse different response shapes
+  // helper to normalize API response
   const robustParseProductResponse = (res) => {
     if (!res) return { rows: [], total: 0 };
     const top = res?.data?.data ?? res?.data ?? res;
-    if (top?.data && Array.isArray(top.data)) return { rows: top.data, total: top.total ?? top.data.length ?? 0 };
+    if (top?.data && Array.isArray(top.data))
+      return { rows: top.data, total: top.total ?? top.data.length ?? 0 };
     if (Array.isArray(top)) return { rows: top, total: top.length ?? 0 };
-    if (Array.isArray(res?.data)) return { rows: res.data, total: res.total ?? res.data.length ?? 0 };
+    if (Array.isArray(res?.data))
+      return { rows: res.data, total: res.total ?? res.data.length ?? 0 };
     return { rows: [], total: 0 };
   };
 
-  // Fetch products
+  // fetch products
   const fetchProducts = async (page = 1) => {
     setLoading(true);
     try {
@@ -56,21 +65,21 @@ export default function ProductList() {
         sort_order: sortOrder,
       };
 
-      // try common method names
       const fn =
         productService.getAllProducts ??
         productService.getAll ??
         productService.listProducts ??
         productService;
 
-      const resp = typeof fn === "function" ? await fn(params) : await productService.getAll(params);
-      const { rows, total: totalVal } = robustParseProductResponse(resp);
+      const resp =
+        typeof fn === "function" ? await fn(params) : await productService.getAll(params);
 
+      const { rows, total: totalVal } = robustParseProductResponse(resp);
       setProducts(rows || []);
       setTotal(Number(totalVal || 0));
       setCurrentPage(page);
     } catch (err) {
-      console.error("Error fetching products:", err);
+      console.error(err);
       toast.error(err?.response?.data?.message || "Failed to fetch products");
       setProducts([]);
       setTotal(0);
@@ -79,12 +88,13 @@ export default function ProductList() {
     }
   };
 
-  // debounce search like your other lists
+  // debounce search
   useEffect(() => {
     const t = setTimeout(() => fetchProducts(1), 350);
     return () => clearTimeout(t);
   }, [searchQuery]);
 
+  // fetch when sorting/pagination changes
   useEffect(() => {
     fetchProducts(currentPage);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,8 +107,7 @@ export default function ProductList() {
       if (productService.deleteProduct) await productService.deleteProduct(id);
       else if (productService.remove) await productService.remove(id);
       else if (productService.delete) await productService.delete(id);
-      else throw new Error("Delete method not found on productService");
-
+      else throw new Error("Delete method not found");
       toast.success("Product deleted successfully");
       fetchProducts(currentPage);
     } catch (err) {
@@ -118,13 +127,9 @@ export default function ProductList() {
     }
   };
 
-  // QR downloads
   const downloadQR = (id, code) => {
     const canvas = qrRefs.current[id]?.querySelector("canvas");
-    if (!canvas) {
-      toast.error("QR not ready");
-      return;
-    }
+    if (!canvas) return toast.error("QR not ready");
     const link = document.createElement("a");
     link.href = canvas.toDataURL();
     link.download = `${code || id}.png`;
@@ -133,16 +138,15 @@ export default function ProductList() {
 
   const downloadAllQRPDF = () => {
     const pdf = new jsPDF();
-    let x = 10;
-    let y = 20;
-    const size = 40;
-
-    products.forEach((product) => {
-      const canvas = qrRefs.current[product.id]?.querySelector("canvas");
+    let x = 10,
+      y = 20,
+      size = 40;
+    products.forEach((p) => {
+      const canvas = qrRefs.current[p.id]?.querySelector("canvas");
       if (canvas) {
         const imgData = canvas.toDataURL("image/png");
         pdf.setFontSize(10);
-        pdf.text(product.product_code || product.product_name || "", x, y - 2);
+        pdf.text(p.product_code || p.product_name || "", x, y - 2);
         pdf.addImage(imgData, "PNG", x, y, size, size);
         x += size + 25;
         if (x + size > 200) {
@@ -151,48 +155,54 @@ export default function ProductList() {
         }
       }
     });
-
     pdf.save("product_qrcodes.pdf");
   };
 
-  // derived values for pagination UI
   const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
   const startIndex = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const endIndex = Math.min(total, currentPage * limit);
   const displayProducts = useMemo(() => products || [], [products]);
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm bg-[#fff] border border-gray-300 rounded-lg shadow-[0_0_8px_rgba(0,0,0,0.15)]">
+    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
+      {loading && <Loading />}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">📦 Products</h2>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
+            <Package className="text-gray-600" size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Products</h2>
+            <p className="text-xs text-gray-500">Manage your inventory — edit, delete, or print QR codes</p>
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="flex gap-2 w-full sm:w-auto">
-            <input
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
+            <Input
+              type="search"
+              placeholder="Search by name, code, or brand"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products by name / code / brand..."
-              className="h-9 px-3 border rounded w-72 text-sm"
+              className="bg-white h-9 pl-9 text-sm"
             />
-            <Button
-              variant="outline"
-              className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 w-full sm:w-auto text-sm"
-              onClick={() => fetchProducts(currentPage)}
-            >
-              <RefreshCw size={14} />
-            </Button>
           </div>
 
           <Button
-            className="h-[36px] bg-[#506EE4] text-white flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
             onClick={() => navigate("/product/create")}
           >
             <Plus size={14} /> Add Product
           </Button>
 
-          <Button variant="outline" className="h-[36px] bg-[#506EE4] text-[#fff] flex items-center gap-2 w-full sm:w-auto text-sm" onClick={downloadAllQRPDF}>
-            <DownloadCloud size={14} /> Download All QR PDF
+          <Button
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
+            onClick={() => fetchProducts(1)}
+          >
+            <RefreshCw size={14} />
           </Button>
         </div>
       </div>
@@ -200,46 +210,45 @@ export default function ProductList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
             <div className="min-w-[800px]">
               <table className="w-full table-auto border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("product_name")}
-                    >
-                      Name {sortBy === "product_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("product_code")}
-                    >
-                      Code {sortBy === "product_code" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">QR Code</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Brand</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Category</th>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("purchase_price")}
-                    >
-                      Price {sortBy === "purchase_price" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("selling_price")}
-                    >
-                      Selling Price {sortBy === "selling_price" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-[#475467]">Actions</th>
+                    {[
+                      { field: "product_name", label: "Name" },
+                      { field: "product_code", label: "Code" },
+                      { field: "purchase_price", label: "Purchase" },
+                      { field: "selling_price", label: "Selling" },
+                    ].map((col) => (
+                      <th
+                        key={col.field}
+                        className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467] cursor-pointer"
+                        onClick={() => toggleSort(col.field)}
+                      >
+                        {col.label}{" "}
+                        {sortBy === col.field ? (
+                          sortOrder === "ASC" ? (
+                            <ChevronUp size={12} className="inline-block" />
+                          ) : (
+                            <ChevronDown size={12} className="inline-block" />
+                          )
+                        ) : (
+                          ""
+                        )}
+                      </th>
+                    ))}
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Brand</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Category</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">QR Code</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="py-4 text-center text-gray-500 text-xs">
+                      <td colSpan={9} className="py-4 text-center text-gray-500 text-[12px]">
                         Loading products...
                       </td>
                     </tr>
@@ -249,50 +258,32 @@ export default function ProductList() {
                         key={p.id}
                         className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
                       >
-                        <td className="px-4 py-3 text-xs font-medium text-gray-800">{p.product_name}</td>
-                        <td className="px-4 py-3 text-xs text-gray-700">{p.product_code}</td>
-
-                        <td className="px-4 py-3">
-                          <div ref={(el) => (qrRefs.current[p.id] = el)} className="flex items-center">
-                            <QRCodeCanvas value={p.product_code || ""} size={56} level="H" />
-                            <Button
-                              variant="outline"
-                              className="text-xs h-7 px-2 ml-2"
-                              onClick={() => downloadQR(p.id, p.product_code)}
-                              title="Download QR"
-                            >
-                              <DownloadCloud size={14} />
-                            </Button>
+                        <td className="px-4 py-3 text-center text-[12px] font-medium">{p.product_name}</td>
+                        <td className="px-4 py-3 text-center text-[12px]">{p.product_code}</td>
+                        <td className="px-4 py-3 text-center text-[12px]">₹{p.purchase_price ?? "—"}</td>
+                        <td className="px-4 py-3 text-center text-[12px]">₹{p.selling_price ?? "—"}</td>
+                        <td className="px-4 py-3 text-center text-[12px]">{p.brand || "—"}</td>
+                        <td className="px-4 py-3 text-center text-[12px]">{p.category_name || "—"}</td>
+                        <td className="px-4 py-3 text-center">
+                          <div ref={(el) => (qrRefs.current[p.id] = el)} className="flex items-center justify-center">
+                            <QRCodeCanvas value={p.product_code || ""} size={40} level="H" />
                           </div>
                         </td>
-
-                        <td className="px-4 py-3 text-xs text-gray-700">{p.brand || "—"}</td>
-                        <td className="px-4 py-3 text-xs text-gray-700">{p.category_name || "—"}</td>
-
-                        <td className="px-4 py-3 text-xs text-gray-700">
-                          {p.purchase_price != null ? `₹${p.purchase_price}` : "—"}
-                        </td>
-
-                        <td className="px-4 py-3 text-xs text-gray-700">
-                          {p.selling_price != null ? `₹${p.selling_price}` : "—"}
-                        </td>
-
-                        <td className="px-4 py-3">
-                          <div className="flex gap-2">
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex gap-2 justify-center">
                             <Button
                               variant="outline"
-                              className="text-xs h-7 px-2 rounded"
+                              size="sm"
+                              className="text-xs h-7 px-2"
                               onClick={() => navigate(`/product/edit/${p.id}`)}
-                              title="Edit"
                             >
                               <Edit2 size={14} />
                             </Button>
-
                             <Button
                               variant="ghost"
-                              className="text-xs h-7 px-2 rounded"
+                              size="sm"
+                              className="text-xs h-7 px-2"
                               onClick={() => handleDelete(p.id)}
-                              title="Delete"
                             >
                               <Trash2 size={14} />
                             </Button>
@@ -302,7 +293,7 @@ export default function ProductList() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} className="py-4 text-center text-gray-500 text-xs">
+                      <td colSpan={9} className="py-4 text-center text-gray-500 text-xs">
                         No products found.
                       </td>
                     </tr>
@@ -311,43 +302,6 @@ export default function ProductList() {
               </table>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Mobile fallback */}
-      <div className="md:hidden mt-4">
-        <div className="space-y-3">
-          {loading ? (
-            <div className="py-4 text-center text-gray-500 text-xs">Loading products...</div>
-          ) : displayProducts.length > 0 ? (
-            displayProducts.map((p) => (
-              <div key={p.id} className="p-3 bg-white rounded-lg border shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-sm font-medium">{p.product_name}</div>
-                    <div className="text-xs text-gray-600">{p.product_code}</div>
-                    <div className="text-xs text-gray-600 mt-1">{p.brand ? `${p.brand} • ${p.category_name || "—"}` : (p.category_name || "—")}</div>
-                    <div className="text-xs text-gray-700 mt-1">₹{p.selling_price ?? "—"}</div>
-                  </div>
-                  <div className="flex flex-col gap-2 items-end">
-                    <div ref={(el) => (qrRefs.current[p.id] = el)}>
-                      <QRCodeCanvas value={p.product_code || ""} size={56} level="H" />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/product/edit/${p.id}`)}>
-                        <Edit2 size={14} />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(p.id)}>
-                        <Trash2 size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="py-4 text-center text-gray-500 text-xs">No products found.</div>
-          )}
         </div>
       </div>
 
