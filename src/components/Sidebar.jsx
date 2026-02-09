@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import logo from "../assets/logo.png";
+import logo from "../../public/dark logo.png";
 import LabResultModal from "./Context/LabResultModal";
 import {
   Users,
@@ -133,7 +133,7 @@ export default function Sidebar({ isOpen, onClose }) {
     <>
       <div className="flex items-center justify-between gap-2 px-4 h-[60px] border-b bg-white">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="logo" className="w-8 h-8" />
+          <img src={logo} alt="logo" className="w-8 h-8 object-contain bg-gray-100 border border-gray-100 rounded-xs" />
           <h1 className="text-lg font-semibold">Atelier HMS</h1>
         </div>
         {/* Mobile close button */}

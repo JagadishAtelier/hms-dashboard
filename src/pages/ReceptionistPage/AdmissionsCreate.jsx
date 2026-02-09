@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area"; // Assuming you have ScrollArea
-import { Separator } from "@/components/ui/separator"; // Assuming you have Separator
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Loader2,
   BedSingle,
@@ -22,21 +22,23 @@ import {
   User,
   XCircle,
   Stethoscope,
-  ChevronDown,
   ChevronLeft,
   Building,
 } from "lucide-react";
 
-// Assuming these service imports are correct
 import patientService from "../../service/patientService.js";
 import bedsService from "../../service/bedsService.js";
 import admissionsService from "../../service/addmissionsService.js";
 
 export default function AdmissionsCreate() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+
   const [loading, setLoading] = useState(false);
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [loadingBeds, setLoadingBeds] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
@@ -57,9 +59,55 @@ export default function AdmissionsCreate() {
   const [beds, setBeds] = useState([]);
   const [selectedBed, setSelectedBed] = useState(null);
 
-  // ---------------- Functional Logic (Unchanged) ----------------
+  // Fetch admission details if editing
+  useEffect(() => {
+    if (!isEdit) return;
+
+    const fetchAdmission = async () => {
+      setFetching(true);
+      try {
+        const res = await admissionsService.getAdmissionById(id);
+        const data = res?.data || res;
+
+        setForm({
+          patient_id: data.patient_id,
+          bed_id: data.bed_id,
+          ward_id: data.ward_id,
+          room_id: data.room_id,
+          reason: data.reason || "",
+          // If admission_date is present, keep it, else current. 
+          // Usually we don't change admission date on edit unless specified.
+          admission_date: data.admission_date || new Date().toISOString(),
+        });
+
+        if (data.patient) {
+          setSelectedPatient(data.patient);
+        }
+
+        if (data.bed) {
+          // Flatten bed structure for display/selection compatibility
+          setSelectedBed({
+            id: data.bed.id,
+            bed_no: data.bed.bed_no,
+            is_occupied: true, // It is occupied by this admission
+            ward_name: data.ward?.name || "Ward N/A",
+            ward_id: data.ward?.id || "",
+            room_name: data.room?.room_no || "Room N/A",
+            room_id: data.room?.id || "",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching admission:", err);
+        toast.error("Failed to load admission details");
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchAdmission();
+  }, [id, isEdit]);
+
   const fetchPatients = async (query = "") => {
-    // ... (unchanged logic)
     setLoadingPatients(true);
     try {
       const params = { search: query, limit: 50 };
@@ -74,7 +122,6 @@ export default function AdmissionsCreate() {
   };
 
   const fetchBeds = async () => {
-    // ... (unchanged logic)
     setLoadingBeds(true);
     try {
       const res = await bedsService.getAllBeds({ status: "available" });
@@ -99,6 +146,8 @@ export default function AdmissionsCreate() {
   };
 
   useEffect(() => {
+    // Only fetch patients if not in edit mode or if query changes?
+    // Actually, we might want to change patient (unlikely for admission edit but possible)
     fetchPatients();
     fetchBeds();
   }, []);
@@ -129,7 +178,7 @@ export default function AdmissionsCreate() {
   const clearSelectedPatient = () => {
     setSelectedPatient(null);
     setForm((prev) => ({ ...prev, patient_id: "" }));
-    setPatientQuery(""); // Reset query when clearing
+    setPatientQuery("");
   };
 
   const selectBed = (bed) => {
@@ -139,6 +188,16 @@ export default function AdmissionsCreate() {
       bed_id: bed.id,
       ward_id: bed.ward_id,
       room_id: bed.room_id,
+    }));
+  };
+
+  const clearSelectedBed = () => {
+    setSelectedBed(null);
+    setForm((prev) => ({
+      ...prev,
+      bed_id: "",
+      ward_id: "",
+      room_id: "",
     }));
   };
 
@@ -162,24 +221,38 @@ export default function AdmissionsCreate() {
     const payload = {
       ...form,
       status: "admitted",
-      admission_date: new Date().toISOString(),
+      // Only set current date on creation? Or keep what's in form?
+      // If editing, we generally preserve original admission date unless modified (though no input for it here)
+      admission_date: form.admission_date || new Date().toISOString(),
     };
 
     setLoading(true);
     try {
-      await admissionsService.createAdmission(payload);
-      toast.success("Patient admitted successfully!");
+      if (isEdit) {
+        await admissionsService.updateAdmission(id, payload);
+        toast.success("Admission updated successfully!");
+      } else {
+        await admissionsService.createAdmission(payload);
+        toast.success("Patient admitted successfully!");
+      }
       navigate("/admissions");
     } catch (err) {
-      console.error("Create Admission Error:", err);
-      toast.error(err?.response?.data?.message || "Failed to admit patient");
+      console.error("Admission Error:", err);
+      toast.error(err?.response?.data?.message || `Failed to ${isEdit ? "update" : "create"} admission`);
       if (err?.response?.data?.errors) setErrors(err.response.data.errors);
     } finally {
       setLoading(false);
     }
   };
 
-  // ---------------- Render (Refactored) ----------------
+  if (fetching) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="animate-spin text-[#0E1680]" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className="p-2 sm:p-2 max-w-5xl mx-auto bg-white rounded-lg shadow-sm">
       {/* HEADER */}
@@ -197,10 +270,12 @@ export default function AdmissionsCreate() {
           </div>
           <div>
             <h2 className="text-2xl font-semibold text-[#0E1680]">
-              New Patient Admission
+              {isEdit ? "Edit Admission Details" : "New Patient Admission"}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Fill in the details to assign a patient to an available bed.
+              {isEdit
+                ? "Update patient admission details and bed assignment."
+                : "Fill in the details to assign a patient to an available bed."}
             </p>
           </div>
         </div>
@@ -231,11 +306,10 @@ export default function AdmissionsCreate() {
               {selectedPatient ? (
                 // Selected Patient Display
                 <div
-                  className={`flex justify-between items-center p-3 rounded-lg border-2 ${
-                    errors.patient_id
+                  className={`flex justify-between items-center p-3 rounded-lg border-2 ${errors.patient_id
                       ? "border-red-400"
                       : "border-blue-400 bg-blue-50/50"
-                  }`}
+                    }`}
                 >
                   <div className="flex flex-col">
                     <div className="font-semibold text-gray-800">
@@ -246,6 +320,7 @@ export default function AdmissionsCreate() {
                       {selectedPatient.phone}
                     </div>
                   </div>
+                  {/* Allow changing patient? Maybe restricted in edit mode? Let's allow it for flexibility */}
                   <Button
                     type="button"
                     variant="ghost"
@@ -274,11 +349,10 @@ export default function AdmissionsCreate() {
                         setShowPatientList(true);
                       }}
                       onFocus={() => setShowPatientList(true)}
-                      className={`pl-10 ${
-                        errors.patient_id
+                      className={`pl-10 ${errors.patient_id
                           ? "border-red-500 focus-visible:ring-red-500"
                           : ""
-                      }`}
+                        }`}
                       autoComplete="off"
                     />
                     {loadingPatients && (
@@ -330,69 +404,102 @@ export default function AdmissionsCreate() {
                 Bed Selection <span className="text-red-500 ml-1">*</span>
               </Label>
 
-              {loadingBeds ? (
-                <div className="flex flex-col items-center justify-center py-10 text-gray-500">
-                  <Loader2 className="animate-spin h-6 w-6 mb-2" />
-                  <p>Loading available beds...</p>
-                </div>
-              ) : (
-                <ScrollArea className="h-64 pr-2">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {beds.length === 0 ? (
-                      <p className="text-gray-500 text-sm col-span-full p-4 border rounded-lg text-center bg-gray-50">
-                        No beds currently available for admission.
-                      </p>
-                    ) : (
-                      beds.map((bed) => (
-                        <button
-                          type="button"
-                          key={bed.id}
-                          onClick={() => selectBed(bed)}
-                          className={`flex cursor-pointer flex-col items-start  text-left w-full h-full border rounded-xl p-4 shadow-sm transition-all duration-200 ease-in-out
-                            ${
-                              selectedBed?.id === bed.id
-                                ? "border-blue-600 border-2 bg-blue-50 shadow-lg"
-                                : "border-gray-200 bg-white hover:border-blue-400 hover:shadow-md"
-                            }`}
-                        >
-                          <div className="flex justify-between items-start w-full mb-1">
-                            <span className="font-bold text-lg text-gray-800">
-                              Bed {bed.bed_no}
-                            </span>
-                            {selectedBed?.id === bed.id && (
-                              <CheckCircle2
-                                className="text-blue-600 h-6 w-6 shrink-0"
-                                fill="white"
-                              />
-                            )}
-                          </div>
-
-                          <div className="text-xs text-gray-600 leading-tight mb-1">
-                            <Building
-                              size={14}
-                              className="inline-block text-blue-500"
-                            />{" "}
-                            <span className="font-medium">{bed.ward_name}</span>{" "}
-                            Ward
-                          </div>
-                          <div className="text-xs text-gray-500 leading-tight">
-                            <BedSingle
-                              size={14}
-                              className="inline-block text-blue-500"
-                            />{" "}
-                            Room {bed.room_name}
-                          </div>
-
-                          <div className="mt-3 flex items-center gap-1 text-green-700 text-xs font-semibold bg-green-50 px-2 py-0.5 rounded-full">
-                            <BedSingle size={12} />
-                            Available
-                          </div>
-                        </button>
-                      ))
-                    )}
+              {/* Display Selected Bed if exists (useful for edit mode or confirmation) */}
+              {selectedBed && (
+                <div
+                  className={`flex justify-between items-center p-3 mb-4 rounded-lg border-2 ${errors.bed_id
+                      ? "border-red-400"
+                      : "border-green-400 bg-green-50/50"
+                    }`}
+                >
+                  <div className="flex flex-col">
+                    <div className="font-semibold text-gray-800">
+                      Bed {selectedBed.bed_no}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {selectedBed.ward_name} Ward / Room {selectedBed.room_name}
+                    </div>
                   </div>
-                </ScrollArea>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSelectedBed}
+                    className="text-red-600 hover:bg-red-50"
+                  >
+                    <XCircle className="h-4 w-4 mr-1" /> Change
+                  </Button>
+                </div>
               )}
+
+              {/* Bed List - Only show if no bed selected or user wants to change */}
+              {!selectedBed && (
+                <>
+                  {loadingBeds ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+                      <Loader2 className="animate-spin h-6 w-6 mb-2" />
+                      <p>Loading available beds...</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-64 pr-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {beds.length === 0 ? (
+                          <p className="text-gray-500 text-sm col-span-full p-4 border rounded-lg text-center bg-gray-50">
+                            No beds currently available for admission.
+                          </p>
+                        ) : (
+                          beds.map((bed) => (
+                            <button
+                              type="button"
+                              key={bed.id}
+                              onClick={() => selectBed(bed)}
+                              className={`flex cursor-pointer flex-col items-start  text-left w-full h-full border rounded-xl p-4 shadow-sm transition-all duration-200 ease-in-out
+                              ${selectedBed?.id === bed.id
+                                  ? "border-blue-600 border-2 bg-blue-50 shadow-lg"
+                                  : "border-gray-200 bg-white hover:border-blue-400 hover:shadow-md"
+                                }`}
+                            >
+                              <div className="flex justify-between items-start w-full mb-1">
+                                <span className="font-bold text-lg text-gray-800">
+                                  Bed {bed.bed_no}
+                                </span>
+                                {selectedBed?.id === bed.id && (
+                                  <CheckCircle2
+                                    className="text-blue-600 h-6 w-6 shrink-0"
+                                    fill="white"
+                                  />
+                                )}
+                              </div>
+
+                              <div className="text-xs text-gray-600 leading-tight mb-1">
+                                <Building
+                                  size={14}
+                                  className="inline-block text-blue-500"
+                                />{" "}
+                                <span className="font-medium">{bed.ward_name}</span>{" "}
+                                Ward
+                              </div>
+                              <div className="text-xs text-gray-500 leading-tight">
+                                <BedSingle
+                                  size={14}
+                                  className="inline-block text-blue-500"
+                                />{" "}
+                                Room {bed.room_name}
+                              </div>
+
+                              <div className="mt-3 flex items-center gap-1 text-green-700 text-xs font-semibold bg-green-50 px-2 py-0.5 rounded-full">
+                                <BedSingle size={12} />
+                                Available
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </>
+              )}
+
               {errors.bed_id && (
                 <p className="text-sm text-red-500 mt-2 flex items-center">
                   <XCircle className="h-4 w-4 mr-1" /> {errors.bed_id}
@@ -418,11 +525,10 @@ export default function AdmissionsCreate() {
                   setForm((prev) => ({ ...prev, reason: e.target.value }))
                 }
                 placeholder="Briefly describe the primary reason for the patient's admission (e.g., 'Severe abdominal pain', 'Post-operative observation')."
-                className={`mt-1 ${
-                  errors.reason
+                className={`mt-1 ${errors.reason
                     ? "border-red-500 focus-visible:ring-red-500"
                     : ""
-                }`}
+                  }`}
               />
               {errors.reason && (
                 <p className="text-sm text-red-500 mt-2 flex items-center">
@@ -453,7 +559,7 @@ export default function AdmissionsCreate() {
             ) : (
               <CheckCircle2 className="h-4 w-4" />
             )}
-            {loading ? "Admitting..." : "Admit Patient"}
+            {loading ? (isEdit ? "Updating..." : "Admitting...") : (isEdit ? "Update Admission" : "Admit Patient")}
           </Button>
         </div>
       </form>

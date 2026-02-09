@@ -45,13 +45,13 @@ import BedCreate from "./pages/AdminPage/BedCreate"
 import LabtestList from "./pages/AdminPage/LabtestList";
 import LabtestCreate from "./pages/AdminPage/LabtestCreate"
 import CategoryList from "./pages/AdminPage/CategoryList";
-import CategoryCreate from "./pages/AdminPage/CategoryCreate";  
+import CategoryCreate from "./pages/AdminPage/CategoryCreate";
 import SubCategoryList from "./pages/AdminPage/SubCategoryList";
 import SubCategoryCreate from "./pages/AdminPage/SubCategoryCreate";
 import ProductList from "./pages/AdminPage/ProductList";
 import ProductCreate from "./pages/AdminPage/ProductCreate";
 import VendorList from "./pages/AdminPage/VendorList";
-import VendorCreate from "./pages/AdminPage/VendorCreate"; 
+import VendorCreate from "./pages/AdminPage/VendorCreate";
 import OrderList from "./pages/AdminPage/OrderList";
 import OrderCreate from "./pages/AdminPage/OrderCreate";
 import OrderView from "./pages/AdminPage/OrderView";
@@ -63,10 +63,10 @@ import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 function App() {
   return (
     <SidebarProvider>
-    <Router>
+      <Router>
         <Routes>
-          <Route path="/" element={<Login/>} />
-          <Route path="/login" element={<Login/>} />
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route
             path="/dashboard"
             element={
@@ -132,12 +132,28 @@ function App() {
             }
           />
           <Route
-          path="/patients/create"
-          element={
-            <AdminLayout>
+            path="/admission/:id"
+            element={
+              <AdminLayout>
+                <AdmissionsCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patients/create"
+            element={
+              <AdminLayout>
                 <PatientsCreate />
               </AdminLayout>
-          }
+            }
+          />
+          <Route
+            path="/patients/edit/:id"
+            element={
+              <AdminLayout>
+                <PatientsCreate />
+              </AdminLayout>
+            }
           />
           <Route
             path="/doctor-notes/:appointment_id"
@@ -219,7 +235,7 @@ function App() {
               </AdminLayout>
             }
           />
-          
+
           <Route
             path="/department"
             element={
@@ -590,7 +606,7 @@ function App() {
             }
           />
         </Routes>
-    </Router>
+      </Router>
     </SidebarProvider>
   );
 }

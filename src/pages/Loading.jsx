@@ -1,8 +1,12 @@
-import loading from "../assets/loading.gif";
+import Lottie from "lottie-react";
+import hospitalAnimation from "../assets/hospital.json";
+
 const Loading = () => {
   return (
     <div className="flex justify-center items-center h-screen">
-      <img src={loading} alt="loading" height={220} width={220}/>
+      <div className="w-64 h-64">
+        <Lottie animationData={hospitalAnimation} loop={true} />
+      </div>
     </div>
   );
 };
