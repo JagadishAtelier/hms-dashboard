@@ -60,6 +60,9 @@ import InwardCreate from "./pages/AdminPage/InwardCreate";
 import StockList from "./pages/AdminPage/StockList";
 import AdminDashboard from "./pages/AdminPage/adminDashboard";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
+import Records from "./pages/RecordsPage/Records";
+import CreateRecord from "./pages/RecordsPage/CreateRecord";
+import CreateTemplate from "./pages/RecordsPage/CreateTemplate";
 function App() {
   return (
     <SidebarProvider>
@@ -602,6 +605,38 @@ function App() {
             element={
               <AdminLayout>
                 <LabTestList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/records"
+            element={
+              <AdminLayout>
+                <Records />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/records/create"
+            element={
+              <AdminLayout>
+                <CreateRecord />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/records/template/create"
+            element={
+              <AdminLayout>
+                <CreateTemplate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/records/template/edit/:id"
+            element={
+              <AdminLayout>
+                <CreateTemplate />
               </AdminLayout>
             }
           />

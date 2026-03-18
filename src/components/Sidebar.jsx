@@ -24,6 +24,7 @@ import {
   Package,
   ClipboardCheck,
   X,
+  FolderOpen,
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -68,6 +69,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarDays },
     { to: "/admissions", label: "Admissions", icon: Bed },
+    { to: "/records", label: "Medical Records", icon: FolderOpen },
   ];
 
   const labtechSidebarLinks = [
