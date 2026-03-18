@@ -28,6 +28,14 @@ const patientService = {
     const res = await axios.post(API_URL, data, { headers: authHeader() });
     return res.data;
   },
+  async getByEmailOrPhone(data) {
+    const res = await axios.post(
+      `${API_URL}/by-contact`,
+      data,
+      { headers: authHeader() }
+    );
+    return res.data;
+  },
 
   /**
    * Get all patients (supports query params: page, limit, search, is_active, sort_by, sort_order)

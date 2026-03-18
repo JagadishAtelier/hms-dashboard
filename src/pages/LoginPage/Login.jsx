@@ -38,7 +38,8 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", normalizedRole);
       localStorage.setItem("username", user.username || "");
-
+      localStorage.setItem("userid", user._id || user.id || "");
+localStorage.setItem("user", JSON.stringify(user));
       switch (normalizedRole) {
         case "superadmin":
 
@@ -52,6 +53,9 @@ export default function Login() {
           break;
         case "labtechnician":
           navigate("/labtech-dashboard");
+          break;
+        case "patient":
+          navigate("/patient-dashboard");
           break;
         default:
           navigate("/dashboard");

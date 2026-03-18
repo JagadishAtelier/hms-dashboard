@@ -60,6 +60,7 @@ import InwardCreate from "./pages/AdminPage/InwardCreate";
 import StockList from "./pages/AdminPage/StockList";
 import AdminDashboard from "./pages/AdminPage/adminDashboard";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
+import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 function App() {
   return (
     <SidebarProvider>
@@ -602,6 +603,22 @@ function App() {
             element={
               <AdminLayout>
                 <LabTestList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/lab-tech-prescriptions"
+            element={
+              <AdminLayout>
+                <LabTestList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patient-dashboard"
+            element={
+              <AdminLayout>
+                <PatientDashboard />
               </AdminLayout>
             }
           />
