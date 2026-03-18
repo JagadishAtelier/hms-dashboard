@@ -112,7 +112,7 @@ const PatientDashboard = () => {
 
     // ✅ Navigation
     const handleTodayConsultation = () => {
-        navigate(`/doctor-notes/${appointmentId}`);
+        navigate(`/patient/appointment/create`);
     };
 
     if (loading) return <p className="text-center mt-10">Loading...</p>;
