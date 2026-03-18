@@ -60,6 +60,9 @@ import InwardCreate from "./pages/AdminPage/InwardCreate";
 import StockList from "./pages/AdminPage/StockList";
 import AdminDashboard from "./pages/AdminPage/adminDashboard";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
+import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
+import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
+import PatientAppointmentList from "./pages/PatientDashboard/PatientAppointmentList";
 import Records from "./pages/RecordsPage/Records";
 import CreateRecord from "./pages/RecordsPage/CreateRecord";
 import CreateTemplate from "./pages/RecordsPage/CreateTemplate";
@@ -605,6 +608,38 @@ function App() {
             element={
               <AdminLayout>
                 <LabTestList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/lab-tech-prescriptions"
+            element={
+              <AdminLayout>
+                <LabTestList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patient-dashboard"
+            element={
+              <AdminLayout>
+                <PatientDashboard />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patient/appointment/create"
+            element={
+              <AdminLayout>
+                <PatientAppointment />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patient/appointment/list"
+            element={
+              <AdminLayout>
+                <PatientAppointmentList />
               </AdminLayout>
             }
           />
