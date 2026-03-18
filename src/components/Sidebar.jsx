@@ -65,7 +65,7 @@ export default function Sidebar({ isOpen, onClose }) {
   // Sidebar links by role
   const patientLinks = [
     { to: "/patient-dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/patient/appointment/create", label: "Appointments", icon: CalendarDays },
+    { to: "/patient/appointment/list", label: "Appointments", icon: CalendarDays },
   ];
 
   const doctorSidebarLinks = [

@@ -37,6 +37,12 @@ const appointmentsService = {
     });
     return res.data;
   },
+  async getByPatientId(patientId) {
+    const res = await axios.get(`${API_URL}/appointment/patient/${patientId}`, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
 
   /**
    * ✅ Update appointment by ID

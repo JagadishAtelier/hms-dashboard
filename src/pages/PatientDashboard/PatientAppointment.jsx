@@ -375,7 +375,7 @@ export default function PatientAppointment() {
                             loading
                                 ? "Fetching patient..."
                                 : patient
-                                    ? `${patient.first_name || ""} ${patient.last_name || ""}`
+                                    ? `${patient.first_name || ""} ${patient.last_name || ""} - ${patient.phone || ""}`
                                     : "No patient found"
                         }
                         disabled

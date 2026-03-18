@@ -62,6 +62,7 @@ import AdminDashboard from "./pages/AdminPage/adminDashboard";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
+import PatientAppointmentList from "./pages/PatientDashboard/PatientAppointmentList";
 function App() {
   return (
     <SidebarProvider>
@@ -628,6 +629,14 @@ function App() {
             element={
               <AdminLayout>
                 <PatientAppointment />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patient/appointment/list"
+            element={
+              <AdminLayout>
+                <PatientAppointmentList />
               </AdminLayout>
             }
           />
