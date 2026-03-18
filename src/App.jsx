@@ -426,6 +426,7 @@ function App() {
               </AdminLayout>
             }
           />
+          
           <Route
             path="/category/edit/:id"
             element={
