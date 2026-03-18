@@ -27,7 +27,7 @@ const CreateTemplate = () => {
 
   useEffect(() => {
     recordsService.getAllRecordTypes()
-      .then((res) => setRecordTypes(res.data?.data || res.data || []))
+      .then((res) => setRecordTypes(res.data?.data?.data || res.data?.data || []))
       .catch(console.error);
 
     if (isEdit && id) {

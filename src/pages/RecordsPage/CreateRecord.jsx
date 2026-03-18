@@ -36,9 +36,9 @@ const CreateRecord = () => {
           recordsService.getAllRecordTypes(),
           recordsService.getAllTemplates(),
         ]);
-        setPatients(pRes.data?.data || pRes.data || []);
-        setRecordTypes(tRes.data?.data || tRes.data || []);
-        setTemplates(tmRes.data?.data || tmRes.data || []);
+        setPatients(pRes.data?.data?.data || pRes.data?.data || []);
+        setRecordTypes(tRes.data?.data?.data || tRes.data?.data || []);
+        setTemplates(tmRes.data?.data?.data || tmRes.data?.data || []);
       } catch (err) {
         console.error("Init error", err);
       } finally {
@@ -52,7 +52,7 @@ const CreateRecord = () => {
   useEffect(() => {
     if (!formData.patient_id) { setAppointments([]); return; }
     appointmentsService.getAllAppointments({ patient_id: formData.patient_id, limit: 100 })
-      .then((res) => setAppointments(res.data?.data || res.data || []))
+      .then((res) => setAppointments(res.data?.data?.data || res.data?.data || []))
       .catch(() => setAppointments([]));
   }, [formData.patient_id]);
 

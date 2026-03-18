@@ -24,9 +24,9 @@ const Records = () => {
         recordsService.getAllRecordTypes(),
         recordsService.getAllTemplates(),
       ]);
-      setRecords(rRes.data?.data || rRes.data || []);
-      setRecordTypes(tRes.data?.data || tRes.data || []);
-      setTemplates(tmRes.data?.data || tmRes.data || []);
+      setRecords(rRes.data?.data?.data || rRes.data?.data || []);
+      setRecordTypes(tRes.data?.data?.data || tRes.data?.data || []);
+      setTemplates(tmRes.data?.data?.data || tmRes.data?.data || []);
     } catch (err) {
       console.error("Failed to fetch records data", err);
     }
