@@ -5,6 +5,7 @@ import logo from "../../public/DarkLogo.png";
 import LabResultModal from "./Context/LabResultModal";
 import {
   Users,
+  UserCog,
   Settings,
   CalendarDays,
   LayoutDashboard,
@@ -85,6 +86,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const superadminSidebarLinks = [
     { to: "/admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/doctors", label: "Doctors", icon: SquareUser },
+    { to: "/receptionist", label: "Receptionist", icon: UserCog },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
     { to: "/admissions", label: "Admissions", icon: Bed },
