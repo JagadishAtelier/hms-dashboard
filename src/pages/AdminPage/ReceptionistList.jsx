@@ -23,9 +23,9 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Loading from "../Loading.jsx";
 
-// 👉 Create service like doctorsService (or use same API)
+//  Create service like doctorsService 
 //import receptionistService from "../../service/receptionistService.js";
-
+import receptionistsService from "../../service/receptionistsService.js";
 const DEFAULT_LIMIT = 10;
 
 function ReceptionistList() {
@@ -58,12 +58,19 @@ function ReceptionistList() {
 //       setLoading(false);
 //     }
 //   };
-const fetchData = () => {
-  const data =
-    JSON.parse(localStorage.getItem("receptionists")) || [];
 
-  setData(data);
-  setTotal(data.length);
+
+const fetchData = async () => {
+  setLoading(true);
+  try {
+    const res = await receptionistsService.getAllReceptionists();
+    setData(res?.data || []);
+    setTotal(res?.total || 0);
+  } catch (err) {
+    toast.error("Failed to fetch receptionists");
+  } finally {
+    setLoading(false);
+  }
 };
   useEffect(() => {
   fetchData();
@@ -72,21 +79,17 @@ const fetchData = () => {
   const handleAdd = () => navigate("/receptionist/create");
   const handleEdit = (id) => navigate(`/receptionist/edit/${id}`);
 
- const handleDelete = (id) => {
-  if (!confirm("Are you sure you want to delete this receptionist?")) return;
+ const handleDelete = async (id) => {
+  if (!confirm("Delete receptionist?")) return;
 
-  const existing =
-    JSON.parse(localStorage.getItem("receptionists")) || [];
-
-  const updated = existing.filter((item) => item.id !== id);
-
-  localStorage.setItem("receptionists", JSON.stringify(updated));
-
-  fetchData(); // refresh table
-
-  toast.success("Receptionist deleted successfully");
+  try {
+    await receptionistsService.deleteReceptionist(id);
+    toast.success("Deleted successfully");
+    fetchData();
+  } catch {
+    toast.error("Delete failed");
+  }
 };
-
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const displayData = useMemo(() => data || [], [data]);

@@ -5,6 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import receptionistsService from "../../service/receptionistsService.js";
+import { toast } from "sonner";
+
 function ReceptionistCreate() {
   const navigate = useNavigate();
 const { id } = useParams();
@@ -33,37 +36,42 @@ const isEdit = Boolean(id);
 useEffect(() => {
   if (!id) return;
 
-  const stored =
-    JSON.parse(localStorage.getItem("receptionists")) || [];
+  const fetchData = async () => {
+    try {
+      const res = await receptionistsService.getReceptionistById(id);
+      const data = res?.data || res;
 
-  const existing = stored.find((item) => String(item.id) === String(id));
+      const staff = data?.staff_profiles || {};
 
-  if (existing) {
-    const names = existing.name ? existing.name.split(" ") : [];
+      setForm({
+        email: data.receptionist_email || "",
+        phone: data.receptionist_phone || "",
+        password: "",
+        shift: data.shift || "",
+        date_of_joining: staff.date_of_joining || "",
+        is_active: data.is_active ?? true,
 
-    setForm({
-      email: existing.email || "",
-      phone: existing.phone || "",
-      password: "",
-      shift: existing.shift || "",
-      date_of_joining: existing.date_of_joining || "",
-      is_active: existing.is_active ?? true,
-
-      staff: {
-        first_name: names[0] || "",
-        last_name: names.slice(1).join(" ") || "",
-        gender: existing.gender || "",
-        dob: existing.dob || "",
-        address: existing.address || "",
-        emergency_contact: {
-          name: existing.emergency_name || "",
-          relationship: existing.emergency_relation || "",
-          phone: existing.emergency_phone || "",
+        staff: {
+          first_name: staff.first_name || "",
+          last_name: staff.last_name || "",
+          gender: staff.gender || "",
+          dob: staff.dob?.split("T")[0] || "",
+          address: staff.address || "",
+          emergency_contact: staff.emergency_contact || {
+            name: "",
+            relationship: "",
+            phone: "",
+          },
         },
-      },
-    });
-  }
+      });
+    } catch {
+      toast.error("Failed to load data");
+    }
+  };
+
+  fetchData();
 }, [id]);
+
 const handleStaffChange = (key, value) =>
   setForm({ ...form, staff: { ...form.staff, [key]: value } });
 
@@ -78,45 +86,71 @@ const handleEmergencyChange = (key, value) =>
       },
     },
   });
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  const stored =
-    JSON.parse(localStorage.getItem("receptionists")) || [];
-
-  const payload = {
-    id: isEdit ? id : Date.now(),
-    name: `${form.staff.first_name} ${form.staff.last_name}`.trim(),
-    email: form.email,
-    phone: form.phone,
-    role: "Receptionist",
-    shift: form.shift,
-    date_of_joining: form.date_of_joining,
-    is_active: form.is_active,
-
-    // optional extra
-    gender: form.staff.gender,
-    dob: form.staff.dob,
-    address: form.staff.address,
-    emergency_name: form.staff.emergency_contact.name,
-    emergency_relation: form.staff.emergency_contact.relationship,
-    emergency_phone: form.staff.emergency_contact.phone,
-  };
-
-  let updated;
-
-  if (isEdit) {
-    updated = stored.map((item) =>
-      item.id == id ? payload : item
-    );
-    toast.success("Receptionist Updated Successfully");
-  } else {
-    updated = [...stored, payload];
-    toast.success("Receptionist Created Successfully");
+  if (!form.staff.first_name) {
+    return toast.error("First name required");
   }
 
-  localStorage.setItem("receptionists", JSON.stringify(updated));
-  navigate("/receptionist");
+  if (!form.email) {
+    return toast.error("Email required");
+  }
+
+  if (!form.password && !isEdit) {
+    return toast.error("Password required");
+  }
+
+  const payload = {
+    receptionist_name: `${form.staff.first_name} ${form.staff.last_name}`,
+    receptionist_email: form.email,
+    receptionist_phone: form.phone,
+    //counter_no: "1",
+    shift: form.shift,
+    is_active: form.is_active,
+
+  staff_profiles: {
+  first_name: form.staff.first_name,
+  last_name: form.staff.last_name,
+  gender: form.staff.gender,
+  dob: form.staff.dob,
+  address: form.staff.address,
+
+  date_of_joining: form.date_of_joining,
+
+  // department_id: 1,      // ✅ NUMBER (not string)
+  // designation_id: 1,     // ✅ NUMBER (not string)
+
+  emergency_contact: {
+    name: form.staff.emergency_contact.name,
+    relationship: form.staff.emergency_contact.relationship,
+    phone: form.staff.emergency_contact.phone,
+  },
+},
+    user: {
+      password: form.password,
+    },
+  };
+
+  console.log("PAYLOAD:", payload);
+
+  try {
+    if (isEdit) {
+      await receptionistsService.updateReceptionist(id, payload);
+      toast.success("Updated successfully");
+    } else {
+      await receptionistsService.createReceptionist(payload);
+      toast.success("Created successfully");
+    }
+
+    navigate("/receptionist");
+  } catch (err) {
+    console.error("ERROR:", err);
+    toast.error(err?.response?.data?.message || "API Failed");
+  }
+};
+const handleChange = (key, value) => {
+  setForm({ ...form, [key]: value });
 };
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -146,8 +180,8 @@ onChange={(e) => handleStaffChange("first_name", e.target.value)}
           <label>
             Last Name
             <Input
-              value={form.last_name}
-              onChange={(e) => handleChange("last_name", e.target.value)}
+              value={form.staff.last_name}
+              onChange={(e) => handleStaffChange("last_name", e.target.value)}
             />
           </label>
 
@@ -155,8 +189,8 @@ onChange={(e) => handleStaffChange("first_name", e.target.value)}
             Gender
             <select
               className="border rounded-md p-2 w-full"
-              value={form.gender}
-              onChange={(e) => handleChange("gender", e.target.value)}
+              value={form.staff.gender}
+              onChange={(e) => handleStaffChange("gender", e.target.value)}
             >
               <option value="">Select Gender</option>
               <option>Male</option>
@@ -169,8 +203,8 @@ onChange={(e) => handleStaffChange("first_name", e.target.value)}
             Date of Birth
             <Input
               type="date"
-              value={form.dob}
-              onChange={(e) => handleChange("dob", e.target.value)}
+              value={form.staff.dob}
+              onChange={(e) => handleStaffChange("dob", e.target.value)}
             />
           </label>
         </div>
@@ -178,8 +212,8 @@ onChange={(e) => handleStaffChange("first_name", e.target.value)}
         <label>
           Address
           <Textarea
-            value={form.address}
-            onChange={(e) => handleChange("address", e.target.value)}
+           value={form.staff.address}
+onChange={(e) => handleStaffChange("address", e.target.value)}
           />
         </label>
 
@@ -245,19 +279,19 @@ onChange={(e) => setForm({ ...form, email: e.target.value })}
           <label>
             Phone *
             <Input
-              value={form.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
-            />
+  value={form.phone}
+  onChange={(e) => handleChange("phone", e.target.value)}
+/>
           </label>
         </div>
 
         <label>
           Password *
           <Input
-            type="password"
-            value={form.password}
-            onChange={(e) => handleChange("password", e.target.value)}
-          />
+  type="password"
+  value={form.password}
+  onChange={(e) => handleChange("password", e.target.value)}
+/>
         </label>
 
         {/* EMERGENCY */}
@@ -277,9 +311,9 @@ onChange={(e) => handleEmergencyChange("name", e.target.value)}
           <label>
             Relationship
             <Input
-              value={form.emergency_relation}
+              value={form.staff.emergency_contact.relationship}
               onChange={(e) =>
-                handleChange("emergency_relation", e.target.value)
+                handleEmergencyChange("relationship", e.target.value)
               }
             />
           </label>
@@ -287,10 +321,8 @@ onChange={(e) => handleEmergencyChange("name", e.target.value)}
           <label>
             Phone
             <Input
-              value={form.emergency_phone}
-              onChange={(e) =>
-                handleChange("emergency_phone", e.target.value)
-              }
+             value={form.staff.emergency_contact.phone}
+onChange={(e) => handleEmergencyChange("phone", e.target.value)}
             />
           </label>
         </div>
