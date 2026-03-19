@@ -20,10 +20,14 @@ const RecordRow = ({ record, onDelete }) => {
   };
 
   let parsedFields = {};
+  let templateEntries = null;
   try {
-    parsedFields = typeof record.field_values === "string"
-      ? JSON.parse(record.field_values)
-      : record.field_values || {};
+    const fv = typeof record.field_values === "string" ? JSON.parse(record.field_values) : record.field_values || {};
+    if (fv._template_entries) {
+      templateEntries = fv._template_entries;
+    } else {
+      parsedFields = fv;
+    }
   } catch { /* ignore */ }
 
   return (
@@ -118,7 +122,30 @@ const RecordRow = ({ record, onDelete }) => {
                   <p className="text-gray-700 whitespace-pre-wrap">{record.diagnosis || "N/A"}</p>
                 </div>
 
-                {Object.keys(parsedFields).length > 0 && (
+                {/* Multi-template entries */}
+                {templateEntries ? (
+                  <div className="space-y-4">
+                    {templateEntries.map((entry, i) => (
+                      <div key={i}>
+                        <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">Template {i + 1}</h3>
+                        {Object.keys(entry.field_values || {}).length > 0 ? (
+                          <div className="grid grid-cols-2 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            {Object.entries(entry.field_values).map(([key, val]) => (
+                              <div key={key}>
+                                <span className="text-xs text-gray-500 block">{key}</span>
+                                <span className="font-medium text-gray-800">
+                                  {typeof val === "boolean" ? (val ? "Yes" : "No") : val || "—"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-400">No fields filled.</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : Object.keys(parsedFields).length > 0 ? (
                   <div>
                     <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">{record.template?.name || "Template Fields"}</h3>
                     <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -132,7 +159,7 @@ const RecordRow = ({ record, onDelete }) => {
                       ))}
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </td>

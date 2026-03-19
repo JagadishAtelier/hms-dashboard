@@ -12,6 +12,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/Context/SidebarContext";
 import appointmentsService from "../service/appointmentsService";
+import labTestOrderService from "../service/labtestorderService";
+import prescriptionService from "../service/prescriptionService";
 import { toast } from "sonner";
 import Loading from "./Loading.jsx";
 
@@ -25,6 +27,8 @@ function TodayAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [labTestMap, setLabTestMap] = useState({});
+  const [prescriptionMap, setPrescriptionMap] = useState({});
 
   // Filters / pagination / sorting
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,6 +146,43 @@ function TodayAppointments() {
       setLoading(false);
     }
   };
+
+  // Check which appointments already have a lab test order
+  const checkLabTestOrders = async (appts) => {
+    if (!appts?.length) return;
+    const results = await Promise.allSettled(
+      appts.map((a) => labTestOrderService.getLabTestOrderByAppointmentId(a.id))
+    );
+    const map = {};
+    results.forEach((r, i) => {
+      const data = r.value?.data ?? r.value;
+      if (r.status === "fulfilled" && data?.id) {
+        map[appts[i].id] = true;
+      }
+    });
+    setLabTestMap(map);
+  };
+
+  const checkPrescriptions = async (appts) => {
+    if (!appts?.length) return;
+    const results = await Promise.allSettled(
+      appts.map((a) => prescriptionService.getPrescriptionByAppointmentId(a.id))
+    );
+    const map = {};
+    results.forEach((r, i) => {
+      const data = r.value?.data ?? r.value;
+      if (r.status === "fulfilled" && data?.id) {
+        map[appts[i].id] = true;
+      }
+    });
+    setPrescriptionMap(map);
+  };
+
+  useEffect(() => {
+    if (appointments.length) checkLabTestOrders(appointments);
+    if (appointments.length) checkPrescriptions(appointments);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appointments]);
 
   // Action: Take for Consultation
   const handleTakeForConsultation = (appointment) => {
@@ -310,7 +351,35 @@ function TodayAppointments() {
                         <td className="px-4 py-3 text-gray-600 text-xs">{item.reason || "—"}</td>
                         <td className="px-4 py-3 text-gray-600 text-xs">{item.notes || "—"}</td>
                         <td className="px-4 py-3">
-                          <Button className="bg-[#506EE4] text-white text-xs h-6 px-2 rounded" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
+                          <div className="flex items-center gap-2">
+                            <Button className="bg-[#506EE4] text-white text-xs h-6 px-2 rounded" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
+                            <button
+                              onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                              className="px-2 py-1 text-[11px] rounded bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
+                            >
+                              Records
+                            </button>
+                            <button
+                              onClick={() => navigate(`/labtestorder/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                              className={`px-2 py-1 text-[11px] rounded font-medium border ${
+                                labTestMap[item.id]
+                                  ? "bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100"
+                                  : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                              }`}
+                            >
+                              {labTestMap[item.id] ? "Edit Lab Test" : "Lab Test"}
+                            </button>
+                            <button
+                              onClick={() => navigate(`/prescription/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                              className={`px-2 py-1 text-[11px] rounded font-medium border ${
+                                prescriptionMap[item.id]
+                                  ? "bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100"
+                                  : "bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100"
+                              }`}
+                            >
+                              {prescriptionMap[item.id] ? "Edit Prescription" : "Prescription"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -371,6 +440,32 @@ function TodayAppointments() {
 
                   <div className="col-span-2">
                     <Button className="bg-[#0E1680] text-white w-full mt-3 text-sm" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
+                    <button
+                      onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                      className="w-full mt-2 px-3 py-2 text-sm rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
+                    >
+                      Records
+                    </button>
+                    <button
+                      onClick={() => navigate(`/labtestorder/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                      className={`w-full mt-2 px-3 py-2 text-sm rounded-md font-medium border ${
+                        labTestMap[item.id]
+                          ? "bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100"
+                          : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                      }`}
+                    >
+                      {labTestMap[item.id] ? "Edit Lab Test" : "Lab Test"}
+                    </button>
+                    <button
+                      onClick={() => navigate(`/prescription/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                      className={`w-full mt-2 px-3 py-2 text-sm rounded-md font-medium border ${
+                        prescriptionMap[item.id]
+                          ? "bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100"
+                          : "bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100"
+                      }`}
+                    >
+                      {prescriptionMap[item.id] ? "Edit Prescription" : "Prescription"}
+                    </button>
                   </div>
                 </div>
               </article>

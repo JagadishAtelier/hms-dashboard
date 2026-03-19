@@ -51,6 +51,13 @@ const labTestOrderService = {
     return res.data;
   },
 
+  async getLabTestOrderByAppointmentId(appointment_id) {
+    const res = await axios.get(`${BASE_API}/hms/laboratory/labtest-order/appointment/${appointment_id}`, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
+
   /**
    * ✅ Get Lab Test Orders by Patient ID
    */

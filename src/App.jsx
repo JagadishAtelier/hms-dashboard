@@ -66,6 +66,8 @@ import PatientAppointmentList from "./pages/PatientDashboard/PatientAppointmentL
 import Records from "./pages/RecordsPage/Records";
 import CreateRecord from "./pages/RecordsPage/CreateRecord";
 import CreateTemplate from "./pages/RecordsPage/CreateTemplate";
+import PatientRecords from "./pages/RecordsPage/PatientRecords";
+import Prescription from "./pages/PrescriptionPage/Prescription";
 function App() {
   return (
     <SidebarProvider>
@@ -170,7 +172,7 @@ function App() {
             }
           />
           <Route
-            path="/labtestorder/:encounter_id"
+            path="/labtestorder/:patient_id"
             element={
               <AdminLayout>
                 <LabTestOrder />
@@ -178,7 +180,7 @@ function App() {
             }
           />
           <Route
-            path="/testresults/:encounter_id"
+            path="/testresults/:patient_id"
             element={
               <AdminLayout>
                 <LabTestResults />
@@ -426,7 +428,7 @@ function App() {
               </AdminLayout>
             }
           />
-          
+
           <Route
             path="/category/edit/:id"
             element={
@@ -673,6 +675,22 @@ function App() {
             element={
               <AdminLayout>
                 <CreateTemplate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/records/patient/:patient_id"
+            element={
+              <AdminLayout>
+                <PatientRecords />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/prescription/:patient_id"
+            element={
+              <AdminLayout>
+                <Prescription />
               </AdminLayout>
             }
           />
