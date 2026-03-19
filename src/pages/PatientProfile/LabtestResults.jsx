@@ -1,6 +1,6 @@
 // src/pages/lab/LabTestResults.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText, Upload } from "lucide-react";
@@ -9,7 +9,10 @@ import labTestOrderService from "../../service/labtestorderService.js";
 import BASE_API from "../../api/baseurl.js";
 
 function LabTestResults() {
-  const { encounter_id } = useParams();
+  const { patient_id } = useParams();
+  const location = useLocation();
+  const appointment_id = new URLSearchParams(location.search).get("appointment_id");
+
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -21,14 +24,14 @@ function LabTestResults() {
   const userRole = userInfo?.role;
 
   useEffect(() => {
-    if (encounter_id) fetchLabTestOrder(encounter_id);
-  }, [encounter_id]);
+    if (appointment_id) fetchLabTestOrder(appointment_id);
+  }, [appointment_id]);
 
-  const fetchLabTestOrder = async (encId) => {
+  const fetchLabTestOrder = async (apptId) => {
     try {
       setLoading(true);
-      const res = await labTestOrderService.getLabTestOrderByEncounterId(encId);
-      setOrder(res?.data);
+      const res = await labTestOrderService.getLabTestOrderByAppointmentId(apptId);
+      setOrder(res?.data ?? null);
     } catch (err) {
       console.error("Failed to fetch lab test results", err);
       toast.error(err?.response?.data?.message || "Failed to load lab test results");
@@ -57,7 +60,7 @@ function LabTestResults() {
       });
       toast.success(res?.message || "Result updated successfully");
       setShowModal(false);
-      fetchLabTestOrder(encounter_id);
+      fetchLabTestOrder(appointment_id);
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.message || "Failed to update result");
@@ -101,11 +104,11 @@ function LabTestResults() {
   if (!order)
     return (
       <div className="p-6 text-center text-gray-600">
-        No lab test order found for this encounter.
+        No lab test order found for this appointment.
       </div>
     );
 
-  const { patient, encounter, items } = order;
+  const { patient, items } = order;
 
   return (
     <div className="p-8 w-full space-y-8">
@@ -139,42 +142,11 @@ function LabTestResults() {
           </div>
 
           <div>
-            <h3 className="font-semibold text-[#0E1680] mb-2">Encounter Info</h3>
-            <p>
-              <span className="font-medium">Encounter No:</span>{" "}
-              {encounter?.encounter_no}
-            </p>
-            <p>
-              <span className="font-medium">Date:</span>{" "}
-              {new Date(encounter?.encounter_date).toLocaleDateString()}
-            </p>
-            <p>
-              <span className="font-medium">Doctor:</span>{" "}
-              {encounter?.created_by_name || "-"}
-            </p>
-            <p>
-              <span className="font-medium">Status:</span>{" "}
-              {encounter?.status || "N/A"}
-            </p>
-          </div>
-
-          <div>
             <h3 className="font-semibold text-[#0E1680] mb-2">Order Info</h3>
-            <p>
-              <span className="font-medium">Order No:</span> {order?.order_no}
-            </p>
-            <p>
-              <span className="font-medium">Priority:</span>{" "}
-              {order?.priority?.toUpperCase()}
-            </p>
-            <p>
-              <span className="font-medium">Status:</span>{" "}
-              {order?.status?.toUpperCase()}
-            </p>
-            <p>
-              <span className="font-medium">Ordered On:</span>{" "}
-              {new Date(order?.order_date).toLocaleString()}
-            </p>
+            <p><span className="font-medium">Order No:</span> {order?.order_no}</p>
+            <p><span className="font-medium">Priority:</span> {order?.priority?.toUpperCase()}</p>
+            <p><span className="font-medium">Status:</span> {order?.status?.toUpperCase()}</p>
+            <p><span className="font-medium">Ordered On:</span> {new Date(order?.order_date).toLocaleString()}</p>
           </div>
         </CardContent>
       </Card>
