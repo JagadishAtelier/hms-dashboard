@@ -36,6 +36,8 @@ import DesignationList from "./pages/AdminPage/DesignationList"
 import DesignationCreate from "./pages/AdminPage/DesignationCreate"
 import DoctorList from "./pages/AdminPage/DoctorList";
 import DoctorCreate from "./pages/AdminPage/DoctorCreate";
+import ReceptionistList from "./pages/AdminPage/ReceptionistList";
+import ReceptionistCreate from "./pages/AdminPage/ReceptionistCreate";
 import WardList from "./pages/AdminPage/WardList";
 import WardCreate from "./pages/AdminPage/WardCreate";
 import RoomList from "./pages/AdminPage/RoomList"
@@ -301,6 +303,14 @@ function App() {
             }
           />
           <Route
+  path="/receptionist"
+  element={
+    <AdminLayout>
+      <ReceptionistList />
+    </AdminLayout>
+  }
+/>
+          <Route
             path="/doctors/create"
             element={
               <AdminLayout>
@@ -308,6 +318,23 @@ function App() {
               </AdminLayout>
             }
           />
+          <Route
+  path="/receptionist/create"
+  element={
+    <AdminLayout>
+      <ReceptionistCreate />
+    </AdminLayout>
+  }
+/>
+<Route
+  path="/receptionist/edit/:id"
+  element={
+    <AdminLayout>
+      <ReceptionistCreate />
+    </AdminLayout>
+  }
+/>
+
           <Route
             path="/doctors/edit/:id"
             element={
