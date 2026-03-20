@@ -61,6 +61,8 @@ import InwardList from "./pages/AdminPage/InwardList";
 import InwardCreate from "./pages/AdminPage/InwardCreate";
 import StockList from "./pages/AdminPage/StockList";
 import AdminDashboard from "./pages/AdminPage/adminDashboard";
+import LabTechnicianList from "./pages/AdminPage/LabTechnicianList";
+import LabTechnicianCreate from "./pages/AdminPage/LabTechnicianCreate";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
@@ -307,6 +309,32 @@ function App() {
   element={
     <AdminLayout>
       <ReceptionistList />
+    </AdminLayout>
+  }
+/>
+<Route
+  path="/labtechnician"
+  element={
+    <AdminLayout>
+      <LabTechnicianList />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/labtechnician/create"
+  element={
+    <AdminLayout>
+      <LabTechnicianCreate />
+    </AdminLayout>
+  }
+/>
+
+<Route
+  path="/labtechnician/edit/:id"
+  element={
+    <AdminLayout>
+      <LabTechnicianCreate />
     </AdminLayout>
   }
 />

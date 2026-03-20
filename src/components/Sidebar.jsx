@@ -80,6 +80,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const labtechSidebarLinks = [
     { to: "/labtech-dashboard", label: "Dashboard", icon: LayoutDashboard },
+     { to: "/labtechnician", label: "Lab Technicians", icon: TestTubeDiagonal }, 
     { to: "/lab-tech-prescriptions", label: "Lab Order", icon: Users },
   ];
 
@@ -87,6 +88,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { to: "/admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/doctors", label: "Doctors", icon: SquareUser },
     { to: "/receptionist", label: "Receptionist", icon: UserCog },
+    { to: "/labtechnician", label: "Lab Technician", icon: TestTubeDiagonal },
     { to: "/patient-list", label: "Patient List", icon: Users },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
     { to: "/admissions", label: "Admissions", icon: Bed },
