@@ -26,6 +26,7 @@ const isEdit = Boolean(id);
     gender: "",
     dob: "",
     address: "",
+    qualification: "",  
     emergency_contact: {
       name: "",
       relationship: "",
@@ -100,48 +101,102 @@ const handleSubmit = async (e) => {
   if (!form.password && !isEdit) {
     return toast.error("Password required");
   }
+  if (!form.shift) {
+    return toast.error("Shift required");
+  }
+  if (!form.staff.qualification) {
+  return toast.error("Qualification required");
+}
+  // ✅ STEP 1: EXTRA VALIDATION
+if (!form.staff.first_name || !form.staff.last_name) {
+  return toast.error("Staff first & last name required");
+}
 
   const payload = {
-    receptionist_name: `${form.staff.first_name} ${form.staff.last_name}`,
-    receptionist_email: form.email,
-    receptionist_phone: form.phone,
-    //counter_no: "1",
-    shift: form.shift,
-    is_active: form.is_active,
+  receptionist_name: `${form.staff.first_name || ""} ${form.staff.last_name || ""}`.trim(),
+  receptionist_email: form.email || "",
+receptionist_phone: form.phone || "",
+counter_no: "1", // keep string
+shift: form.shift || "Morning", // fallback
+is_active: form.is_active ?? true,
 
-  staff_profiles: {
-  first_name: form.staff.first_name,
-  last_name: form.staff.last_name,
-  gender: form.staff.gender,
-  dob: form.staff.dob,
-  address: form.staff.address,
+  staff: {
+    first_name: form.staff.first_name,
+    last_name: form.staff.last_name,
+    gender: form.staff.gender || "Male",
+    dob: form.staff.dob,
+    address: form.staff.address,
 
-  date_of_joining: form.date_of_joining,
+  date_of_joining: form.date_of_joining
+  ? new Date(form.date_of_joining).toISOString().split("T")[0]
+  : null,
 
-  // department_id: 1,      // ✅ NUMBER (not string)
-  // designation_id: 1,     // ✅ NUMBER (not string)
-
-  emergency_contact: {
-    name: form.staff.emergency_contact.name,
-    relationship: form.staff.emergency_contact.relationship,
-    phone: form.staff.emergency_contact.phone,
-  },
-},
-    user: {
-      password: form.password,
+    emergency_contact: {
+      name: form.staff.emergency_contact.name,
+      relationship:
+        form.staff.emergency_contact.relationship || "Friend",
+      phone: form.staff.emergency_contact.phone,
     },
-  };
+  },
 
-  console.log("PAYLOAD:", payload);
+ user: {
+  password: form.password,
+}
+};
+  console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
 
   try {
     if (isEdit) {
       await receptionistsService.updateReceptionist(id, payload);
       toast.success("Updated successfully");
     } else {
-      await receptionistsService.createReceptionist(payload);
-      toast.success("Created successfully");
-    }
+  const receptionistData = {
+    receptionist_name: payload.receptionist_name,
+    receptionist_email: payload.receptionist_email,
+    receptionist_phone: payload.receptionist_phone,
+    counter_no: payload.counter_no,
+    shift: payload.shift,
+    is_active: payload.is_active,
+  };
+
+  const staffData = {
+    first_name: form.staff.first_name || "Default",
+    last_name: form.staff.last_name || "User",
+    gender: form.staff.gender || "Male",
+    dob: form.staff.dob,
+    address: form.staff.address,
+     qualification: form.staff.qualification || "General", // ✅ ADD THIS
+    date_of_joining: form.date_of_joining,
+
+    emergency_contact: {
+      name: form.staff.emergency_contact.name || "Test",
+      relationship: form.staff.emergency_contact.relationship || "Friend",
+      phone: form.staff.emergency_contact.phone || "9999999999",
+    },
+  };
+
+console.log("FINAL SEND:", JSON.stringify({
+  receptionistData,
+  staffData,
+  password: form.password,
+}, null, 2));
+
+await receptionistsService.createReceptionist({
+  receptionist_name: receptionistData.receptionist_name,
+  receptionist_email: receptionistData.receptionist_email,
+  receptionist_phone: receptionistData.receptionist_phone,
+  counter_no: receptionistData.counter_no,
+  shift: receptionistData.shift,
+  is_active: receptionistData.is_active,
+
+  staff: staffData,
+
+  user: {
+    password: form.password,
+  },
+});
+  toast.success("Created successfully");
+}
 
     navigate("/receptionist");
   } catch (err) {
@@ -216,6 +271,13 @@ onChange={(e) => handleStaffChange("first_name", e.target.value)}
 onChange={(e) => handleStaffChange("address", e.target.value)}
           />
         </label>
+        <label>
+  Qualification *
+  <Input
+    value={form.staff.qualification}
+    onChange={(e) => handleStaffChange("qualification", e.target.value)}
+  />
+</label>
 
         {/* ✅ PROFESSIONAL INFO */}
         <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">

@@ -64,7 +64,8 @@ const fetchData = async () => {
   setLoading(true);
   try {
     const res = await receptionistsService.getAllReceptionists();
-    setData(res?.data || []);
+   setData(res?.data?.data || []);
+setTotal(res?.data?.total || 0);
     setTotal(res?.total || 0);
   } catch (err) {
     toast.error("Failed to fetch receptionists");
@@ -161,15 +162,15 @@ const fetchData = async () => {
   className="border-t border-gray-100 hover:bg-[#FBFBFF] transition-colors duration-150"
 >
                     <td className="px-4 py-3 text-[12px] font-medium text-gray-800">
-  {item.name}
+{item.receptionist_name}
 </td>
 
 <td className="px-4 py-3 text-[12px] text-gray-700">
-  {item.email}
+  {item.receptionist_email}
 </td>
 
 <td className="px-4 py-3 text-[12px] text-gray-700">
-  {item.phone}
+  {item.receptionist_phone}
 </td>
 
 <td className="px-4 py-3 text-[12px] text-gray-700">

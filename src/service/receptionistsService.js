@@ -10,13 +10,21 @@ const authHeader = () => ({
 
 const receptionistsService = {
   // ✅ CREATE
-  async createReceptionist(data) {
-    const res = await axios.post(API_URL, data, {
+async createReceptionist(data) {
+  const res = await axios.post(API_URL, data, {
+    headers: authHeader(),
+  });
+  return res.data;
+},
+
+  // ✅ GET ALL
+  async getAllReceptionists(params = {}) {
+    const res = await axios.get(API_URL, {
       headers: authHeader(),
+      params,
     });
     return res.data;
   },
-
   // ✅ GET ALL
   async getAllReceptionists(params = {}) {
     const res = await axios.get(API_URL, {
