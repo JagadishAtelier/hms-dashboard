@@ -70,6 +70,11 @@ import CreateRecord from "./pages/RecordsPage/CreateRecord";
 import CreateTemplate from "./pages/RecordsPage/CreateTemplate";
 import PatientRecords from "./pages/RecordsPage/PatientRecords";
 import Prescription from "./pages/PrescriptionPage/Prescription";
+import NurseList from "./pages/AdminPage/NurseList";
+import NurseCreate from "./pages/AdminPage/NurseCreate";
+import NurseDashboard from "./pages/NursePage/NurseDashboard";
+import PharmacistList from "./pages/AdminPage/PharmacistList";
+import PharmacistCreate from "./pages/AdminPage/PharmacistCreate";
 function App() {
   return (
     <SidebarProvider>
@@ -718,6 +723,62 @@ function App() {
             element={
               <AdminLayout>
                 <Prescription />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/nurses"
+            element={
+              <AdminLayout>
+                <NurseList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/nurses/create"
+            element={
+              <AdminLayout>
+                <NurseCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/nurses/edit/:id"
+            element={
+              <AdminLayout>
+                <NurseCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/nurse-dashboard"
+            element={
+              <AdminLayout>
+                <NurseDashboard />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/pharmacists"
+            element={
+              <AdminLayout>
+                <PharmacistList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/pharmacists/create"
+            element={
+              <AdminLayout>
+                <PharmacistCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/pharmacists/edit/:id"
+            element={
+              <AdminLayout>
+                <PharmacistCreate />
               </AdminLayout>
             }
           />

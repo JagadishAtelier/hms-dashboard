@@ -26,6 +26,8 @@ import {
   ClipboardCheck,
   X,
   FolderOpen,
+  HeartPulse,
+  Pill,
 } from "lucide-react";
 import { useSidebar } from "./Context/SidebarContext";
 import { useEffect, useState } from "react";
@@ -103,23 +105,19 @@ export default function Sidebar({ isOpen, onClose }) {
     { to: "/vendor", label: "Vendor", icon: Tractor },
     { to: "/order", label: "Order", icon: ShoppingCart },
     { to: "/inward", label: "Inward", icon: FileInput },
+    { to: "/nurses", label: "Nurses", icon: HeartPulse },
+    { to: "/pharmacists", label: "Pharmacists", icon: Pill },
   ];
 
   const pharmacistSidebarLinks = [
     { to: "/pharma-dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/category", label: "Category", icon: ToolCase },
-    { to: "/subcategory", label: "Subcategory", icon: AlignEndVertical },
     { to: "/product", label: "Product", icon: ShoppingBasket },
-    { to: "/vendor", label: "Vendor", icon: Tractor },
-    { to: "/order", label: "Order", icon: ShoppingCart },
-    { to: "/inward", label: "Inward", icon: FileInput },
     { to: "/stock", label: "Stock & Inventory", icon: Package },
     { to: "/prescription", label: "Prescriptions", icon: ClipboardCheck },
   ];
 
   const nursesSidebarLinks = [
-    { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/patient-list", label: "Patient List", icon: Users },
+    { to: "/nurse-dashboard", label: "Dashboard", icon: LayoutDashboard },
     { to: "/appointment", label: "Appointments", icon: CalendarDays },
     { to: "/admissions", label: "Admissions", icon: Bed },
   ];
