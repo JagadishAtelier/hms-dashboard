@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import recordsService from "../../service/recordsService";
 import patientService from "../../service/patientService";
 import appointmentsService from "../../service/appointmentsService";
+import admissionsService from "../../service/addmissionsService";
 
 const inputCls = "w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400";
 const selectCls = inputCls + " bg-white";
@@ -97,16 +98,19 @@ const CreateRecord = () => {
   const [searchParams] = useSearchParams();
   const prefilledPatientId = searchParams.get("patient_id") || "";
   const prefilledAppointmentId = searchParams.get("appointment_id") || "";
+  const prefilledAdmissionId = searchParams.get("admission_id") || "";
 
   const [loading, setLoading] = useState(false);
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [admissionInfo, setAdmissionInfo] = useState(null);
   const [recordTypes, setRecordTypes] = useState([]);
   const [allTemplates, setAllTemplates] = useState([]);
 
   const [formData, setFormData] = useState({
     patient_id: prefilledPatientId,
     appointment_id: prefilledAppointmentId,
+    admission_id: prefilledAdmissionId,
     date: dayjs().format("YYYY-MM-DD"),
     record_type_id: "",
     description: "",
@@ -129,6 +133,16 @@ const CreateRecord = () => {
         setPatients(pRes.data?.data?.data || pRes.data?.data || []);
         setRecordTypes(tRes.data?.data?.data || tRes.data?.data || []);
         setAllTemplates(tmRes.data?.data?.data || tmRes.data?.data || []);
+
+        // If coming from an admission, fetch admission details to display
+        if (prefilledAdmissionId) {
+          try {
+            const aRes = await admissionsService.getAdmissionById(prefilledAdmissionId);
+            setAdmissionInfo(aRes?.data || null);
+          } catch {
+            // non-fatal
+          }
+        }
       } catch (err) {
         console.error("Init error", err);
       } finally {
@@ -196,6 +210,7 @@ const CreateRecord = () => {
       await recordsService.createRecord({
         patient_id: formData.patient_id,
         appointment_id: formData.appointment_id || undefined,
+        admission_id: formData.admission_id || undefined,
         record_type_id: formData.record_type_id,
         date: formData.date,
         description: formData.description,
@@ -209,6 +224,7 @@ const CreateRecord = () => {
       if (prefilledPatientId) {
         const params = new URLSearchParams();
         if (prefilledAppointmentId) params.set("appointment_id", prefilledAppointmentId);
+        if (prefilledAdmissionId) params.set("admission_id", prefilledAdmissionId);
         navigate(`/records/patient/${prefilledPatientId}?${params.toString()}`);
       } else {
         navigate("/records");
@@ -250,16 +266,26 @@ const CreateRecord = () => {
                 </select>
               </Field>
 
-              <Field label="Appointment (optional)">
-                <select className={selectCls} value={formData.appointment_id}
-                  onChange={(e) => setFormData((p) => ({ ...p, appointment_id: e.target.value }))}
-                  disabled={!formData.patient_id}>
-                  <option value="">Select an appointment</option>
-                  {appointments.map((a) => (
-                    <option key={a.id} value={a.id}>{a.appointment_no} — {dayjs(a.scheduled_at).format("MMM D, YYYY")} ({a.status})</option>
-                  ))}
-                </select>
-              </Field>
+              {prefilledAdmissionId ? (
+                <Field label="Admission">
+                  <div className={`${inputCls} flex items-center bg-gray-50 text-gray-700 cursor-default`}>
+                    {admissionInfo
+                      ? `${admissionInfo.admission_no || "Admission"} — ${dayjs(admissionInfo.admission_date).format("MMM D, YYYY")} (${admissionInfo.status})`
+                      : prefilledAdmissionId}
+                  </div>
+                </Field>
+              ) : (
+                <Field label="Appointment (optional)">
+                  <select className={selectCls} value={formData.appointment_id}
+                    onChange={(e) => setFormData((p) => ({ ...p, appointment_id: e.target.value }))}
+                    disabled={!formData.patient_id}>
+                    <option value="">Select an appointment</option>
+                    {appointments.map((a) => (
+                      <option key={a.id} value={a.id}>{a.appointment_no} — {dayjs(a.scheduled_at).format("MMM D, YYYY")} ({a.status})</option>
+                    ))}
+                  </select>
+                </Field>
+              )}
 
               <Field label="Date" required>
                 <input type="date" className={inputCls} value={formData.date}

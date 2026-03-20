@@ -12,6 +12,7 @@ function LabTestResults() {
   const { patient_id } = useParams();
   const location = useLocation();
   const appointment_id = new URLSearchParams(location.search).get("appointment_id");
+  const admission_id = new URLSearchParams(location.search).get("admission_id");
 
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
@@ -24,8 +25,25 @@ function LabTestResults() {
   const userRole = userInfo?.role;
 
   useEffect(() => {
-    if (appointment_id) fetchLabTestOrder(appointment_id);
-  }, [appointment_id]);
+    if (admission_id) {
+      fetchByAdmission(admission_id);
+    } else if (appointment_id) {
+      fetchLabTestOrder(appointment_id);
+    }
+  }, [appointment_id, admission_id]);
+
+  const fetchByAdmission = async (admId) => {
+    try {
+      setLoading(true);
+      const res = await labTestOrderService.getLabTestOrderByAdmissionId(admId);
+      setOrder(res?.data ?? null);
+    } catch (err) {
+      console.error("Failed to fetch lab test results", err);
+      toast.error(err?.response?.data?.message || "Failed to load lab test results");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchLabTestOrder = async (apptId) => {
     try {
@@ -60,7 +78,8 @@ function LabTestResults() {
       });
       toast.success(res?.message || "Result updated successfully");
       setShowModal(false);
-      fetchLabTestOrder(appointment_id);
+      if (admission_id) fetchByAdmission(admission_id);
+      else fetchLabTestOrder(appointment_id);
     } catch (err) {
       console.error(err);
       toast.error(err?.response?.data?.message || "Failed to update result");
@@ -104,7 +123,7 @@ function LabTestResults() {
   if (!order)
     return (
       <div className="p-6 text-center text-gray-600">
-        No lab test order found for this appointment.
+        No lab test order found for this {admission_id ? "admission" : "appointment"}.
       </div>
     );
 

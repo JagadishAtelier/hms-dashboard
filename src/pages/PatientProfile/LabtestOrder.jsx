@@ -15,6 +15,7 @@ function LabTestOrder() {
   const location = useLocation();
 
   const appointment_id = new URLSearchParams(location.search).get("appointment_id");
+  const admission_id = new URLSearchParams(location.search).get("admission_id");
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -38,18 +39,47 @@ function LabTestOrder() {
   const init = async () => {
     setLoading(true);
     try {
-      // fetch lab tests first, then check for existing order
       const res = await labtestService.getAllLabTests();
       const data = res?.data?.data ?? res?.data ?? res;
       setLabTests(Array.isArray(data) ? data : []);
 
-      if (appointment_id) {
+      if (admission_id) {
+        await fetchExistingOrderByAdmission(admission_id);
+      } else if (appointment_id) {
         await fetchExistingOrderByAppointment(appointment_id);
       }
     } catch (err) {
       console.error("Init error", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchExistingOrderByAdmission = async (admId) => {
+    try {
+      const res = await labTestOrderService.getLabTestOrderByAdmissionId(admId);
+      const data = res?.data ?? res;
+      if (data?.id) {
+        setOrderId(data.id);
+        setOrder((prev) => ({
+          ...prev,
+          status: data.status || "pending",
+          priority: data.priority || "normal",
+          is_active: data.is_active ?? true,
+          items: (data.items || []).length
+            ? data.items.map((it) => ({
+                id: it.id,
+                lab_test_id: it.lab_test_id,
+                sample_type: it.sample_type || "",
+                collected_at: it.collected_at || "",
+                result_value: it.result_value || "",
+                result_file_url: it.result_file_url || "",
+              }))
+            : prev.items,
+        }));
+      }
+    } catch {
+      // no existing order — fine
     }
   };
 
@@ -141,6 +171,7 @@ function LabTestOrder() {
       const payload = {
         patient_id: order.patient_id,
         appointment_id: appointment_id || undefined,
+        admission_id: admission_id || undefined,
         order_date: now,
         status: orderId ? (order.status || "pending") : "pending",
         priority: order.priority,
@@ -193,7 +224,12 @@ function LabTestOrder() {
             <Button
               variant="outline"
               className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-              onClick={() => navigate(`/testresults/${patient_id}?appointment_id=${appointment_id}`)}
+              onClick={() => {
+                const param = admission_id
+                  ? `admission_id=${admission_id}`
+                  : `appointment_id=${appointment_id}`;
+                navigate(`/testresults/${patient_id}?${param}`);
+              }}
             >
               View Results
             </Button>

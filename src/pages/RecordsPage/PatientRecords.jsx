@@ -47,7 +47,11 @@ const RecordRow = ({ record }) => {
         </td>
         <td className="p-4 text-gray-500 truncate max-w-[200px]">{record.description || "—"}</td>
         <td className="p-4">
-          {record.appointment ? (
+          {record.admission ? (
+            <span className="px-2 py-0.5 rounded-md text-xs bg-blue-50 text-blue-600 border border-blue-100">
+              {dayjs(record.admission.admission_date).format("MMM D, YYYY")}
+            </span>
+          ) : record.appointment ? (
             <span className="px-2 py-0.5 rounded-md text-xs bg-indigo-50 text-indigo-600 border border-indigo-100">
               {record.appointment.appointment_no}
             </span>
@@ -81,13 +85,19 @@ const RecordRow = ({ record }) => {
                     <p className="text-sm text-gray-500">ID: #{record.id?.slice(0, 8)}</p>
                   </div>
                 </div>
-                {record.appointment && (
+                {record.admission ? (
+                  <div className="mb-4">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Admission</h3>
+                    <p className="text-gray-800 font-medium">{dayjs(record.admission.admission_date).format("MMM D, YYYY")}</p>
+                    <p className="text-gray-500 text-sm">{record.admission.status} · {record.admission.reason || "—"}</p>
+                  </div>
+                ) : record.appointment ? (
                   <div className="mb-4">
                     <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Appointment</h3>
                     <p className="text-gray-800 font-medium">{record.appointment.appointment_no}</p>
                     <p className="text-gray-500 text-sm">{dayjs(record.appointment.scheduled_at).format("MMM D, YYYY")} · {record.appointment.status}</p>
                   </div>
-                )}
+                ) : null}
                 <div className="mb-4">
                   <h3 className="text-xs font-bold text-gray-400 uppercase mb-1">Description</h3>
                   <p className="text-gray-700 whitespace-pre-wrap">{record.description || "N/A"}</p>
@@ -140,6 +150,7 @@ const PatientRecords = () => {
   const { patient_id } = useParams();
   const [searchParams] = useSearchParams();
   const appointment_id = searchParams.get("appointment_id");
+  const admission_id = searchParams.get("admission_id");
   const navigate = useNavigate();
 
   const [patient, setPatient] = useState(null);
@@ -152,7 +163,7 @@ const PatientRecords = () => {
         setLoading(true);
         const [pRes, rRes] = await Promise.all([
           patientService.getPatientById(patient_id),
-          recordsService.getAllRecords({ patient_id }),
+          recordsService.getAllRecords({ patient_id, ...(admission_id ? { admission_id } : {}) }),
         ]);
         setPatient(pRes.data || pRes);
         setRecords(rRes.data?.data?.data || rRes.data?.data || rRes.data || []);
@@ -168,6 +179,7 @@ const PatientRecords = () => {
   const handleCreateRecord = () => {
     const params = new URLSearchParams({ patient_id });
     if (appointment_id) params.set("appointment_id", appointment_id);
+    if (admission_id) params.set("admission_id", admission_id);
     navigate(`/records/create?${params.toString()}`);
   };
 
@@ -187,6 +199,7 @@ const PatientRecords = () => {
               <p className="text-sm text-gray-500">
                 {patient.patient_code} · {patient.gender} · {patient.phone || "—"}
                 {appointment_id && <span className="ml-2 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 text-xs border border-indigo-100">Appointment linked</span>}
+                {admission_id && <span className="ml-2 px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-xs border border-blue-100">Admission linked</span>}
               </p>
             )}
           </div>
@@ -205,7 +218,7 @@ const PatientRecords = () => {
             <table className="w-full text-sm text-left">
               <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
-                  {["Date", "Record Type", "Description", "Appointment", "Status"].map((h) => (
+                  {["Date", "Record Type", "Description", admission_id ? "Admission" : "Appointment", "Status"].map((h) => (
                     <th key={h} className="h-10 px-4 font-semibold text-gray-700">{h}</th>
                   ))}
                 </tr>

@@ -13,6 +13,9 @@ import {
   X,
   ChevronUp,
   ChevronDown,
+  FlaskConical,
+  FolderOpen,
+  ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -286,16 +289,37 @@ export default function AdmissionsList() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-[12px] text-gray-700">
-                      {item.status !== "discharged" ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <button
-                          onClick={() => handleDischarge(item.id)}
-                          className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                          onClick={() => navigate(`/labtestorder/${item.patient_id}?admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-blue-600 hover:bg-blue-50 border border-blue-200"
+                          title="Lab Test"
                         >
-                          <LogOut size={14} /> Discharge
+                          <FlaskConical size={12} /> Lab Test
                         </button>
-                      ) : (
-                        <span className="text-gray-400 italic">—</span>
-                      )}
+                        <button
+                          onClick={() => navigate(`/records/patient/${item.patient_id}?admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
+                          title="Records"
+                        >
+                          <FolderOpen size={12} /> Records
+                        </button>
+                        <button
+                          onClick={() => navigate(`/prescription/${item.patient_id}?admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-green-600 hover:bg-green-50 border border-green-200"
+                          title="Prescription"
+                        >
+                          <ClipboardList size={12} /> Prescription
+                        </button>
+                        {item.status !== "discharged" && (
+                          <button
+                            onClick={() => handleDischarge(item.id)}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-red-600 hover:bg-red-50 border border-red-200"
+                          >
+                            <LogOut size={12} /> Discharge
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

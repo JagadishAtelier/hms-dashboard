@@ -14,6 +14,7 @@ function Prescription() {
     const navigate = useNavigate();
     const location = useLocation();
     const appointment_id = new URLSearchParams(location.search).get('appointment_id');
+    const admission_id = new URLSearchParams(location.search).get('admission_id');
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -142,6 +143,7 @@ function Prescription() {
             const payload = {
                 patient_id,
                 appointment_id: appointment_id || undefined,
+                admission_id: admission_id || undefined,
                 notes: form.notes || undefined,
                 status: form.status,
                 items: form.items.map(i => ({
