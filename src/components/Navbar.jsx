@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import {
   Search,
   Calendar,
@@ -10,6 +11,8 @@ import {
   User,
   Settings,
   LogOut,
+  CircleChevronRight,
+  CircleChevronLeft,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function TopNavbar({ onMenuClick }) {
+export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) {
   const [academicYear, setAcademicYear] = useState("2024/2025");
 
   const handleLogout = () => {
@@ -43,9 +46,22 @@ export default function TopNavbar({ onMenuClick }) {
         {/* Hamburger for mobile */}
         <button
           onClick={onMenuClick}
-          className="md:hidden flex items-center justify-center p-2 border border-gray-200 rounded hover:bg-gray-50"
+          className="lg:hidden flex items-center justify-center p-2 border border-gray-200 rounded hover:bg-gray-50"
         >
           <Menu size={18} />
+        </button>
+
+        {/* Collapse toggle for desktop */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden lg:flex items-center justify-center p-1.5 border border-gray-200 rounded-full hover:bg-gray-50 text-gray-500 transition-all"
+          title={isCollapsed ? "Open Side Menu" : "Close Side Menu"}
+        >
+           {isCollapsed ? (
+          <CircleChevronRight size={24} className="text-gray-400 hover:opacity-50 hover:text-[#3F56C1] cursor-pointer" />
+        ) : (
+          <CircleChevronLeft size={24} className="text-gray-400 hover:opacity-50 hover:text-[#3F56C1] cursor-pointer" />
+        )}
         </button>
 
         {/* Search */}
