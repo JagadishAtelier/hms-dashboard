@@ -343,6 +343,89 @@ export default function BedList() {
           </table>
         </div>
       </div>
+      {/* Mobile / Tab View */}
+<div className="md:hidden space-y-3 mt-3">
+  {displayBeds.length > 0 ? (
+    displayBeds.map((b) => (
+      <div
+        key={b.id}
+        className="w-full border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">
+            Bed {b.bed_no}
+          </h3>
+
+          <span
+            className={`text-xs px-2 py-1 rounded ${
+              b.is_active
+                ? "bg-green-100 text-green-600"
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {b.is_active ? "Active" : "Inactive"}
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-600">
+          Room: {b.room?.room_no || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Ward: {b.room?.ward?.name || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Type: {b.room?.room_type || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Price: ₹{b.room?.price_per_day || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Status:{" "}
+          {b.is_occupied ? "Occupied" : "Available"}
+        </p>
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-3">
+          <Button
+            size="icon"
+            variant="outline"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200"
+            onClick={() => handleEditBed(b.id)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          {b.is_active ? (
+            <Button
+              size="icon"
+              variant="outline"
+              className="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-600 border-gray-200"
+              onClick={() => handleDeleteBed(b.id)}
+            >
+              <Trash2 size={14} />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleRestoreBed(b.id)}
+            >
+              <RotateCw size={14} />
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No beds found.
+    </p>
+  )}
+</div>
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">

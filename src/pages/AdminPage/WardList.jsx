@@ -337,7 +337,75 @@ export default function WardList() {
           </table>
         </div>
       </div>
+{/* Mobile / Tab View */}
+<div className="md:hidden flex flex-col gap-3">
+  {displayWards.length > 0 ? (
+    displayWards.map((w) => (
+      <div
+        key={w.id}
+        className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">
+            {w.name || "—"}
+          </h3>
 
+          <span
+            className={`px-2 py-1 text-xs rounded-full ${
+              w.is_active
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {w.is_active ? "Active" : "Inactive"}
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-600">
+          <strong>Floor:</strong> {w.floor || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Description:</strong> {w.description || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600 mb-2">
+          <strong>Created By:</strong> {w.created_by_email || "—"}
+        </p>
+
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleEditWard(w.id)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          {w.is_active ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDeleteWard(w.id)}
+            >
+              <Trash2 size={14} />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleRestoreWard(w.id)}
+            >
+              <RotateCw size={14} />
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">No wards found.</p>
+  )}
+</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">

@@ -63,6 +63,8 @@ import StockList from "./pages/AdminPage/StockList";
 import AdminDashboard from "./pages/AdminPage/adminDashboard";
 import LabTechnicianList from "./pages/AdminPage/LabTechnicianList";
 import LabTechnicianCreate from "./pages/AdminPage/LabTechnicianCreate";
+import AccountantList from "./pages/AdminPage/AccountantList.jsx";
+import AccountantCreate from "./pages/AdminPage/AccountantCreate.jsx";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
@@ -77,6 +79,7 @@ import NurseCreate from "./pages/AdminPage/NurseCreate";
 import NurseDashboard from "./pages/NursePage/NurseDashboard";
 import PharmacistList from "./pages/AdminPage/PharmacistList";
 import PharmacistCreate from "./pages/AdminPage/PharmacistCreate";
+
 function App() {
   return (
     <SidebarProvider>
@@ -85,7 +88,7 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
 
-          {/* Persistent Layout for all Admin Routes */}
+          {/* Persistent Layout for all Admin Routes (Maintains Sidebar State) */}
           <Route element={<AdminLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/patient-list" element={<ProductsList />} />
@@ -176,6 +179,9 @@ function App() {
             <Route path="/pharmacists" element={<PharmacistList />} />
             <Route path="/pharmacists/create" element={<PharmacistCreate />} />
             <Route path="/pharmacists/edit/:id" element={<PharmacistCreate />} />
+            <Route path="/accountant" element={<AccountantList />} />
+            <Route path="/accountant/create" element={<AccountantCreate />} />
+            <Route path="/accountant/edit/:id" element={<AccountantCreate />} />
           </Route>
         </Routes>
       </Router>

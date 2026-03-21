@@ -303,6 +303,67 @@ export default function ProductList() {
             </div>
           </div>
         </div>
+        {/* Mobile / Tab View */}
+<div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+  {displayProducts.length > 0 ? (
+    displayProducts.map((p) => (
+      <div
+        key={p.id}
+        className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
+      >
+        <h3 className="text-sm font-semibold text-gray-800">
+          {p.product_name}
+        </h3>
+
+        <p className="text-xs text-gray-600">
+          Code: {p.product_code}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Purchase: ₹{p.purchase_price ?? "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Selling: ₹{p.selling_price ?? "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Brand: {p.brand || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Category: {p.category_name || "—"}
+        </p>
+
+        <div className="flex justify-center my-2">
+          <QRCodeCanvas value={p.product_code || ""} size={60} />
+        </div>
+
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate(`/product/edit/${p.id}`)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleDelete(p.id)}
+          >
+            <Trash2 size={14} />
+          </Button>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No products found.
+    </p>
+  )}
+</div>
       </div>
 
       {/* Pagination */}

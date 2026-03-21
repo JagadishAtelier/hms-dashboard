@@ -405,7 +405,7 @@ function AppointmentsList() {
 
       {/* Table (desktop) */}
       <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 overflow-y-auto">
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
             <div className="min-w-[600px]">
               <table className="w-full table-auto border-collapse">
@@ -492,6 +492,36 @@ function AppointmentsList() {
                 </motion.tbody>
               </table>
             </div>
+            <div className="hidden md:block lg:hidden overflow-x-auto bg-white border rounded-md mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Appt No", "Patient", "Date", "Status"].map((h, i) => (
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {displayAppointments.map((item) => (
+        <tr key={item.id} className="border-t">
+          <td className="px-3 py-2 text-xs">{item.appointment_no}</td>
+          <td className="px-3 py-2 text-xs">
+            {item.patient?.first_name}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {new Date(item.scheduled_at).toLocaleDateString()}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.status}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
           </div>
         </div>
 

@@ -323,7 +323,75 @@ export default function LabtestList() {
           </table>
         </div>
       </div>
+{/* Mobile / Tab View */}
+<div className="md:hidden flex flex-col gap-3">
+  {displayLabtests.length > 0 ? (
+    displayLabtests.map((t) => (
+      <div
+        key={t.id}
+        className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">
+            {t.name || "—"}
+          </h3>
+        </div>
 
+        <p className="text-xs text-gray-600">
+          <strong>Code:</strong> {t.code || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Category:</strong> {t.category || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Units:</strong> {t.units || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Range:</strong> {t.reference_range || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>TAT:</strong> {t.turnaround_time || "—"}
+        </p>
+
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleEditLabtest(t.id)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          {t.is_active ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDeleteLabtest(t.id)}
+            >
+              <Trash2 size={14} />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleRestoreLabtest(t.id)}
+            >
+              <RotateCw size={14} />
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No lab tests found.
+    </p>
+  )}
+</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">
