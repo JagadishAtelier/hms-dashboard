@@ -109,6 +109,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { to: "/inward", label: "Inward", icon: FileInput },
     { to: "/nurses", label: "Nurses", icon: HeartPulse },
     { to: "/pharmacists", label: "Pharmacists", icon: Pill },
+    { to: "/accountant", label: "Accountant", icon: Users },
   ];
 
   const pharmacistSidebarLinks = [
