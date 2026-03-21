@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import logo from "../assets/DarkLogo.png";
+import logo from "/favicon.png";
 import LabResultModal from "./Context/LabResultModal";
 import {
   Users,
@@ -68,7 +68,7 @@ const SidebarItem = ({
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setIsFlyoutOpen(false);
-    }, 150);
+    }, 300);
   };
 
   const ItemWithTooltip = ({ children }) => (
@@ -166,7 +166,7 @@ const SidebarItem = ({
               "flex items-center w-full rounded-xl transition-all duration-300 p-3 group cursor-pointer",
               isCollapsed ? "justify-center" : "justify-between",
               isActive 
-                ? "bg-[#3D5EE1] text-white shadow-lg shadow-[#3D5EE1]/20" 
+                ? "bg-[#506EE1] hover:bg-[#3f56c2] text-white shadow-lg shadow-[#3D5EE1]/20" 
                 : "text-gray-600 hover:bg-[#F2F5FF] hover:text-[#3D5EE1]"
             )}
           >

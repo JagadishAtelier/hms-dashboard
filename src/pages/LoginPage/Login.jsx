@@ -243,7 +243,7 @@ export default function Login() {
       </div>
 
       {/* Gradient Overlay for Readability */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/80 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/65 to-transparent pointer-events-none" />
 
       {/* Glassmorphism Login Card */}
       <motion.div
