@@ -36,15 +36,6 @@ import {
   FileText,
   ClipboardList,
   ClipboardCheck,
-  SquareUser,
-  UserCog,
-  TestTubeDiagonal,
-  ToolCase,
-  AlignEndVertical,
-  ShoppingBasket,
-  Tractor,
-  FileInput,
-  HeartPulse,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import AddPatientModal from "./Context/AddPatientModal";
