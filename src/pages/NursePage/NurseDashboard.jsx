@@ -36,7 +36,7 @@ export default function NurseDashboard() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ admissions: 0, todayAppts: 0, pendingLab: 0 });
   const [recentAppts, setRecentAppts] = useState([]);
-
+  const [activeTab, setActiveTab] = useState("appointments");
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
@@ -126,7 +126,30 @@ export default function NurseDashboard() {
           </motion.div>
         ))}
       </motion.div>
+{/* Desktop Tabs */}
+<div className="hidden md:flex gap-4 border-b pb-2">
+  <button
+    onClick={() => setActiveTab("appointments")}
+    className={`px-4 py-2 text-sm font-medium ${
+      activeTab === "appointments"
+        ? "border-b-2 border-blue-500 text-blue-600"
+        : "text-gray-500"
+    }`}
+  >
+    Appointments
+  </button>
 
+  <button
+    onClick={() => setActiveTab("labs")}
+    className={`px-4 py-2 text-sm font-medium ${
+      activeTab === "labs"
+        ? "border-b-2 border-blue-500 text-blue-600"
+        : "text-gray-500"
+    }`}
+  >
+    Lab Tests
+  </button>
+</div>
       {/* Recent Appointments */}
       <motion.div
         variants={slideUp}
