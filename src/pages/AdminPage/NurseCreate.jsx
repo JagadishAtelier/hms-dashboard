@@ -162,7 +162,7 @@ export default function NurseCreate() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="md:p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Nurse" : "Create Nurse"}
       </h2>
@@ -176,7 +176,7 @@ export default function NurseCreate() {
 
           {/* Personal Information */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Personal Information</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               First Name <span className="text-red-500">*</span>
               <Input value={form.staff.first_name} onChange={(e) => handleStaffChange("first_name", e.target.value)} />
@@ -206,7 +206,7 @@ export default function NurseCreate() {
 
           {/* Professional Information */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Professional Information</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               Department
               <select className="border rounded-md p-2 w-full" value={form.staff.department_id} onChange={(e) => handleStaffChange("department_id", e.target.value)}>
@@ -246,7 +246,7 @@ export default function NurseCreate() {
 
           {/* Account Information */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Account Information</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               Email <span className="text-red-500">*</span>
               <Input value={form.nurse_email} onChange={(e) => setForm({ ...form, nurse_email: e.target.value })} />
@@ -265,7 +265,7 @@ export default function NurseCreate() {
 
           {/* Emergency Contact */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Emergency Contact</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <label>
               Name
               <Input value={form.staff.emergency_contact.name} onChange={(e) => handleEmergencyChange("name", e.target.value)} />
@@ -281,7 +281,7 @@ export default function NurseCreate() {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-6">
+          <div className="flex flex-col md:flex-row justify-end gap-3 pt-6">
             <Button type="button" variant="outline" onClick={() => navigate("/nurses")}>Cancel</Button>
             <Button type="submit" className="bg-[#0E1680] text-white" disabled={loading}>
               {loading ? "Saving..." : isEdit ? "Update Nurse" : "Create Nurse"}

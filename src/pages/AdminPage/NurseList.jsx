@@ -80,7 +80,7 @@ function NurseList() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">

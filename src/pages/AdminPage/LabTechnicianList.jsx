@@ -119,7 +119,7 @@ const endIndex = Math.min(total, currentPage * limit);
           <h2 className="text-xl font-bold">Lab Technicians</h2>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             className="bg-[#506EE4] text-white w-full sm:w-auto"
             onClick={handleAdd}
@@ -134,7 +134,7 @@ const endIndex = Math.min(total, currentPage * limit);
       </div>
 
       {/* Table */}
-     <div className="hidden lg:block overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
+     <div className="hidden md:block overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
   <div className="min-w-[900px]">
           <table className="w-full table-auto border-collapse">
             <thead className="bg-[#F6F7FF]">
@@ -234,7 +234,7 @@ const endIndex = Math.min(total, currentPage * limit);
         </div>
       </div>
               {/* TABLET VIEW */}
-<div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
+{/* <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
   <table className="w-full">
     <thead className="bg-[#F6F7FF]">
       <tr>
@@ -259,7 +259,7 @@ const endIndex = Math.min(total, currentPage * limit);
       ))}
     </tbody>
   </table>
-</div>
+</div> */}
 
 {/* MOBILE VIEW */}
 <div className="md:hidden space-y-3 mt-3">
