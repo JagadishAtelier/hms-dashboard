@@ -152,7 +152,7 @@ export default function AdmissionsList() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start lg:items-center mb-6 gap-4"
       >
         <div className="flex items-center gap-3 mb-1">
           <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
@@ -169,7 +169,7 @@ export default function AdmissionsList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -202,7 +202,7 @@ export default function AdmissionsList() {
           </Select>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] ms-auto lg:ms-0 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddAdmission}
           >
             <Plus size={14} /> Add Admission
@@ -218,15 +218,15 @@ export default function AdmissionsList() {
       </motion.div>
 
       {/* Table (Desktop) */}
-      <div className="hidden lg:block flex-1 overflow-y-auto">
+      <div className="hidden md:block flex-1 overflow-y-auto">
         <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
           <table className="w-full table-auto border-collapse">
-            <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
+            <thead className="sticky top-0 z-10 bg-[#F6F7FF] text-nowrap">
               <tr>
                 <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Patient</th>
                 <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Code</th>
                 <th
-                  className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer flex items-center gap-1"
+                  className="px-4 text-nowrap py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer flex items-center gap-1"
                   onClick={() => toggleSort("admission_date")}
                 >
                   Admission Date{" "}
@@ -246,7 +246,7 @@ export default function AdmissionsList() {
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="text-nowrap">
               {displayAdmissions.length > 0 ? (
                 displayAdmissions.map((item) => (
                   <tr
@@ -275,15 +275,14 @@ export default function AdmissionsList() {
                     </td>
                     <td className="px-4 py-3 text-[12px]">
                       <span
-                        className={`px-2.5 py-1.5 uppercase rounded-full text-[12px] font-semibold ${
-                          item.status === "admitted"
+                        className={`px-2.5 py-1.5 uppercase rounded-full text-[12px] font-semibold ${item.status === "admitted"
                             ? "bg-blue-100 text-blue-700"
                             : item.status === "transferred"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : item.status === "discharged"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
+                              ? "bg-yellow-100 text-yellow-700"
+                              : item.status === "discharged"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}
                       >
                         {item.status}
                       </span>
@@ -337,111 +336,111 @@ export default function AdmissionsList() {
           </table>
         </div>
       </div>
-      <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
-  <table className="w-full">
-    <thead className="bg-[#F6F7FF]">
-      <tr>
-        {["Patient", "Date", "Ward", "Status"].map((h, i) => (
-          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
-            {h}
-          </th>
-        ))}
-      </tr>
-    </thead>
+      {/* <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
+        <table className="w-full">
+          <thead className="bg-[#F6F7FF]">
+            <tr>
+              {["Patient", "Date", "Ward", "Status"].map((h, i) => (
+                <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-    <tbody>
-      {displayAdmissions.map((item) => (
-        <tr key={item.id} className="border-t">
-          <td className="px-3 py-2 text-xs">
-            {item.patient?.first_name}
-          </td>
-          <td className="px-3 py-2 text-xs">
-            {formatDate(item.admission_date)}
-          </td>
-          <td className="px-3 py-2 text-xs">
-            {item.ward?.name}
-          </td>
-          <td className="px-3 py-2 text-xs">
-            {item.status}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-{/* Mobile View */}
-<div className="md:hidden space-y-3 mt-3">
-  {displayAdmissions.length > 0 ? (
-    displayAdmissions.map((item) => (
-      <div
-        key={item.id}
-        className="w-full border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
-      >
-        <h3 className="text-sm font-semibold text-gray-800">
-          {item.patient
-            ? `${item.patient.first_name} ${item.patient.last_name}`
-            : "—"}
-        </h3>
-
-        <p className="text-xs text-gray-600">
-          Code: {item.patient?.patient_code || "—"}
-        </p>
-
-        <p className="text-xs text-gray-600">
-          Date: {formatDate(item.admission_date)}
-        </p>
-
-        <p className="text-xs text-gray-600">
-          Ward: {item.ward?.name || "—"}
-        </p>
-
-        <p className="text-xs text-gray-600">
-          Room: {item.room?.room_no || "—"} / {item.bed?.bed_no || "—"}
-        </p>
-
-        <p className="text-xs text-gray-600">
-          Status: {item.status}
-        </p>
-
-        <div className="flex gap-2 mt-2 flex-wrap">
-          <button
-            onClick={() => navigate(`/labtestorder/${item.patient_id}?admission_id=${item.id}`)}
-            className="text-xs px-2 py-1 border rounded text-blue-600"
-          >
-            Lab
-          </button>
-
-          <button
-            onClick={() => navigate(`/records/patient/${item.patient_id}?admission_id=${item.id}`)}
-            className="text-xs px-2 py-1 border rounded text-indigo-600"
-          >
-            Records
-          </button>
-
-          <button
-            onClick={() => navigate(`/prescription/${item.patient_id}?admission_id=${item.id}`)}
-            className="text-xs px-2 py-1 border rounded text-green-600"
-          >
-            Rx
-          </button>
-
-          {item.status !== "discharged" && (
-            <button
-              onClick={() => handleDischarge(item.id)}
-              className="text-xs px-2 py-1 border rounded text-red-600"
+          <tbody>
+            {displayAdmissions.map((item) => (
+              <tr key={item.id} className="border-t">
+                <td className="px-3 py-2 text-xs">
+                  {item.patient?.first_name}
+                </td>
+                <td className="px-3 py-2 text-xs">
+                  {formatDate(item.admission_date)}
+                </td>
+                <td className="px-3 py-2 text-xs">
+                  {item.ward?.name}
+                </td>
+                <td className="px-3 py-2 text-xs">
+                  {item.status}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div> */}
+      {/* Mobile View */}
+      <div className="md:hidden space-y-3 mt-3">
+        {displayAdmissions.length > 0 ? (
+          displayAdmissions.map((item) => (
+            <div
+              key={item.id}
+              className="w-full border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
             >
-              Discharge
-            </button>
-          )}
-        </div>
+              <h3 className="text-sm font-semibold text-gray-800">
+                {item.patient
+                  ? `${item.patient.first_name} ${item.patient.last_name}`
+                  : "—"}
+              </h3>
+
+              <p className="text-xs text-gray-600">
+                Code: {item.patient?.patient_code || "—"}
+              </p>
+
+              <p className="text-xs text-gray-600">
+                Date: {formatDate(item.admission_date)}
+              </p>
+
+              <p className="text-xs text-gray-600">
+                Ward: {item.ward?.name || "—"}
+              </p>
+
+              <p className="text-xs text-gray-600">
+                Room: {item.room?.room_no || "—"} / {item.bed?.bed_no || "—"}
+              </p>
+
+              <p className="text-xs text-gray-600">
+                Status: {item.status}
+              </p>
+
+              <div className="flex gap-2 mt-2 flex-wrap">
+                <button
+                  onClick={() => navigate(`/labtestorder/${item.patient_id}?admission_id=${item.id}`)}
+                  className="text-xs px-2 py-1 border rounded text-blue-600"
+                >
+                  Lab
+                </button>
+
+                <button
+                  onClick={() => navigate(`/records/patient/${item.patient_id}?admission_id=${item.id}`)}
+                  className="text-xs px-2 py-1 border rounded text-indigo-600"
+                >
+                  Records
+                </button>
+
+                <button
+                  onClick={() => navigate(`/prescription/${item.patient_id}?admission_id=${item.id}`)}
+                  className="text-xs px-2 py-1 border rounded text-green-600"
+                >
+                  Rx
+                </button>
+
+                {item.status !== "discharged" && (
+                  <button
+                    onClick={() => handleDischarge(item.id)}
+                    className="text-xs px-2 py-1 border rounded text-red-600"
+                  >
+                    Discharge
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 text-sm">
+            No admissions found.
+          </p>
+        )}
       </div>
-    ))
-  ) : (
-    <p className="text-center text-gray-500 text-sm">
-      No admissions found.
-    </p>
-  )}
-</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">
@@ -482,9 +481,8 @@ export default function AdmissionsList() {
                 size="sm"
                 variant={currentPage === i + 1 ? "default" : "outline"}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`text-xs rounded ${
-                  currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
-                }`}
+                className={`text-xs rounded ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""
+                  }`}
               >
                 {i + 1}
               </Button>
