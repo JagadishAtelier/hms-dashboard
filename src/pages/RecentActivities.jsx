@@ -87,7 +87,7 @@ function RecentActivities() {
 
 const tableHead = role === "doctor" ? [...baseTableHead, "Action"] : baseTableHead;
   return (
-    <div className="p-4 my-5">
+    <div className="my-5">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mb-4">Recent Activities</h2>
         <a href="/" className="text-blue-700 underline">

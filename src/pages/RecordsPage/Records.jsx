@@ -48,7 +48,7 @@ const Records = () => {
   };
 
   return (
-    <div className="px-4 py-6 space-y-6">
+    <div className="py-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
@@ -90,7 +90,7 @@ const Records = () => {
       </div>
 
       {/* Content */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-xl md:border border-gray-200 md:bg-white md:shadow-sm overflow-hidden">
         {view === "list" && <RecordsList records={records} searchTerm={search} refreshRecords={fetchAll} />}
         {view === "types" && (
           <RecordTypes types={recordTypes} searchTerm={search} refreshTypes={fetchAll}

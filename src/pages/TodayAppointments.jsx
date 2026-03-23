@@ -250,7 +250,7 @@ function TodayAppointments() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm ">
+    <div className="w-full h-full flex flex-col overflow-hidden text-sm ">
       {loading && <Loading />}
 
       {/* Header */}

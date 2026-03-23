@@ -133,8 +133,8 @@ function PatientsList() {
           isActiveFilter === "active"
             ? true
             : isActiveFilter === "inactive"
-            ? false
-            : undefined,
+              ? false
+              : undefined,
         sort_by: sortBy,
         sort_order: sortOrder,
       };
@@ -273,14 +273,14 @@ function PatientsList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-1 sm:p-1 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center md:mb-6 mb-4 gap-4"
       >
         <div className="flex items-center gap-2">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
@@ -296,7 +296,7 @@ function PatientsList() {
 
           <Button
             variant="outline"
-            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-fit ms-auto md:ms-0 sm:w-auto text-sm"
             onClick={handleAddPatient}
             aria-label="Add Patient"
           >
@@ -306,8 +306,8 @@ function PatientsList() {
       </motion.div>
 
       {/* Table desktop */}
-      <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 overflow-y-auto">
-        <div className="hidden lg:block">
+      <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 md:overflow-y-auto">
+        <div className="hidden md:block">
           <div className="overflow-x-auto rounded-sm border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[800px]">
               <table className="w-full table-auto border-collapse">
@@ -380,31 +380,31 @@ function PatientsList() {
                 </motion.tbody>
               </table>
             </div>
-            <div className="hidden md:block lg:hidden overflow-x-auto bg-white border rounded mt-3">
-  <table className="w-full">
-    <thead className="bg-[#F6F7FF]">
-      <tr>
-        {["Patient","Phone","Status"].map((h,i)=>(
-          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
-            {h}
-          </th>
-        ))}
-      </tr>
-    </thead>
+            {/* <div className="hidden md:block lg:hidden overflow-x-auto bg-white border rounded mt-3">
+              <table className="w-full">
+                <thead className="bg-[#F6F7FF]">
+                  <tr>
+                    {["Patient", "Phone", "Status"].map((h, i) => (
+                      <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
 
-    <tbody>
-      {displayPatients.map((p)=>(
-        <tr key={p.id} className="border-t">
-          <td className="px-3 py-2 text-xs">{p.first_name}</td>
-          <td className="px-3 py-2 text-xs">{p.phone}</td>
-          <td className="px-3 py-2 text-xs">
-            {p.is_active ? "Active" : "Inactive"}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+                <tbody>
+                  {displayPatients.map((p) => (
+                    <tr key={p.id} className="border-t">
+                      <td className="px-3 py-2 text-xs">{p.first_name}</td>
+                      <td className="px-3 py-2 text-xs">{p.phone}</td>
+                      <td className="px-3 py-2 text-xs">
+                        {p.is_active ? "Active" : "Inactive"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div> */}
           </div>
         </div>
 
