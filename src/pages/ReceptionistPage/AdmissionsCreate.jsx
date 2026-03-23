@@ -256,8 +256,8 @@ export default function AdmissionsCreate() {
   return (
     <div className="p-2 sm:p-2 max-w-5xl mx-auto bg-white rounded-lg shadow-sm">
       {/* HEADER */}
-      <div className="mb-6 flex justify-between items-center p-1">
-        <div className="flex items-start mb-4 gap-3">
+      <div className="flex justify-between items-center p-1">
+        <div className="flex flex-col md:flex-row items-start mb-4 gap-3">
           <div
             className="bg-white cursor-pointer hover:bg-gray-100 hover:border-gray-300 rounded-full p-1 shadow-sm border border-gray-100"
             title="Go Back"
@@ -283,8 +283,8 @@ export default function AdmissionsCreate() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* CARD WRAPPER */}
-        <Card className="border-0 shadow-none">
-          <CardHeader>
+        <Card className="border-0 shadow-none p-0">
+          <CardHeader className="p-2">
             <CardTitle className="text-xl text-[#0E1680]">
               Admission Details
             </CardTitle>
@@ -292,7 +292,7 @@ export default function AdmissionsCreate() {
               Select the patient, assign a bed, and note the reason.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-2">
             {/* 1. PATIENT SELECTION */}
             <div ref={patientBoxRef} className="relative">
               <Label
@@ -441,8 +441,8 @@ export default function AdmissionsCreate() {
                       <p>Loading available beds...</p>
                     </div>
                   ) : (
-                    <ScrollArea className="h-64 pr-2">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <ScrollArea className="h-auto pr-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {beds.length === 0 ? (
                           <p className="text-gray-500 text-sm col-span-full p-4 border rounded-lg text-center bg-gray-50">
                             No beds currently available for admission.
@@ -540,7 +540,7 @@ export default function AdmissionsCreate() {
         </Card>
 
         {/* FORM SUBMISSION BUTTONS */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <div className="flex flex-col md:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
           <Button
             type="button"
             variant="outline"
