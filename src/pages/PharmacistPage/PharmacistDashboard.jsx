@@ -93,7 +93,7 @@ export default function PharmacistDashboard() {
   ];
 
   return (
-    <motion.div className="p-4 sm:p-6 space-y-6" initial="hidden" animate="visible">
+    <motion.div className="p-0 sm:p-6 space-y-6" initial="hidden" animate="visible">
       {/* Header */}
       <motion.div variants={slideUp} custom={0}>
         <h1 className="text-2xl font-bold text-gray-800">Pharmacist Dashboard</h1>
