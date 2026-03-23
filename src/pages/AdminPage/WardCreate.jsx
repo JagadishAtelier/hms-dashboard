@@ -93,7 +93,7 @@ export default function WardCreate() {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
+    <div className="md:p-6 max-w-lg mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Ward" : "Create Ward"}
       </h2>
@@ -162,7 +162,7 @@ export default function WardCreate() {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex flex-col md:flex-row justify-end gap-3 pt-2">
             <Button
               type="button"
               variant="outline"

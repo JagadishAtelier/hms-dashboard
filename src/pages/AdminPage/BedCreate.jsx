@@ -107,7 +107,7 @@ export default function BedCreate() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="md:p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Bed" : "Create Bed"}
       </h2>
@@ -124,7 +124,7 @@ export default function BedCreate() {
               Select Room <span className="text-red-500">*</span>
             </label>
 
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto p-2 border rounded-lg bg-gray-50">
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto p-2 border rounded-lg bg-gray-50">
               {rooms.length > 0 ? (
                 rooms.map((room) => {
                   const isSelected = selectedRoom === room.id;

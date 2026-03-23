@@ -120,7 +120,7 @@ export default function VendorList() {
   const endIndex = Math.min(total, currentPage * limit);
 
   return (
-    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
+    <div className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
       {loading && <Loading />}
 
       {/* Header */}
@@ -141,7 +141,7 @@ export default function VendorList() {
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
           {/* Search */}
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -175,7 +175,7 @@ export default function VendorList() {
 
           {/* Add & Refresh */}
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm ms-auto lg:ms-0"
             onClick={() => navigate("/vendor/create")}
           >
             <Plus size={14} /> Add Vendor

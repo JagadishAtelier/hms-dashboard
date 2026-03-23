@@ -139,7 +139,7 @@ export default function OrderList() {
   };
 
   return (
-    <div className="p-3 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-0 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm">
       {loading && <Loading />}
 
       {/* HEADER */}
@@ -160,7 +160,7 @@ export default function OrderList() {
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
           {/* search */}
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search
               className="absolute left-3 top-2.5 text-gray-400"
               size={16}
@@ -197,7 +197,7 @@ export default function OrderList() {
             value={statusFilter || "all"}
             onValueChange={(v) => setStatusFilter(v === "all" ? "" : v)}
           >
-            <SelectTrigger className="h-9 w-[140px] bg-white border border-gray-200 text-sm">
+            <SelectTrigger className="h-9 w-[140px] bg-white border border-gray-200 text-sm md:ms-auto lg:ms-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -447,7 +447,7 @@ export default function OrderList() {
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           >
-            <ChevronLeft size={14} /> Prev
+            <ChevronLeft size={14} />
           </Button>
           <span className="text-xs">
             Page {currentPage} / {totalPages}
@@ -458,7 +458,7 @@ export default function OrderList() {
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           >
-            Next <ChevronRight size={14} />
+            <ChevronRight size={14} />
           </Button>
         </div>
       </div>

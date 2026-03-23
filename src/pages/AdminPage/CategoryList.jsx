@@ -149,7 +149,7 @@ function CategoryList() {
   const displayCategories = useMemo(() => categories || [], [categories]);
 
   return (
-    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm">
       {loading && <Loading />}
 
       {/* Header */}

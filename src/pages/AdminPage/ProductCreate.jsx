@@ -208,7 +208,7 @@ export default function ProductCreate() {
     s.subcategory_name ?? s.name ?? "Unnamed subcategory";
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="md:p-6 max-w-3xl mx-auto">
       <h2 className="text-xl font-semibold mb-4">
         {isEdit ? "Edit Product" : "Create Product"}
       </h2>

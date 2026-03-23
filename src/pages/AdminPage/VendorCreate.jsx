@@ -122,7 +122,7 @@ export default function VendorCreate() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="md:p-6 max-w-3xl mx-auto">
       <h2 className="text-xl font-semibold mb-4">
         {isEdit ? "Edit Vendor" : "Create Vendor"}
       </h2>

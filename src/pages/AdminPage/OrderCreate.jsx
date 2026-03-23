@@ -239,7 +239,7 @@ export default function OrderCreate() {
 
   /** Render */
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="md:p-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">
           {isEdit ? "Edit Order" : "Create Order"}
@@ -336,30 +336,92 @@ export default function OrderCreate() {
           </Button>
 
           {/* Items Table */}
-          <div className="overflow-x-auto border rounded-lg mt-4">
-            <table className="w-full text-sm border-collapse">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="border p-2">Name</th>
-                  <th className="border p-2">Qty</th>
-                  <th className="border p-2">Unit Price</th>
-                  <th className="border p-2">Unit</th>
-                  <th className="border p-2 w-12"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {form.items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="border p-2">
-                      <Input
-                        value={item.product_name}
-                        onChange={(e) =>
-                          handleItemChange(idx, "product_name", e.target.value)
-                        }
-                        placeholder="Product name"
-                      />
-                    </td>
-                    <td className="border p-2">
+          {/* Items Section */}
+          <div className="mt-4">
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto border rounded-lg">
+              <table className="w-full text-sm border-collapse">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="border p-2">Name</th>
+                    <th className="border p-2">Qty</th>
+                    <th className="border p-2">Unit Price</th>
+                    <th className="border p-2">Unit</th>
+                    <th className="border p-2 w-12"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {form.items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td className="border p-2">
+                        <Input
+                          value={item.product_name}
+                          onChange={(e) =>
+                            handleItemChange(idx, "product_name", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <Input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleItemChange(idx, "quantity", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <Input
+                          type="number"
+                          value={item.unit_price}
+                          onChange={(e) =>
+                            handleItemChange(idx, "unit_price", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="border p-2">
+                        <Input
+                          value={item.unit}
+                          onChange={(e) =>
+                            handleItemChange(idx, "unit", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="border p-2 text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeItem(idx)}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-2">
+              {form.items.map((item, idx) => (
+                <Card key={idx} className="p-4  shadow-sm">
+                  {/* Product Name */}
+                  <div>
+                    <label className="text-xs text-gray-500">Product Name</label>
+                    <Input
+                      value={item.product_name}
+                      onChange={(e) =>
+                        handleItemChange(idx, "product_name", e.target.value)
+                      }
+                      placeholder="Enter product name"
+                    />
+                  </div>
+
+                  {/* Qty + Price */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500">Qty</label>
                       <Input
                         type="number"
                         value={item.quantity}
@@ -367,8 +429,10 @@ export default function OrderCreate() {
                           handleItemChange(idx, "quantity", e.target.value)
                         }
                       />
-                    </td>
-                    <td className="border p-2">
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Unit Price</label>
                       <Input
                         type="number"
                         value={item.unit_price}
@@ -376,33 +440,43 @@ export default function OrderCreate() {
                           handleItemChange(idx, "unit_price", e.target.value)
                         }
                       />
-                    </td>
-                    <td className="border p-2">
-                      <Input
-                        value={item.unit}
-                        onChange={(e) =>
-                          handleItemChange(idx, "unit", e.target.value)
-                        }
-                        placeholder="pcs/kg"
-                      />
-                    </td>
-                    <td className="border p-2 text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeItem(idx)}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </div>
+
+                  {/* Unit */}
+                  <div>
+                    <label className="text-xs text-gray-500">Unit</label>
+                    <Input
+                      value={item.unit}
+                      onChange={(e) =>
+                        handleItemChange(idx, "unit", e.target.value)
+                      }
+                      placeholder="pcs/kg"
+                    />
+                  </div>
+
+                  {/* Delete Button */}
+                  <div className="flex justify-end">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeItem(idx)}
+                      className="flex items-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Remove
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
             {errors.items && (
               <p className="text-red-500 text-sm mt-2">{errors.items}</p>
             )}
           </div>
+
+
 
           {/* Summary */}
           <div className="flex justify-end gap-6 mt-4 text-sm text-gray-700">

@@ -283,7 +283,7 @@ export default function StockList() {
   };
 
   return (
-    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
+    <div className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
       {loading && <Loading />}
 
       {/* Header */}
@@ -303,7 +303,7 @@ export default function StockList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -334,7 +334,7 @@ export default function StockList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm border border-gray-200"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm border border-gray-200 ms-auto lg:ms-0"
             onClick={() => setShowUploadModal(true)}
           >
             <Upload size={14} /> Bulk Upload

@@ -91,7 +91,7 @@ export default function DesignationCreate() {
 
   // ✅ Render
   return (
-    <div className="p-6 max-w-lg mx-auto">
+    <div className="md:p-6 max-w-lg mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Designation" : "Create Designation"}
       </h2>
@@ -138,7 +138,7 @@ export default function DesignationCreate() {
             )}
           </div>
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col md:flex-row justify-end gap-3 pt-4">
             <Button
               type="button"
               variant="outline"

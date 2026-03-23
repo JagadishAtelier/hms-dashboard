@@ -101,7 +101,7 @@ export default function LabtestCreate() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="md:p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Lab Test" : "Create Lab Test"}
       </h2>

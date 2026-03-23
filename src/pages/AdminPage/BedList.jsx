@@ -157,7 +157,7 @@ export default function BedList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
@@ -179,7 +179,7 @@ export default function BedList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -202,7 +202,7 @@ export default function BedList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
             onClick={() => fetchBeds(currentPage)}
           >
             <RefreshCw size={14} /> Refresh

@@ -129,7 +129,7 @@ export default function InwardList() {
   const displayInwards = useMemo(() => inwards || [], [inwards]);
 
   return (
-    <div className="p-3 sm:p-5 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-0 sm:p-5 w-full h-full flex flex-col overflow-hidden text-sm">
       {loading && <Loading />}
 
       {/* Header */}
@@ -150,7 +150,7 @@ export default function InwardList() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto md:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -199,7 +199,7 @@ export default function InwardList() {
           </Select>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
+            className="bg-[#506EE4] ms-auto md:ms-0 hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
             onClick={() => navigate("/inward/create")}
           >
             <Plus size={14} /> Add Inward

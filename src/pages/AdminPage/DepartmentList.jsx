@@ -163,7 +163,7 @@ export default function DepartmentList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
@@ -187,7 +187,7 @@ export default function DepartmentList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -210,7 +210,7 @@ export default function DepartmentList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
             onClick={() => fetchDepartments(currentPage)}
           >
             <RefreshCw size={14} /> Refresh
@@ -219,7 +219,7 @@ export default function DepartmentList() {
       </motion.div>
 
       {/* Table */}
-      <div className="hidden lg:block flex-1 overflow-y-auto">
+      <div className="hidden md:block flex-1 overflow-y-auto">
         <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
           <table className="w-full table-auto border-collapse">
             <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
@@ -338,7 +338,7 @@ export default function DepartmentList() {
           </table>
         </div>
       </div>
-      <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
+      {/* <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
   <table className="w-full">
     <thead className="bg-[#F6F7FF]">
       <tr>
@@ -362,7 +362,7 @@ export default function DepartmentList() {
       ))}
     </tbody>
   </table>
-</div>
+</div> */}
       <div className="md:hidden space-y-3 mt-3">
   {displayDepartments.map((d) => (
     <div key={d.id} className="bg-white border rounded-lg p-3 shadow-sm">

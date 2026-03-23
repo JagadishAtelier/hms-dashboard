@@ -164,7 +164,7 @@ export default function ProductList() {
   const displayProducts = useMemo(() => products || [], [products]);
 
   return (
-    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
+    <div className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
       {loading && <Loading />}
 
       {/* Header */}
@@ -199,7 +199,7 @@ export default function ProductList() {
           </Button>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm md:ms-auto lg:ms-0"
             onClick={() => fetchProducts(1)}
           >
             <RefreshCw size={14} />
@@ -335,7 +335,7 @@ export default function ProductList() {
           Category: {p.category_name || "—"}
         </p>
 
-        <div className="flex justify-center my-2">
+        <div className="flex justify-start my-2">
           <QRCodeCanvas value={p.product_code || ""} size={60} />
         </div>
 
