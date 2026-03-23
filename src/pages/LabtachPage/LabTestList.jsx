@@ -172,7 +172,7 @@ export default function LabTestList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
@@ -196,7 +196,7 @@ export default function LabTestList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -230,7 +230,7 @@ export default function LabTestList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
             onClick={() => fetchLabOrders(currentPage)}
           >
             <RefreshCw size={14} /> Refresh
@@ -326,7 +326,7 @@ export default function LabTestList() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex flex-col lg:flex-row gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -363,6 +363,93 @@ export default function LabTestList() {
           </table>
         </div>
       </div>
+
+      {/* Mobile Card View */}
+<div className="md:hidden flex flex-col gap-3 overflow-y-auto">
+  {displayOrders.length > 0 ? (
+    displayOrders.map((order) => (
+      <div
+        key={order.id}
+        className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm flex flex-col gap-2"
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <p className="text-xs font-semibold text-gray-800">
+            #{order.order_no}
+          </p>
+          <span
+            className={`px-2 py-1 rounded-full text-[10px] font-semibold ${
+              order.status === "completed"
+                ? "bg-green-100 text-green-700"
+                : order.status === "in_progress"
+                ? "bg-yellow-100 text-yellow-700"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {order.status}
+          </span>
+        </div>
+
+        {/* Patient */}
+        <div className="text-xs text-gray-600">
+          <span className="font-medium text-gray-800">Patient: </span>
+          {order.patient
+            ? `${order.patient.first_name || ""} ${
+                order.patient.last_name || ""
+              }`
+            : "—"}
+        </div>
+
+        {/* Encounter */}
+        <div className="text-xs text-gray-600">
+          <span className="font-medium text-gray-800">Encounter: </span>
+          {order.encounter?.encounter_no || "—"}
+        </div>
+
+        {/* Tests */}
+        <div className="text-xs text-gray-600">
+          <span className="font-medium text-gray-800">Tests: </span>
+          {(order.items || [])
+            .map((i) => i.test?.name || i.name)
+            .join(", ") || "—"}
+        </div>
+
+        {/* Date */}
+        <div className="text-xs text-gray-600">
+          <span className="font-medium text-gray-800">Date: </span>
+          {formatDate(order.order_date)}
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2 mt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs h-8"
+            onClick={() => handleViewResults(order)}
+          >
+            View <ArrowRight size={14} className="ml-1" />
+          </Button>
+
+          {order.status !== "completed" && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="text-xs h-8"
+              onClick={() => handleMarkComplete(order.id)}
+            >
+              Mark Complete
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <div className="text-center text-gray-500 text-xs py-4">
+      No lab test orders found.
+    </div>
+  )}
+</div>
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
