@@ -233,7 +233,7 @@ function DoctorList() {
       {/* Table */}
       <motion.div variants={tableVariant} initial="hidden" animate="visible" className="flex-1 overflow-y-auto">
         {/* DESKTOP */}
-<div className="hidden lg:block">
+        <div className="hidden md:block">
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[900px]">
               <table className="w-full table-auto border-collapse">
@@ -327,38 +327,131 @@ function DoctorList() {
                 </tbody>
               </table>
             </div>
-            {/* TABLET VIEW */}
-<div className="hidden md:block lg:hidden">
-  <div className="overflow-x-auto border rounded-md bg-white">
-    <table className="w-full">
-      <thead className="bg-[#F6F7FF]">
-        <tr>
-          {["Doctor Name", "Email", "Phone", "Department", "Fee"].map((h, i) => (
-            <th key={i} className="px-3 py-2 text-xs font-semibold text-[#475467] text-left">
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
 
-      <tbody>
-        {displayDoctors.map((d) => (
-          <tr key={d.id} className="border-t">
-            <td className="px-3 py-2 text-xs">{d.doctor_name}</td>
-            <td className="px-3 py-2 text-xs">{d.doctor_email}</td>
-            <td className="px-3 py-2 text-xs">{d.doctor_phone}</td>
-            <td className="px-3 py-2 text-xs">
-              {d.staff_profiles?.department?.name}
-            </td>
-            <td className="px-3 py-2 text-xs">₹{d.consultation_fee}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
+            
+            {/* TABLET VIEW */}
+            {/* <div className="hidden md:block lg:hidden">
+              <div className="overflow-x-auto border rounded-md bg-white">
+                <table className="w-full">
+                  <thead className="bg-[#F6F7FF]">
+                    <tr>
+                      {["Doctor Name", "Email", "Phone", "Department", "Fee"].map((h, i) => (
+                        <th key={i} className="px-3 py-2 text-xs font-semibold text-[#475467] text-left">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {displayDoctors.map((d) => (
+                      <tr key={d.id} className="border-t">
+                        <td className="px-3 py-2 text-xs">{d.doctor_name}</td>
+                        <td className="px-3 py-2 text-xs">{d.doctor_email}</td>
+                        <td className="px-3 py-2 text-xs">{d.doctor_phone}</td>
+                        <td className="px-3 py-2 text-xs">
+                          {d.staff_profiles?.department?.name}
+                        </td>
+                        <td className="px-3 py-2 text-xs">₹{d.consultation_fee}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div> */}
           </div>
         </div>
+
+        {/* MOBILE VIEW */}
+<div className="md:hidden space-y-3">
+  <AnimatePresence>
+    {displayDoctors.length > 0 ? (
+      displayDoctors.map((d, i) => (
+        <motion.div
+          key={d.id}
+          custom={i}
+          variants={rowVariant}
+          initial="hidden"
+          animate="visible"
+          exit={{ opacity: 0, y: 20 }}
+          className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+        >
+          {/* Name + Fee */}
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-sm font-semibold text-gray-800">
+              {d.doctor_name || "—"}
+            </h3>
+            <span className="text-xs font-medium text-indigo-600">
+              ₹{d.consultation_fee || 0}
+            </span>
+          </div>
+
+          {/* Details */}
+          <div className="space-y-1 text-xs text-gray-600">
+            <p><span className="font-medium">Email:</span> {d.doctor_email || "—"}</p>
+            <p><span className="font-medium">Phone:</span> {d.doctor_phone || "—"}</p>
+            <p><span className="font-medium">Department:</span> {d.staff_profiles?.department?.name || "—"}</p>
+            <p><span className="font-medium">Designation:</span> {d.staff_profiles?.designation?.title || "—"}</p>
+            <p>
+              <span className="font-medium">Specialties:</span>{" "}
+              {Array.isArray(d.specialties)
+                ? d.specialties.join(", ")
+                : "—"}
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 mt-3">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleEditDoctor(d.id)}
+              className="h-8 w-8"
+            >
+              <Edit2 size={14} />
+            </Button>
+
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => {
+                setSelectedDoctor(d);
+                setShowScheduleModal(true);
+              }}
+              className="h-8 w-8"
+            >
+              <Clock size={14} />
+            </Button>
+
+            {d.is_active ? (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => handleDeleteDoctor(d.id)}
+                className="h-8 w-8"
+              >
+                <Trash2 size={14} />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => handleRestoreDoctor(d.id)}
+                className="h-8 w-8"
+              >
+                <RotateCw size={14} />
+              </Button>
+            )}
+          </div>
+        </motion.div>
+      ))
+    ) : (
+      <p className="text-center text-xs text-gray-500">
+        No doctors found.
+      </p>
+    )}
+  </AnimatePresence>
+</div>
       </motion.div>
 
       {/* Pagination */}
