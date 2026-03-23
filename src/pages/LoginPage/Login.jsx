@@ -4,7 +4,7 @@ import { Mail, Lock, Eye, EyeOff, Activity, Calendar, FileText, User, Heart, Che
 import authService from "../../service/authService.js";
 import dayjs from "dayjs";
 import { motion } from "framer-motion";
-import logo from "../../assets/logo.png";
+import logo from "/favicon.png";
 
 // --- Mock UI Components for Background ---
 
