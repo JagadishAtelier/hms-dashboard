@@ -50,7 +50,7 @@ const Records = () => {
   return (
     <div className="px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800">{viewTitles[view]}</h1>
           <p className="text-sm text-gray-500">{viewDescs[view]}</p>
