@@ -78,7 +78,7 @@ export default function PharmacistList() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -101,7 +101,7 @@ export default function PharmacistList() {
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
         {/* DESKTOP VIEW */}
-<div className="hidden lg:block">
+<div className="hidden md:block">
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[900px]">
               <table className="w-full table-auto border-collapse">
@@ -159,7 +159,7 @@ export default function PharmacistList() {
               </table>
             </div>
              {/* TABLET VIEW */}
-<div className="hidden md:block lg:hidden">
+{/* <div className="hidden md:block lg:hidden">
   <div className="overflow-x-auto rounded-md border bg-white">
     <table className="w-full">
       <thead className="bg-[#F6F7FF]">
@@ -189,7 +189,7 @@ export default function PharmacistList() {
       </tbody>
     </table>
   </div>
-</div>
+</div> */}
           </div>
         </div>
 
