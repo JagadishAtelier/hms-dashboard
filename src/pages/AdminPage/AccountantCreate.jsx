@@ -110,7 +110,7 @@ export default function AccountantCreate() {
     setForm({ ...form, staff: { ...form.staff, [key]: value } });
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="md:p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Accountant" : "Create Accountant"}
       </h2>
@@ -129,7 +129,7 @@ export default function AccountantCreate() {
             Personal Information
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <Input
               placeholder="First Name"
               value={form.staff.first_name}
@@ -180,7 +180,7 @@ export default function AccountantCreate() {
             Professional Information
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <select
               className="border p-2 rounded"
               value={form.staff.department_id}
@@ -233,7 +233,7 @@ export default function AccountantCreate() {
             Accountant Info
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <Input
               placeholder="Accountant Name"
               value={form.accountant_name}
@@ -256,7 +256,7 @@ export default function AccountantCreate() {
             Account Information
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <Input
               placeholder="Email"
               value={form.accountant_email}

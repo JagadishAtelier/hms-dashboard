@@ -98,7 +98,7 @@ function AccountantList() {
     <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-3 sm:p-4 w-full max-w-full mx-auto flex flex-col text-sm"
+      className="p-0 sm:p-4 w-full max-w-full mx-auto flex flex-col text-sm"
     >
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
