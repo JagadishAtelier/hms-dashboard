@@ -1,687 +1,403 @@
-// src/prescription/pages/PrescriptionList.jsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-  Search as SearchIcon,
-  FileText,
-  Eye,
-  Trash2,
-  Plus,
-  CalendarRange,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, Search as SearchIcon, FileText, Eye, Trash2, ClipboardCheck, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import billingService from "../../service/billingService.js";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import prescriptionService from "../../service/prescriptionService.js";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Loading from "../Loading.jsx";
+import dayjs from "dayjs";
 
 const DEFAULT_LIMIT = 10;
 
-export default function PrescriptionList() {
-  const navigate = useNavigate();
+const statusColor = (s) => {
+  const map = { draft: "bg-gray-100 text-gray-600", active: "bg-blue-100 text-blue-700", dispensed: "bg-green-100 text-green-700", cancelled: "bg-red-100 text-red-600" };
+  return map[s?.toLowerCase()] ?? "bg-gray-100 text-gray-600";
+};
 
-  // data + ui
+const computeTotal = (items = []) =>
+  items.reduce((sum, it) => sum + parseFloat(it.total_price ?? (it.quantity && it.unit_price ? it.quantity * it.unit_price : 0) ?? 0), 0).toFixed(2);
+
+export default function PrescriptionList() {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  // filters / pagination / sorting
-  const [searchQuery, setSearchQuery] = useState("");
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterDoctorId, setFilterDoctorId] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
-  const [sortBy, setSortBy] = useState("prescription_date");
+  const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
-
-  // modal
   const [selected, setSelected] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  const [modalStatus, setModalStatus] = useState("pending");
-  const [modalPaymentMethod, setModalPaymentMethod] = useState("cash");
+  const [modalStatus, setModalStatus] = useState("active");
+  const [saving, setSaving] = useState(false);
 
-  // small helper: robust parse (handles many API shapes)
-  const robustParseResponse = (res) => {
-    if (!res) return { rows: [], total: 0, page: 1, limit };
-    const top = res?.data?.data ?? res?.data ?? res;
-    let rows = [];
-    let t = 0;
-    let p = currentPage;
-    let l = limit;
-
-    if (top?.data && Array.isArray(top.data)) {
-      rows = top.data;
-      t = top.total ?? top.data.length ?? 0;
-      p = top.page ?? res?.data?.page ?? p;
-      l = top.limit ?? res?.data?.limit ?? l;
-    } else if (Array.isArray(top)) {
-      rows = top;
-      t = res?.data?.total ?? res?.total ?? top.length ?? 0;
-      p = res?.data?.page ?? res?.page ?? p;
-      l = res?.data?.limit ?? res?.limit ?? l;
-    } else if (Array.isArray(res?.data)) {
-      rows = res.data;
-      t = res.total ?? res.data.length ?? 0;
-      p = res.page ?? p;
-      l = res.limit ?? l;
-    } else {
-      if (Array.isArray(res?.rows)) {
-        rows = res.rows;
-        t = res.total ?? rows.length ?? 0;
-        p = res.page ?? p;
-        l = res.limit ?? l;
-      } else {
-        rows = [];
-        t = res?.total ?? 0;
-      }
+  const fetchPrescriptions = useCallback(async (page = 1) => {
+    setLoading(true);
+    try {
+      const res = await prescriptionService.getAllPrescriptions({
+        page, limit,
+        search: search || undefined,
+        status: filterStatus || undefined,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+      });
+      // res = { status, data: { total, currentPage, totalPages, data: [...] } }
+      const payload = res?.data ?? res;
+      const rows = Array.isArray(payload?.data) ? payload.data : [];
+      setItems(rows);
+      setTotal(Number(payload?.total ?? 0));
+      setCurrentPage(page);
+    } catch (err) {
+      toast.error("Failed to fetch prescriptions");
+      setItems([]);
+    } finally {
+      setLoading(false);
     }
+  }, [limit, search, filterStatus, sortBy, sortOrder]);
 
-    return { rows: Array.isArray(rows) ? rows : [], total: Number(t || 0), page: Number(p || 1), limit: Number(l || limit) };
-  };
+  useEffect(() => { fetchPrescriptions(1); }, []);
+  useEffect(() => { const t = setTimeout(() => fetchPrescriptions(1), 350); return () => clearTimeout(t); }, [search, fetchPrescriptions]);
+  useEffect(() => { fetchPrescriptions(currentPage); }, [currentPage, limit, filterStatus, sortBy, sortOrder, fetchPrescriptions]);
 
-  // fetch prescriptions
-  const fetchPrescriptions = useCallback(
-    async (page = 1) => {
-      setLoading(true);
-      try {
-        const params = {
-          page,
-          limit,
-          search: searchQuery || undefined,
-          status: filterStatus || undefined,
-          doctor_id: filterDoctorId || undefined,
-          start_date: startDate || undefined,
-          end_date: endDate || undefined,
-          sort_by: sortBy,
-          sort_order: sortOrder,
-        };
-
-        // support different service method names
-        const res =
-          (billingService.getAll ? await billingService.getAll(params) : null) ||
-          (billingService.list ? await billingService.list(params) : null) ||
-          (billingService.getAllPrescriptions ? await billingService.getAllPrescriptions(params) : null) ||
-          (await billingService.get(params).catch(() => null));
-
-        const { rows, total: t, page: p, limit: l } = robustParseResponse(res);
-        const mapped = (rows || []).map((r) => ({
-          ...r,
-          prescription_no: r.prescription_no ?? r.billing_no ?? r.id ?? "-",
-          patient_name: r.patient_name ?? r.customer_name ?? (r.patient ? `${r.patient.first_name || ""} ${r.patient.last_name || ""}`.trim() : "-"),
-          prescription_date: r.prescription_date ?? r.billing_date ?? r.date ?? r.created_at ?? null,
-          doctor_name: r.doctor_name ?? (r.doctor?.doctor_name) ?? r.doctor ?? "-",
-          med_count: Array.isArray(r.items) ? r.items.length : r.med_count ?? 0,
-          total_amount: r.total_amount ?? r.total ?? r.grand_total ?? 0,
-          status: r.status ?? "unknown",
-        }));
-        setItems(mapped || []);
-        setTotal(Number(t || 0));
-        setCurrentPage(Number(p || page));
-        setLimit(Number(l || limit));
-      } catch (err) {
-        console.error("Fetch prescriptions failed:", err);
-        toast.error("Failed to fetch prescriptions");
-        setItems([]);
-        setTotal(0);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [limit, searchQuery, filterStatus, filterDoctorId, startDate, endDate, sortBy, sortOrder]
-  );
-
-  // initial + deps
-  useEffect(() => {
-    fetchPrescriptions(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // debounce search
-  useEffect(() => {
-    const t = setTimeout(() => fetchPrescriptions(1), 350);
-    return () => clearTimeout(t);
-  }, [searchQuery, fetchPrescriptions]);
-
-  // change page/limit or filters triggers fetch
-  useEffect(() => {
-    fetchPrescriptions(currentPage);
-  }, [currentPage, limit, filterStatus, filterDoctorId, startDate, endDate, sortBy, sortOrder, fetchPrescriptions]);
-
-  // derived
-  const totalPages = Math.max(1, Math.ceil((total || 0) / limit));
+  const totalPages = Math.max(1, Math.ceil(total / limit));
   const startIndex = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const endIndex = Math.min(total, currentPage * limit);
-  const displayItems = useMemo(() => items || [], [items]);
-
-  const formatDate = (iso) => {
-    if (!iso) return "—";
-    try {
-      return new Date(iso).toLocaleDateString();
-    } catch {
-      return iso;
-    }
-  };
+  const displayItems = useMemo(() => items, [items]);
 
   const toggleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder((o) => (o === "ASC" ? "DESC" : "ASC"));
-    } else {
-      setSortBy(field);
-      setSortOrder("ASC");
-    }
+    if (sortBy === field) setSortOrder(o => o === "ASC" ? "DESC" : "ASC");
+    else { setSortBy(field); setSortOrder("ASC"); }
   };
 
-  // actions
-  const handleView = async (idOrRec) => {
+  const handleView = async (rx) => {
     setModalLoading(true);
+    setModalOpen(true);
     try {
-      let payload = null;
-      if (typeof idOrRec === "object") {
-        payload = idOrRec;
-      } else {
-        if (billingService.get) {
-          const res = await billingService.get(idOrRec);
-          payload = res?.data ?? res;
-        } else if (billingService.find) {
-          const res = await billingService.find(idOrRec);
-          payload = res?.data ?? res;
-        } else {
-          payload = items.find((r) => r.id === idOrRec) ?? null;
-        }
-      }
-      setSelected(payload);
-      setModalStatus((payload?.status ?? "pending").toString());
-      setModalPaymentMethod((payload?.payment_method ?? "cash").toString());
-      setModalOpen(true);
-    } catch (err) {
-      console.error("Failed to load prescription:", err);
-      toast.error("Failed to load prescription");
+      const res = await prescriptionService.getPrescriptionById(rx.id);
+      const data = res?.data?.data ?? res?.data ?? res;
+      setSelected(data);
+      setModalStatus(data?.status ?? "pending");
+    } catch {
+      setSelected(rx);
+      setModalStatus(rx?.status ?? "pending");
     } finally {
       setModalLoading(false);
     }
   };
 
-  const handleEdit = (id) => navigate(`/prescription/edit/${id}`);
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this prescription?")) return;
+    if (!confirm("Delete this prescription?")) return;
     try {
-      if (billingService.remove) await billingService.remove(id);
+      await prescriptionService.deletePrescription(id);
       toast.success("Deleted");
       fetchPrescriptions(currentPage);
     } catch (err) {
-      console.error("Delete failed", err);
-      toast.error("Delete failed");
+      toast.error(err?.response?.data?.message || "Delete failed");
     }
   };
 
-  const saveModalChanges = async () => {
+  const saveStatus = async () => {
     if (!selected) return;
-    setModalLoading(true);
+    setSaving(true);
     try {
-      const payload = {
-        status: modalStatus,
-        payment_method: modalPaymentMethod,
-      };
-
-      let res;
-      if (billingService.update) {
-        res = await billingService.update(selected.id, payload);
-      } else if (billingService.patch) {
-        res = await billingService.patch(selected.id, payload);
-      } else if (billingService.edit) {
-        res = await billingService.edit(selected.id, payload);
-      } else {
-        throw new Error("Update API not available on billingService");
-      }
-
-      const updated = res?.data ?? res ?? payload;
-
-      setSelected((s) => ({ ...(s || {}), ...payload }));
-      setItems((prev) => (prev || []).map((it) => (it.id === selected.id ? { ...it, ...payload } : it)));
-
-      toast.success("Updated successfully");
+      await prescriptionService.updatePrescription(selected.id, { status: modalStatus });
+      setSelected(s => ({ ...s, status: modalStatus }));
+      setItems(prev => prev.map(it => it.id === selected.id ? { ...it, status: modalStatus } : it));
+      toast.success("Status updated");
     } catch (err) {
-      console.error("Update failed:", err);
-      toast.error("Failed to update");
+      toast.error(err?.response?.data?.message || "Update failed");
     } finally {
-      setModalLoading(false);
+      setSaving(false);
     }
   };
 
-  // export functions (re-using your previous logic)
-  const exportPrescriptionPDF = (prescription) => {
-    if (!prescription) return;
+  const exportPDF = (rx) => {
+    if (!rx) return;
+    const fmt = (v) => `Rs. ${v}`;
     try {
       const doc = new jsPDF({ unit: "pt", format: "A4" });
-      doc.setFontSize(18);
-      doc.text("Prescription", 40, 40);
-      doc.setFontSize(12);
-      doc.text(`Prescription No: ${prescription.prescription_no ?? prescription.billing_no ?? "-"}`, 40, 70);
-      doc.text(`Patient: ${prescription.patient_name ?? prescription.customer_name ?? "-"}`, 40, 90);
-      doc.text(`Doctor: ${prescription.doctor_name ?? "-"}`, 40, 110);
-      doc.text(
-        `Date: ${prescription.prescription_date ? new Date(prescription.prescription_date).toLocaleString() : "-"}`,
-        40,
-        130
-      );
-      const head = [["Medicine", "Dose", "Frequency", "Qty", "Price", "Total"]];
-      const body = (prescription.items || []).map((it) => [
-        it.product?.product_name ?? it.medicine_name ?? "-",
-        it.dose ?? "-",
-        it.frequency ?? "-",
-        it.quantity ?? 0,
-        it.unit_price ? `₹${it.unit_price}` : "-",
-        it.total_price
-          ? `₹${it.total_price}`
-          : it.quantity && it.unit_price
-          ? `₹${(it.quantity * it.unit_price).toFixed(2)}`
-          : "-",
-      ]);
+      doc.setFontSize(18); doc.text("Prescription", 40, 40);
+      doc.setFontSize(11);
+      const patName = rx.patient ? `${rx.patient.first_name ?? ""} ${rx.patient.last_name ?? ""}`.trim() : rx.patient_name ?? "—";
+      const drName = rx.doctor?.doctor_name ?? rx.doctor_name ?? "—";
+      doc.text(`Patient: ${patName}`, 40, 70);
+      doc.text(`Doctor: ${drName}`, 40, 88);
+      doc.text(`Date: ${rx.prescription_date ? dayjs(rx.prescription_date).format("DD MMM YYYY") : "—"}`, 40, 106);
+      doc.text(`Status: ${rx.status ?? "—"}`, 40, 124);
       autoTable(doc, {
-        startY: 160,
-        head,
-        body,
+        startY: 150,
+        head: [["Medicine", "Dose", "Frequency", "Qty", "Unit Price", "Total"]],
+        body: (rx.items ?? []).map(it => [
+          it.product?.product_name ?? it.medicine_name ?? "—",
+          it.dosage ?? it.dose ?? "—", it.frequency ?? "—",
+          it.quantity ?? 0,
+          it.unit_price ? fmt(it.unit_price) : "—",
+          it.total_price ? fmt(it.total_price) : it.quantity && it.unit_price ? fmt((it.quantity * it.unit_price).toFixed(2)) : "—",
+        ]),
         styles: { fontSize: 10 },
       });
-      const finalY = doc.lastAutoTable?.finalY || 330;
-      doc.text(`Subtotal: ₹${prescription.subtotal_amount ?? "0.00"}`, 40, finalY + 18);
-      doc.text(`Discount: ₹${prescription.discount_amount ?? "0.00"}`, 40, finalY + 34);
-      doc.text(`Tax: ₹${prescription.tax_amount ?? "0.00"}`, 40, finalY + 50);
-      doc.setFontSize(13);
-      doc.text(`Total: ₹${prescription.total_amount ?? "0.00"}`, 40, finalY + 70);
-
-      doc.save(`${prescription.prescription_no ?? "prescription"}.pdf`);
-      toast.success("Prescription PDF downloaded");
-    } catch (err) {
-      console.error("Prescription PDF failed:", err);
-      toast.error("Failed to export prescription PDF");
-    }
+      const y = doc.lastAutoTable?.finalY ?? 300;
+      doc.setFontSize(12);
+      doc.text(`Total: ${fmt(computeTotal(rx.items))}`, 40, y + 24);
+      doc.save(`prescription-${rx.id ?? "rx"}.pdf`);
+      toast.success("PDF downloaded");
+    } catch { toast.error("PDF export failed"); }
   };
 
-  const exportPrescriptionExcel = (prescription) => {
-    if (!prescription) return;
-    try {
-      const wb = XLSX.utils.book_new();
-      const header = ["Medicine", "Dose", "Frequency", "Qty", "Unit Price", "Total"];
-      const body = (prescription.items || []).map((it) => [
-        it.product?.product_name ?? it.medicine_name ?? "-",
-        it.dose ?? "-",
-        it.frequency ?? "-",
-        it.quantity ?? (it.qty ?? 0),
-        it.unit_price ?? "-",
-        it.total_price ?? (it.quantity && it.unit_price ? Number(it.quantity * it.unit_price) : "-"),
-      ]);
-      const aoa = [
-        ["Prescription No", prescription.prescription_no ?? prescription.billing_no ?? "-"],
-        ["Patient", prescription.patient_name ?? prescription.customer_name ?? "-"],
-        ["Doctor", prescription.doctor_name ?? "-"],
-        ["Date", prescription.prescription_date ? new Date(prescription.prescription_date).toLocaleString() : "-"],
-        [],
-        header,
-        ...body,
-        [],
-        ["Subtotal", prescription.subtotal_amount ?? prescription.subtotal ?? 0],
-        ["Discount", prescription.discount_amount ?? 0],
-        ["Tax", prescription.tax_amount ?? 0],
-        ["Total", prescription.total_amount ?? prescription.total ?? 0],
-      ];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, "Prescription");
-      XLSX.writeFile(wb, `${prescription.prescription_no ?? "prescription"}.xlsx`);
-      toast.success("Prescription Excel downloaded");
-    } catch (err) {
-      console.error("Prescription Excel failed:", err);
-      toast.error("Failed to export prescription Excel");
-    }
-  };
 
   return (
-    <div className="p-2 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg">
-      {loading && <Loading />}
-
+    <div className="p-2 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
-              <CalendarRange size={20} className="text-gray-600" />
-            </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold">Prescriptions</h2>
-              <p className="text-xs text-gray-500">Manage prescriptions — search, filter, and export</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white shadow-sm rounded-sm flex items-center justify-center border border-gray-200">
+            <ClipboardCheck size={20} className="text-gray-600" />
+          </div>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold">Prescriptions</h2>
+            <p className="text-xs text-gray-500">View, filter and manage all prescriptions</p>
           </div>
         </div>
-
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <SearchIcon className="absolute left-3 top-2.5 text-gray-400" size={16} />
-            <Input
-              type="search"
-              placeholder="Search patient, doctor, prescription no"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="bg-white h-9 pl-9 text-sm"
-            />
+            <Input placeholder="Search patient or doctor..." value={search} onChange={e => { setSearch(e.target.value); setCurrentPage(1); }} className="bg-white h-9 pl-9 text-sm" />
           </div>
-
-          <Select
-            value={filterStatus || "all"}
-            onValueChange={(value) => {
-              setFilterStatus(value === "all" ? "" : value);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="h-9 w-full sm:w-auto text-sm border border-gray-200 bg-white rounded-md shadow-sm hover:bg-gray-50">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-md shadow-md border border-gray-100 bg-white text-sm">
+          <Select value={filterStatus || "all"} onValueChange={v => { setFilterStatus(v === "all" ? "" : v); setCurrentPage(1); }}>
+            <SelectTrigger className="h-9 w-[140px] text-sm bg-white border-gray-200"><SelectValue placeholder="All Status" /></SelectTrigger>
+            <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="dispensed">Dispensed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
-            onClick={() => fetchPrescriptions(1)}
-          >
+          <Button className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9" onClick={() => fetchPrescriptions(1)}>
             <RefreshCw size={14} />
           </Button>
         </div>
       </div>
 
-      {/* Table (desktop) */}
+      {/* Table */}
       <div className="flex-1 overflow-y-auto">
-        <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
-            <div className="min-w-[700px]">
-              <table className="w-full table-auto border-collapse">
+        {loading ? <div className="flex justify-center py-20"><Loading /></div> : (
+          <>
+            {/* Desktop */}
+            <div className="hidden md:block overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
+              <table className="w-full table-auto border-collapse min-w-[750px]">
                 <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
                   <tr>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">No</th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Prescription</th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Patient</th>
-                    <th
-                      className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("prescription_date")}
-                      title={`Sort by ${sortBy === "prescription_date" && sortOrder === "ASC" ? "descending" : "ascending"}`}
-                    >
-                      Date{" "}
-                      {sortBy === "prescription_date" ? (
-                        sortOrder === "ASC" ? <ChevronUp size={12} /> : <ChevronDown size={12} />
-                      ) : (
-                        ""
-                      )}
-                    </th>
-                    <th
-                      className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467] cursor-pointer"
-                      onClick={() => toggleSort("total_amount")}
-                    >
-                      Total {sortBy === "total_amount" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Doctor</th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Status</th>
-                    <th className="px-4 py-3 text-center text-[10px] font-semibold text-[#475467]">Actions</th>
+                    {["#", "Patient", "Doctor", "Date", "Medicines", "Total", "Status", "Actions"].map((h, i) => (
+                      <th key={i} className={`px-4 py-3 text-left text-[12px] font-semibold text-[#475467] ${h === "Date" || h === "Total" ? "cursor-pointer" : ""}`}
+                        onClick={() => h === "Date" ? toggleSort("prescription_date") : h === "Total" ? toggleSort("total_amount") : null}>
+                        {h}
+                        {h === "Date" && sortBy === "prescription_date" && (sortOrder === "ASC" ? <ChevronUp size={11} className="inline ml-1" /> : <ChevronDown size={11} className="inline ml-1" />)}
+                        {h === "Total" && sortBy === "total_amount" && (sortOrder === "ASC" ? <ChevronUp size={11} className="inline ml-1" /> : <ChevronDown size={11} className="inline ml-1" />)}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-
                 <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan={8} className="py-4 text-center text-gray-500 text-xs">Loading prescriptions...</td>
-                    </tr>
-                  ) : displayItems.length > 0 ? (
-                    displayItems.map((item, idx) => (
-                      <tr key={item.id ?? idx} className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100">
-                        <td className="px-4 py-3 text-center text-[10px]">{(currentPage - 1) * limit + idx + 1}</td>
-                        <td className="px-4 py-3 text-center text-[10px] font-medium">{item.prescription_no}</td>
-                        <td className="px-4 py-3 text-center text-[10px]">{item.patient_name || "—"}</td>
-                        <td className="px-4 py-3 text-center text-[10px]">{formatDate(item.prescription_date)}</td>
-                        <td className="px-4 py-3 text-center text-[10px]">₹{item.total_amount ?? 0}</td>
-                        <td className="px-4 py-3 text-center text-[10px]">{item.doctor_name || "—"}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${item.status === "pending" ? "bg-yellow-100 text-yellow-700" : item.status === "paid" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{item.status}</span>
+                  {displayItems.length > 0 ? displayItems.map((rx, idx) => {
+                    const patName = rx.patient ? `${rx.patient.first_name ?? ""} ${rx.patient.last_name ?? ""}`.trim() : rx.patient_name ?? "—";
+                    const drName = rx.doctor?.doctor_name ?? rx.doctor_name ?? "—";
+                    return (
+                      <tr key={rx.id ?? idx} className="border-t border-gray-100 hover:bg-[#FBFBFF] transition-colors">
+                        <td className="px-4 py-3 text-[12px] text-gray-500">{(currentPage - 1) * limit + idx + 1}</td>
+                        <td className="px-4 py-3 text-[12px] font-medium text-gray-800">{patName}</td>
+                        <td className="px-4 py-3 text-[12px] text-gray-600">{drName}</td>
+                        <td className="px-4 py-3 text-[12px] text-gray-600">{rx.prescription_date ? dayjs(rx.prescription_date).format("DD MMM YYYY") : "—"}</td>
+                        <td className="px-4 py-3 text-[12px] text-gray-600">{Array.isArray(rx.items) ? rx.items.length : "—"}</td>
+                        <td className="px-4 py-3 text-[12px] text-gray-600">₹{rx.total_amount ?? rx.grand_total ?? computeTotal(rx.items)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${statusColor(rx.status)}`}>{rx.status ?? "—"}</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => handleView(item)}>
-                              <Eye size={14} />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
-                              <Trash2 size={14} />
-                            </Button>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-1">
+                            <Button variant="outline" size="icon" className="h-7 w-7 hover:bg-indigo-50 hover:text-indigo-600" onClick={() => handleView(rx)}><Eye size={13} /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600" onClick={() => exportPDF(rx)}><FileText size={13} /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(rx.id)}><Trash2 size={13} /></Button>
                           </div>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={8} className="py-4 text-center text-gray-500 text-[10px]">No prescriptions found.</td>
-                    </tr>
+                    );
+                  }) : (
+                    <tr><td colSpan={8} className="py-10 text-center text-gray-400 text-xs">No prescriptions found.</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
 
-        {/* Mobile card view */}
-        <div className="md:hidden space-y-3 mt-3">
-          {loading ? (
-            <p className="text-center text-gray-500 text-xs">Loading prescriptions...</p>
-          ) : displayItems.length > 0 ? (
-            displayItems.map((item) => (
-              <article key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
-                <div className="flex justify-between items-start mb-2 gap-2">
-                  <div>
-                    <p className="font-semibold text-[#0E1680] text-sm">{item.prescription_no}</p>
-                    <p className="text-xs text-gray-600 mt-1">{item.patient_name || "—"}</p>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-1">
-                    <span className={`px-2 py-0.5 text-[11px] rounded-full ${item.status === "pending" ? "bg-yellow-100 text-yellow-700" : item.status === "paid" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{item.status}</span>
-                    <span className="text-[11px] text-gray-500">{formatDate(item.prescription_date)}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                  <div>
-                    <div className="text-[11px] text-gray-500">Doctor</div>
-                    <div className="text-sm">{item.doctor_name || "—"}</div>
-                  </div>
-
-                  <div>
-                    <div className="text-[11px] text-gray-500">Items</div>
-                    <div className="text-sm">{item.med_count ?? 0}</div>
-                  </div>
-
-                  <div className="col-span-2">
-                    <div className="text-[11px] text-gray-500">Total</div>
-                    <div className="text-sm">₹{item.total_amount ?? 0}</div>
-                  </div>
-
-                  <div className="col-span-2">
-                    <div className="flex gap-2">
-                      <Button className="bg-[#0E1680] text-white w-full text-sm" onClick={() => handleView(item)}>View</Button>
-                      <Button variant="ghost" className="w-14" onClick={() => handleDelete(item.id)}><Trash2 /></Button>
+            {/* Mobile */}
+            <div className="md:hidden space-y-3 mt-2">
+              {displayItems.length > 0 ? displayItems.map((rx) => {
+                const patName = rx.patient ? `${rx.patient.first_name ?? ""} ${rx.patient.last_name ?? ""}`.trim() : rx.patient_name ?? "—";
+                return (
+                  <article key={rx.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-semibold text-[#0E1680] text-sm">{patName}</p>
+                        <p className="text-xs text-gray-500">Dr. {rx.doctor?.doctor_name ?? rx.doctor_name ?? "—"}</p>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${statusColor(rx.status)}`}>{rx.status ?? "—"}</span>
                     </div>
-                  </div>
-                </div>
-              </article>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 text-xs">No prescriptions found.</p>
-          )}
-        </div>
+                    <div className="grid grid-cols-2 gap-1 text-xs text-gray-600 mb-3">
+                      <div><span className="text-gray-400">Date: </span>{rx.prescription_date ? dayjs(rx.prescription_date).format("DD MMM YYYY") : "—"}</div>
+                      <div><span className="text-gray-400">Total: </span>₹{rx.total_amount ?? "0"}</div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button className="flex-1 h-8 text-xs bg-[#506EE4] text-white" onClick={() => handleView(rx)}>View</Button>
+                      <Button variant="outline" className="h-8 text-xs" onClick={() => exportPDF(rx)}><FileText size={13} /></Button>
+                      <Button variant="outline" className="h-8 text-xs text-red-600 border-red-200" onClick={() => handleDelete(rx.id)}><Trash2 size={13} /></Button>
+                    </div>
+                  </article>
+                );
+              }) : <p className="text-center text-gray-400 text-xs py-6">No prescriptions found.</p>}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
-        <p className="text-xs text-gray-500">Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} prescriptions</p>
-
+        <p className="text-xs text-gray-500">Showing {total === 0 ? 0 : startIndex}–{endIndex} of {total}</p>
         <div className="flex items-center gap-2">
-          <Select value={String(limit)} onValueChange={(value) => { setLimit(Number(value)); setCurrentPage(1); }}>
-            <SelectTrigger className="h-8 w-[110px] text-xs border border-gray-200 bg-white rounded shadow-sm">
-              <SelectValue placeholder="Items per page" />
-            </SelectTrigger>
-            <SelectContent className="rounded-md shadow-md border border-gray-100 bg-white text-xs">
-              <SelectItem value="5">5 / page</SelectItem>
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="20">20 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
+          <Select value={String(limit)} onValueChange={v => { setLimit(Number(v)); setCurrentPage(1); }}>
+            <SelectTrigger className="h-8 w-[110px] text-xs bg-white"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[5, 10, 20, 50].map(n => <SelectItem key={n} value={String(n)}>{n} / page</SelectItem>)}
             </SelectContent>
           </Select>
-
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs"><ChevronLeft /></Button>
-
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <Button key={i} size="sm" variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)} className={`text-xs ${currentPage === i + 1 ? "bg-[#0E1680] text-white" : ""}`}>
-                {i + 1}
-              </Button>
-            ))}
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}><ChevronLeft size={14} /></Button>
+          <div className="flex gap-1">
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              const page = totalPages <= 5 ? i + 1 : currentPage <= 3 ? i + 1 : currentPage >= totalPages - 2 ? totalPages - 4 + i : currentPage - 2 + i;
+              return (
+                <Button key={page} size="sm" variant={currentPage === page ? "default" : "outline"} onClick={() => setCurrentPage(page)} className={`text-xs ${currentPage === page ? "bg-[#0E1680] text-white" : ""}`}>{page}</Button>
+              );
+            })}
           </div>
-
-          <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs"><ChevronRight /></Button>
+          <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}><ChevronRight size={14} /></Button>
         </div>
       </div>
 
-      {/* View Modal */}
+
+      {/* View / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-8">
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-6 px-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => { setModalOpen(false); setSelected(null); }} />
-          <div className="relative bg-white rounded-xl shadow-xl w-[92%] md:w-4/5 lg:w-3/4 z-20 overflow-auto max-h-[85vh]">
-            <div className="flex items-center justify-between p-4 border-b gap-4">
+          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-3xl z-10 overflow-auto max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b gap-4 flex-wrap">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-[#0ea5a4] flex items-center justify-center text-white font-bold">
-                  {(selected?.patient_name || "P").split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase()}
+                <div className="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                  {(selected?.patient ? `${selected.patient.first_name ?? ""}` : selected?.patient_name ?? "P").charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-bold text-sm truncate">{selected?.patient_name ?? "-"}</div>
-                  <div className="text-xs text-gray-500">
-                    Prescription <strong className="text-gray-700">{selected?.prescription_no ?? selected?.billing_no ?? "-"}</strong> • {selected?.prescription_date ? new Date(selected.prescription_date).toLocaleString() : "—"}
-                  </div>
+                  <p className="font-bold text-sm text-gray-800 truncate">
+                    {selected?.patient ? `${selected.patient.first_name ?? ""} ${selected.patient.last_name ?? ""}`.trim() : selected?.patient_name ?? "—"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Dr. {selected?.doctor?.doctor_name ?? selected?.doctor_name ?? "—"} •{" "}
+                    {selected?.prescription_date ? dayjs(selected.prescription_date).format("DD MMM YYYY") : "—"}
+                  </p>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1">
-                  <label className="text-xs text-gray-500 mr-1">Payment</label>
-                  <select value={modalPaymentMethod} onChange={(e) => setModalPaymentMethod(e.target.value)} className="h-9 px-2 border rounded bg-white text-sm">
-                    <option value="cash">Cash</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="debit_card">Debit Card</option>
-                    <option value="upi">UPI</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-1">
-                  <label className="text-xs text-gray-500 mr-1">Status</label>
-                  <select value={modalStatus} onChange={(e) => setModalStatus(e.target.value)} className="h-9 px-2 border rounded bg-white text-sm">
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
+                  <label className="text-xs text-gray-500">Status</label>
+                  <select value={modalStatus} onChange={e => setModalStatus(e.target.value)} className="h-8 px-2 border rounded bg-white text-xs">
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="dispensed">Dispensed</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
-
-                <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={saveModalChanges} disabled={modalLoading}>Save</Button>
-
-                <Button className="h-9 flex items-center gap-2 text-sm" onClick={() => exportPrescriptionPDF(selected)}>
-                  <FileText size={14} /> PDF
-                </Button>
-
-                <Button variant="ghost" className="h-9" onClick={() => { setModalOpen(false); setSelected(null); }}>Close</Button>
+                <Button variant="outline" className="h-8 text-xs" onClick={saveStatus} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+                <Button className="h-8 text-xs bg-[#0E1680] text-white" onClick={() => exportPDF(selected)}><FileText size={13} className="mr-1" />PDF</Button>
+                <Button variant="ghost" className="h-8 text-xs" onClick={() => { setModalOpen(false); setSelected(null); }}>Close</Button>
               </div>
             </div>
 
+            {/* Modal Body */}
             <div className="p-4">
               {modalLoading ? (
-                <div className="text-center py-12">Loading...</div>
-              ) : (
+                <div className="flex justify-center py-12"><Loading /></div>
+              ) : selected ? (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <div className="text-xs text-gray-500">Patient</div>
-                      <div className="font-semibold">{selected?.patient_name ?? "-"}</div>
-                      <div className="text-xs text-gray-500 mt-2">Doctor</div>
-                      <div className="font-semibold">{selected?.doctor_name ?? "-"}</div>
+                  {/* Info grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5 text-xs">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-gray-400 mb-1">Patient</p>
+                      <p className="font-semibold text-gray-800">{selected.patient ? `${selected.patient.first_name ?? ""} ${selected.patient.last_name ?? ""}`.trim() : selected.patient_name ?? "—"}</p>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500">Status</div>
-                      <div className="font-semibold">{(selected?.status || "unknown").toString()}</div>
-
-                      <div className="text-xs text-gray-500 mt-2">Totals</div>
-                      <div className="font-semibold">₹{selected?.total_amount ?? selected?.total ?? "0.00"}</div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-gray-400 mb-1">Doctor</p>
+                      <p className="font-semibold text-gray-800">{selected.doctor?.doctor_name ?? selected.doctor_name ?? "—"}</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-gray-400 mb-1">Status</p>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${statusColor(selected.status)}`}>{selected.status ?? "—"}</span>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-gray-400 mb-1">Total Amount</p>
+                      <p className="font-bold text-gray-800">₹{computeTotal(selected.items)}</p>
                     </div>
                   </div>
 
-                  <div className="mb-4">
-                    <div className="font-semibold mb-2">Medicines</div>
-                    <div className="overflow-auto border rounded-md">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-xs">Medicine</th>
-                            <th className="px-3 py-2 text-left text-xs">Dose</th>
-                            <th className="px-3 py-2 text-left text-xs">Freq</th>
-                            <th className="px-3 py-2 text-right text-xs">Qty</th>
-                            <th className="px-3 py-2 text-right text-xs">Unit</th>
-                            <th className="px-3 py-2 text-right text-xs">Total</th>
+                  {/* Notes */}
+                  {selected.notes && (
+                    <div className="mb-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-800">
+                      <span className="font-semibold">Notes: </span>{selected.notes}
+                    </div>
+                  )}
+
+                  {/* Medicines table */}
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Medicines</p>
+                  <div className="overflow-x-auto border rounded-lg">
+                    <table className="w-full text-xs">
+                      <thead className="bg-[#F6F7FF]">
+                        <tr>
+                          {["Medicine", "Dose", "Frequency", "Duration", "Qty", "Unit Price", "Total"].map(h => (
+                            <th key={h} className="px-3 py-2 text-left font-semibold text-[#475467]">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(selected.items ?? []).length === 0 ? (
+                          <tr><td colSpan={7} className="py-6 text-center text-gray-400">No medicines listed</td></tr>
+                        ) : (selected.items ?? []).map((it, idx) => (
+                          <tr key={idx} className="border-t border-gray-50 hover:bg-gray-50">
+                            <td className="px-3 py-2 font-medium">{it.product?.product_name ?? it.medicine_name ?? "—"}</td>
+                            <td className="px-3 py-2">{it.dosage ?? it.dose ?? "—"}</td>
+                            <td className="px-3 py-2">{it.frequency ?? "—"}</td>
+                            <td className="px-3 py-2">{it.duration ?? "—"}</td>
+                            <td className="px-3 py-2 text-right">{it.quantity ?? "—"}</td>
+                            <td className="px-3 py-2 text-right">₹{it.unit_price ?? "—"}</td>
+                            <td className="px-3 py-2 text-right font-medium">₹{it.total_price ?? (it.quantity && it.unit_price ? (it.quantity * it.unit_price).toFixed(2) : "—")}</td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {(selected?.items || []).length === 0 ? (
-                            <tr>
-                              <td colSpan={6} className="p-6 text-center text-gray-500">No medicines listed.</td>
-                            </tr>
-                          ) : (
-                            (selected.items || []).map((it, idx) => (
-                              <tr key={it.id ?? idx} className="border-t">
-                                <td className="px-3 py-2 text-xs">{it.product?.product_name ?? it.medicine_name ?? "-"}</td>
-                                <td className="px-3 py-2 text-xs">{it.dose ?? "-"}</td>
-                                <td className="px-3 py-2 text-xs">{it.frequency ?? "-"}</td>
-                                <td className="px-3 py-2 text-right text-xs">{it.quantity ?? it.qty ?? 0}</td>
-                                <td className="px-3 py-2 text-right text-xs">{it.unit_price ? `₹${it.unit_price}` : "-"}</td>
-                                <td className="px-3 py-2 text-right text-xs">{it.total_price ? `₹${it.total_price}` : (it.quantity && it.unit_price ? `₹${(it.quantity * it.unit_price).toFixed(2)}` : "-")}</td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
 
-                  <div className="flex justify-end">
-                    <div className="w-full md:w-1/3">
-                      <div className="flex justify-between text-sm text-gray-600"><div>Subtotal</div><div>₹{selected?.subtotal_amount ?? selected?.subtotal ?? "0.00"}</div></div>
-                      <div className="flex justify-between text-sm text-gray-600"><div>Discount</div><div>₹{selected?.discount_amount ?? "0.00"}</div></div>
-                      <div className="flex justify-between text-sm text-gray-600"><div>Tax</div><div>₹{selected?.tax_amount ?? "0.00"}</div></div>
-                      <div className="flex justify-between text-base font-bold mt-2 bg-yellow-50 rounded p-2"><div>Total</div><div>₹{selected?.total_amount ?? selected?.total ?? "0.00"}</div></div>
+                  {/* Totals */}
+                  <div className="mt-4 flex justify-end">
+                    <div className="text-xs space-y-1 text-right min-w-[180px]">
+                      <div className="flex justify-between gap-8 font-bold text-sm text-gray-800 border-t pt-1">
+                        <span>Total</span>
+                        <span>₹{computeTotal(selected.items)}</span>
+                      </div>
                     </div>
                   </div>
                 </>
-              )}
+              ) : <p className="text-center text-gray-400 py-8">No data</p>}
             </div>
           </div>
         </div>

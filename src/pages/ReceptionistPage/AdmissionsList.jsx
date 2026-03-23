@@ -13,6 +13,9 @@ import {
   X,
   ChevronUp,
   ChevronDown,
+  FlaskConical,
+  FolderOpen,
+  ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -215,7 +218,7 @@ export default function AdmissionsList() {
       </motion.div>
 
       {/* Table (Desktop) */}
-      <div className="hidden md:block flex-1 overflow-y-auto">
+      <div className="hidden lg:block flex-1 overflow-y-auto">
         <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
           <table className="w-full table-auto border-collapse">
             <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
@@ -286,16 +289,37 @@ export default function AdmissionsList() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-[12px] text-gray-700">
-                      {item.status !== "discharged" ? (
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <button
-                          onClick={() => handleDischarge(item.id)}
-                          className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                          onClick={() => navigate(`/labtestorder/${item.patient_id}?admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-blue-600 hover:bg-blue-50 border border-blue-200"
+                          title="Lab Test"
                         >
-                          <LogOut size={14} /> Discharge
+                          <FlaskConical size={12} /> Lab Test
                         </button>
-                      ) : (
-                        <span className="text-gray-400 italic">—</span>
-                      )}
+                        <button
+                          onClick={() => navigate(`/records/patient/${item.patient_id}?admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
+                          title="Records"
+                        >
+                          <FolderOpen size={12} /> Records
+                        </button>
+                        <button
+                          onClick={() => navigate(`/prescription/${item.patient_id}?admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-green-600 hover:bg-green-50 border border-green-200"
+                          title="Prescription"
+                        >
+                          <ClipboardList size={12} /> Prescription
+                        </button>
+                        {item.status !== "discharged" && (
+                          <button
+                            onClick={() => handleDischarge(item.id)}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-red-600 hover:bg-red-50 border border-red-200"
+                          >
+                            <LogOut size={12} /> Discharge
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -313,7 +337,111 @@ export default function AdmissionsList() {
           </table>
         </div>
       </div>
+      <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Patient", "Date", "Ward", "Status"].map((h, i) => (
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
 
+    <tbody>
+      {displayAdmissions.map((item) => (
+        <tr key={item.id} className="border-t">
+          <td className="px-3 py-2 text-xs">
+            {item.patient?.first_name}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {formatDate(item.admission_date)}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.ward?.name}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.status}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+{/* Mobile View */}
+<div className="md:hidden space-y-3 mt-3">
+  {displayAdmissions.length > 0 ? (
+    displayAdmissions.map((item) => (
+      <div
+        key={item.id}
+        className="w-full border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
+      >
+        <h3 className="text-sm font-semibold text-gray-800">
+          {item.patient
+            ? `${item.patient.first_name} ${item.patient.last_name}`
+            : "—"}
+        </h3>
+
+        <p className="text-xs text-gray-600">
+          Code: {item.patient?.patient_code || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Date: {formatDate(item.admission_date)}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Ward: {item.ward?.name || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Room: {item.room?.room_no || "—"} / {item.bed?.bed_no || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Status: {item.status}
+        </p>
+
+        <div className="flex gap-2 mt-2 flex-wrap">
+          <button
+            onClick={() => navigate(`/labtestorder/${item.patient_id}?admission_id=${item.id}`)}
+            className="text-xs px-2 py-1 border rounded text-blue-600"
+          >
+            Lab
+          </button>
+
+          <button
+            onClick={() => navigate(`/records/patient/${item.patient_id}?admission_id=${item.id}`)}
+            className="text-xs px-2 py-1 border rounded text-indigo-600"
+          >
+            Records
+          </button>
+
+          <button
+            onClick={() => navigate(`/prescription/${item.patient_id}?admission_id=${item.id}`)}
+            className="text-xs px-2 py-1 border rounded text-green-600"
+          >
+            Rx
+          </button>
+
+          {item.status !== "discharged" && (
+            <button
+              onClick={() => handleDischarge(item.id)}
+              className="text-xs px-2 py-1 border rounded text-red-600"
+            >
+              Discharge
+            </button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No admissions found.
+    </p>
+  )}
+</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">

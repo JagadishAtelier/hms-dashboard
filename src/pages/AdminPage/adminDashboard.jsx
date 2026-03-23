@@ -166,7 +166,7 @@ export default function AdminDashboard() {
     >
       {/* ✅ Header */}
       <motion.div variants={slideRight}>
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div className="flex flex-col sm:flex-row md:flex-row justify-between md:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
               Admin Dashboard
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
         {/* Table */}
         <div className="overflow-x-auto">
           {recent_admitted.length > 0 ? (
-            <Table className="min-w-[600px]">
+            <Table className="min-w-[600px] md:min-w-[800px] lg:min-w-full">
               <TableHeader>
                 <TableRow className="bg-gray-50 hover:bg-gray-50">
                   <TableHead>ID</TableHead>

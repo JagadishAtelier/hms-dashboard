@@ -17,6 +17,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSidebar } from "@/components/Context/SidebarContext";
 import appointmentsService from "../../service/appointmentsService.js";
+import labTestOrderService from "../../service/labtestorderService.js";
+import prescriptionService from "../../service/prescriptionService.js";
 import { toast } from "sonner";
 import {
   Select,
@@ -44,6 +46,10 @@ function AppointmentsList() {
   const [appointments, setAppointments] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  // map of appointment_id -> true for appointments that already have a lab test order
+  const [labTestMap, setLabTestMap] = useState({});
+  // map of appointment_id -> true for appointments that already have a prescription
+  const [prescriptionMap, setPrescriptionMap] = useState({});
 
   // Animation control: key increments when loading finishes so animations replay after loader
   const [animateKey, setAnimateKey] = useState(0);
@@ -160,6 +166,37 @@ function AppointmentsList() {
     }
   };
 
+  // After appointments load, check which ones already have a lab test order
+  const checkLabTestOrders = async (appts) => {
+    if (!appts?.length) return;
+    const results = await Promise.allSettled(
+      appts.map((a) => labTestOrderService.getLabTestOrderByAppointmentId(a.id))
+    );
+    const map = {};
+    results.forEach((r, i) => {
+      const data = r.value?.data ?? r.value;
+      if (r.status === "fulfilled" && data?.id) {
+        map[appts[i].id] = true;
+      }
+    });
+    setLabTestMap(map);
+  };
+
+  const checkPrescriptions = async (appts) => {
+    if (!appts?.length) return;
+    const results = await Promise.allSettled(
+      appts.map((a) => prescriptionService.getPrescriptionByAppointmentId(a.id))
+    );
+    const map = {};
+    results.forEach((r, i) => {
+      const data = r.value?.data ?? r.value;
+      if (r.status === "fulfilled" && data?.id) {
+        map[appts[i].id] = true;
+      }
+    });
+    setPrescriptionMap(map);
+  };
+
   // Action: Take for Consultation -> navigate to overview with appointmentId & set sidebar
   const handleTakeForConsultation = (appointment) => {
     const patientId = appointment?.patient?.id || appointment?.patient_id;
@@ -215,6 +252,12 @@ function AppointmentsList() {
 
   // Derived UI-friendly appointments (ensure patient fields exist)
   const displayAppointments = useMemo(() => appointments || [], [appointments]);
+
+  useEffect(() => {
+    if (appointments.length) checkLabTestOrders(appointments);
+    if (appointments.length) checkPrescriptions(appointments);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appointments]);
 
   // Small helper to format date
   const formatDate = (iso) => {
@@ -362,7 +405,7 @@ function AppointmentsList() {
 
       {/* Table (desktop) */}
       <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 overflow-y-auto">
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
             <div className="min-w-[600px]">
               <table className="w-full table-auto border-collapse">
@@ -385,6 +428,7 @@ function AppointmentsList() {
                     <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Doctor</th>
                     <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Visit</th>
                     <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Status</th>
+                    <th className="px-4 py-3 text-center text-[13px] font-semibold text-[#475467]">Actions</th>
                   </tr>
                 </thead>
 
@@ -408,6 +452,36 @@ function AppointmentsList() {
                             {item.status}
                           </span>
                         </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                              className="px-3 py-1 text-[11px] rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
+                            >
+                              Records
+                            </button>
+                            <button
+                              onClick={() => navigate(`/labtestorder/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                              className={`px-3 py-1 text-[11px] rounded-md font-medium border ${
+                                labTestMap[item.id]
+                                  ? "bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100"
+                                  : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                              }`}
+                            >
+                              {labTestMap[item.id] ? "Edit Lab Test" : "Lab Test"}
+                            </button>
+                            <button
+                              onClick={() => navigate(`/prescription/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                              className={`px-3 py-1 text-[11px] rounded-md font-medium border ${
+                                prescriptionMap[item.id]
+                                  ? "bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100"
+                                  : "bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100"
+                              }`}
+                            >
+                              {prescriptionMap[item.id] ? "Edit Prescription" : "Prescription"}
+                            </button>
+                          </div>
+                        </td>
                       </motion.tr>
                     ))
                   ) : (
@@ -418,6 +492,36 @@ function AppointmentsList() {
                 </motion.tbody>
               </table>
             </div>
+            <div className="hidden md:block lg:hidden overflow-x-auto bg-white border rounded-md mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Appt No", "Patient", "Date", "Status"].map((h, i) => (
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {displayAppointments.map((item) => (
+        <tr key={item.id} className="border-t">
+          <td className="px-3 py-2 text-xs">{item.appointment_no}</td>
+          <td className="px-3 py-2 text-xs">
+            {item.patient?.first_name}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {new Date(item.scheduled_at).toLocaleDateString()}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.status}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
           </div>
         </div>
 
@@ -467,6 +571,32 @@ function AppointmentsList() {
                     <Button className="bg-[#0E1680] text-white w-full mt-3 text-sm" onClick={() => handleTakeForConsultation(item)}>
                       Consultation
                     </Button>
+                    <button
+                      onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                      className="w-full mt-2 px-3 py-2 text-sm rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
+                    >
+                      Records
+                    </button>
+                    <button
+                      onClick={() => navigate(`/labtestorder/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                      className={`w-full mt-2 px-3 py-2 text-sm rounded-md font-medium border ${
+                        labTestMap[item.id]
+                          ? "bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100"
+                          : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                      }`}
+                    >
+                      {labTestMap[item.id] ? "Edit Lab Test" : "Lab Test"}
+                    </button>
+                    <button
+                      onClick={() => navigate(`/prescription/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
+                      className={`w-full mt-2 px-3 py-2 text-sm rounded-md font-medium border ${
+                        prescriptionMap[item.id]
+                          ? "bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100"
+                          : "bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100"
+                      }`}
+                    >
+                      {prescriptionMap[item.id] ? "Edit Prescription" : "Prescription"}
+                    </button>
                   </div>
                 </div>
               </motion.article>

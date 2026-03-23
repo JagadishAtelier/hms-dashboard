@@ -352,7 +352,7 @@ export default function StockList() {
 
       {/* Table (desktop) */}
       <div className="flex-1 overflow-y-auto">
-        <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
+        <div className="hidden md:block overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
           <div className="min-w-[600px]">
             <table className="w-full table-auto border-collapse">
               <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
@@ -421,7 +421,7 @@ export default function StockList() {
             <p className="text-center text-gray-500 text-xs">Loading...</p>
           ) : displayItems.length > 0 ? (
             displayItems.map((row, idx) => (
-              <article key={row.id ?? idx} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+              <article key={row.id ?? idx} className="w-full bg-white rounded-lg shadow-sm border border-gray-200 p-3">
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div>
                     <p className="font-semibold text-[#0E1680] text-sm">
