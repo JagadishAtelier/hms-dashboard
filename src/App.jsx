@@ -77,6 +77,8 @@ import NurseCreate from "./pages/AdminPage/NurseCreate";
 import NurseDashboard from "./pages/NursePage/NurseDashboard";
 import PharmacistList from "./pages/AdminPage/PharmacistList";
 import PharmacistCreate from "./pages/AdminPage/PharmacistCreate";
+import SurgeriesList from "./pages/SurgeriesPage/SurgeriesList";
+import SurgeryForm from "./pages/SurgeriesPage/SurgeryForm";
 function App() {
   return (
     <SidebarProvider>
@@ -802,14 +804,10 @@ function App() {
               </AdminLayout>
             }
           />
-          <Route
-            path="/pharmacists/edit/:id"
-            element={
-              <AdminLayout>
-                <PharmacistCreate />
-              </AdminLayout>
-            }
-          />
+          <Route path="/pharmacists/edit/:id" element={<AdminLayout><PharmacistCreate /></AdminLayout>} />
+          <Route path="/surgeries" element={<AdminLayout><SurgeriesList /></AdminLayout>} />
+          <Route path="/surgeries/create" element={<AdminLayout><SurgeryForm /></AdminLayout>} />
+          <Route path="/surgeries/edit/:id" element={<AdminLayout><SurgeryForm /></AdminLayout>} />
         </Routes>
       </Router>
     </SidebarProvider>

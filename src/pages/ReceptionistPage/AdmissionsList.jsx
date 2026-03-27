@@ -16,6 +16,7 @@ import {
   FlaskConical,
   FolderOpen,
   ClipboardList,
+  Scissors,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -310,6 +311,13 @@ export default function AdmissionsList() {
                           title="Prescription"
                         >
                           <ClipboardList size={12} /> Prescription
+                        </button>
+                        <button
+                          onClick={() => navigate(`/surgeries/create?patient_id=${item.patient_id}&admission_id=${item.id}`)}
+                          className="flex items-center gap-1 px-2 py-1 rounded text-purple-600 hover:bg-purple-50 border border-purple-200"
+                          title="Surgery"
+                        >
+                          <Scissors size={12} /> Surgery
                         </button>
                         {item.status !== "discharged" && (
                           <button
