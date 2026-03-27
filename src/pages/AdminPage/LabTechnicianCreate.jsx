@@ -150,8 +150,8 @@ useEffect(() => {
   fetchLabTech();
 }, [id]);
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h2>
+    <div className="md:p-6 max-w-4xl mx-auto">
+      <h2 className="text-lg font-semibold text-gray-800 border-b pb-2">
   {isEdit ? "Edit Lab Technician" : "Create Lab Technician"}
 </h2>
 
@@ -164,7 +164,7 @@ useEffect(() => {
           Personal Information
         </h3>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <label>
             First Name *
             <Input
@@ -228,7 +228,7 @@ useEffect(() => {
           Lab Technician Info
         </h3>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <label>
             Technician Name *
             <Input
@@ -276,7 +276,7 @@ useEffect(() => {
           Account Information
         </h3>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <label>
             Email *
             <Input
@@ -328,7 +328,7 @@ useEffect(() => {
           Emergency Contact
         </h3>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <Input
             placeholder="Name"
             value={form.staff.emergency_contact.name}
@@ -353,7 +353,7 @@ useEffect(() => {
         </div>
 
         {/* BUTTONS */}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col md:flex-row justify-end gap-3">
           <Button variant="outline" onClick={() => navigate("/labtechnician")}>
             Cancel
           </Button>

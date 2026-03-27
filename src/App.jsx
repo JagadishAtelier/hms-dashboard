@@ -63,6 +63,8 @@ import StockList from "./pages/AdminPage/StockList";
 import AdminDashboard from "./pages/AdminPage/adminDashboard";
 import LabTechnicianList from "./pages/AdminPage/LabTechnicianList";
 import LabTechnicianCreate from "./pages/AdminPage/LabTechnicianCreate";
+import AccountantList from "./pages/AdminPage/AccountantList.jsx";
+import AccountantCreate from "./pages/AdminPage/AccountantCreate.jsx";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";

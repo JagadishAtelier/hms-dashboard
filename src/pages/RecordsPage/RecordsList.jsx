@@ -169,6 +169,84 @@ const RecordRow = ({ record, onDelete }) => {
   );
 };
 
+const MobileRecordCard = ({ record, onDelete }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+      
+      {/* Header */}
+      <div
+        className="flex justify-between items-start cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div>
+          <p className="text-sm text-gray-500">{fmt(record.date)}</p>
+          <p className="font-semibold text-gray-800">
+            {record.patient?.first_name} {record.patient?.last_name}
+          </p>
+          <p className="text-xs text-gray-400">
+            {record.patient?.patient_code || "—"}
+          </p>
+        </div>
+
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-bold ${
+            record.is_active
+              ? "bg-emerald-100 text-emerald-600"
+              : "bg-gray-100 text-gray-500"
+          }`}
+        >
+          {record.status || (record.is_active ? "Active" : "Inactive")}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="mt-3 space-y-2 text-sm">
+        <p>
+          <span className="text-gray-500">Type:</span>{" "}
+          {record.record_type?.name || "—"}
+        </p>
+
+        <p className="truncate">
+          <span className="text-gray-500">Desc:</span>{" "}
+          {record.description || "No description"}
+        </p>
+
+        <p className="text-xs text-gray-400">
+          Created: {fmt(record.createdAt, true)}
+        </p>
+
+        {record.appointment && (
+          <p className="text-xs text-indigo-600">
+            Appt: {record.appointment.appointment_no}
+          </p>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={() => onDelete(record.id)}
+          className="h-8 px-3 text-xs rounded-md border border-red-200 bg-red-50 text-red-600"
+        >
+          Delete
+        </button>
+      </div>
+
+      {/* Expand Section */}
+      {expanded && (
+        <div className="mt-4 border-t pt-3 text-sm text-gray-700 space-y-2">
+          <p>
+            <span className="font-medium">Diagnosis:</span>{" "}
+            {record.diagnosis || "N/A"}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const RecordsList = ({ records, searchTerm, refreshRecords }) => {
   const filtered = records.filter((r) => {
     const name = `${r.patient?.first_name || ""} ${r.patient?.last_name || ""}`.toLowerCase();
@@ -189,25 +267,44 @@ const RecordsList = ({ records, searchTerm, refreshRecords }) => {
   };
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full text-sm text-left">
-        <thead className="border-b border-gray-200 bg-gray-50">
-          <tr>
-            {["Date", "Patient", "Record Type", "Description", "Created At", "Appointment", "Status", "Actions"].map((h) => (
-              <th key={h} className="h-10 px-4 font-semibold text-gray-700">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.length > 0 ? (
-            filtered.map((r) => <RecordRow key={r.id} record={r} onDelete={handleDelete} />)
-          ) : (
-            <tr><td colSpan="8" className="p-8 text-center text-gray-400">No records found.</td></tr>
-          )}
-        </tbody>
-      </table>
-      <div className="px-4 py-3 border-t border-gray-200 text-sm text-gray-500">
-        Showing {filtered.length} of {records.length} entries
+    <div>
+      <div className="w-full overflow-x-auto hidden md:block">
+        <table className="w-full text-sm text-left">
+          <thead className="border-b border-gray-200 bg-gray-50">
+            <tr>
+              {["Date", "Patient", "Record Type", "Description", "Created At", "Appointment", "Status", "Actions"].map((h) => (
+                <th key={h} className="h-10 px-4 font-semibold text-gray-700">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((r) => <RecordRow key={r.id} record={r} onDelete={handleDelete} />)
+            ) : (
+              <tr><td colSpan="8" className="p-8 text-center text-gray-400">No records found.</td></tr>
+            )}
+          </tbody>
+        </table>
+        <div className="px-4 py-3 border-t border-gray-200 text-sm text-gray-500">
+          Showing {filtered.length} of {records.length} entries
+        </div>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-4">
+        {filtered.length > 0 ? (
+          filtered.map((record) => (
+            <MobileRecordCard
+              key={record.id}
+              record={record}
+              onDelete={handleDelete}
+            />
+          ))
+        ) : (
+          <div className="p-6 text-center text-gray-400">
+            No records found.
+          </div>
+        )}
       </div>
     </div>
   );

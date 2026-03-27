@@ -465,7 +465,7 @@ export default function AppointmentsCreate() {
         </div>
 
         {/* Date + Slot */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">
               Available Date <span className="text-red-500">*</span>
@@ -613,7 +613,7 @@ export default function AppointmentsCreate() {
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-col md:flex-row gap-3 justify-end">
           <Button
             type="button"
             variant="outline"

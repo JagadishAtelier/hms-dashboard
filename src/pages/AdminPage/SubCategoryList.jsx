@@ -150,7 +150,7 @@ export default function SubCategoryList() {
   const categoryName = (rec) => rec?.category_name ?? rec?.category?.name ?? "—";
 
   return (
-    <div className="p-3 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg relative">
+    <div className="p-0 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg relative">
       {loading && <Loading />}
 
       {/* Header */}
@@ -170,7 +170,7 @@ export default function SubCategoryList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search
               className="absolute left-3 top-2.5 text-gray-400"
               size={16}
@@ -205,7 +205,7 @@ export default function SubCategoryList() {
           </Select>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] ms-auto lg:ms-0 hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAdd}
           >
             <Plus size={14} /> Add Subcategory

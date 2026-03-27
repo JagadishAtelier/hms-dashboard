@@ -169,7 +169,7 @@ export default function PatientsCreate() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="md:p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-semibold text-[#0E1680] mb-6 flex items-center gap-2">
         <UserCircle2 className="text-[#0E1680]" size={24} />
         {isEdit ? "Edit Patient" : "Add New Patient"}
@@ -460,7 +460,7 @@ export default function PatientsCreate() {
         </div>
 
         {/* ACTION BUTTONS */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex flex-col md:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
           <Button
             type="button"
             variant="outline"

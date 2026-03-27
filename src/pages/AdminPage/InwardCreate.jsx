@@ -353,7 +353,7 @@ export default function InwardCreate() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="md:p-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">{isEdit ? "Edit Inward" : "Create Inward"}</h2>
         <div className="flex items-center gap-2">
@@ -447,56 +447,194 @@ export default function InwardCreate() {
           </div>
 
           {/* Items table */}
-          <div className="overflow-x-auto border rounded-lg mt-4">
-            <table className="w-full text-sm border-collapse">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="border p-2">Name / Code</th>
-                  <th className="border p-2 w-28">Qty</th>
-                  <th className="border p-2 w-36">Unit Price</th>
-                  <th className="border p-2 w-24">Unit</th>
-                  <th className="border p-2 w-36">Expiry</th>
-                  <th className="border p-2 w-12"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {form.items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="border p-2">
-                      <Input value={item.product_name} onChange={(e) => handleItemChange(idx, "product_name", e.target.value)} placeholder="Product name" />
-                      <Input value={item.product_code} onChange={(e) => handleItemChange(idx, "product_code", e.target.value)} placeholder="Code (optional)" className="mt-2" />
-                    </td>
-
-                    <td className="border p-2">
-                      <Input type="number" value={item.quantity} onChange={(e) => handleItemChange(idx, "quantity", Number(e.target.value))} />
-                    </td>
-
-                    <td className="border p-2">
-                      <Input type="number" value={item.unit_price} onChange={(e) => handleItemChange(idx, "unit_price", Number(e.target.value))} />
-                    </td>
-
-                    <td className="border p-2">
-                      <Input value={item.unit} onChange={(e) => handleItemChange(idx, "unit", e.target.value)} placeholder="pcs/kg" />
-                    </td>
-
-                    <td className="border p-2">
-                      <Input type="date" value={item.expiry_date || ""} onChange={(e) => handleItemChange(idx, "expiry_date", e.target.value)} />
-                    </td>
-
-                    <td className="border p-2 text-center">
-                      <button type="button" onClick={() => removeItem(idx)} className="p-1"><Trash2 className="w-4 h-4 text-red-500" /></button>
-                    </td>
-                  </tr>
-                ))}
-
-                {form.items.length === 0 && (
+          {/* Items Section */}
+          <div className="mt-4">
+            {/* ================= DESKTOP TABLE ================= */}
+            <div className="hidden lg:block overflow-x-auto border rounded-lg">
+              <table className="w-full text-sm border-collapse">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan={6} className="text-center p-4 text-gray-500">No items added</td>
+                    <th className="border p-2">Name / Code</th>
+                    <th className="border p-2 w-28">Qty</th>
+                    <th className="border p-2 w-36">Unit Price</th>
+                    <th className="border p-2 w-24">Unit</th>
+                    <th className="border p-2 w-36">Expiry</th>
+                    <th className="border p-2 w-12"></th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-            {errors.items && <p className="text-red-500 text-sm mt-2 p-2">{errors.items}</p>}
+                </thead>
+
+                <tbody>
+                  {form.items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td className="border p-2">
+                        <Input
+                          value={item.product_name}
+                          onChange={(e) =>
+                            handleItemChange(idx, "product_name", e.target.value)
+                          }
+                          placeholder="Product name"
+                        />
+                        <Input
+                          value={item.product_code}
+                          onChange={(e) =>
+                            handleItemChange(idx, "product_code", e.target.value)
+                          }
+                          placeholder="Code"
+                          className="mt-2"
+                        />
+                      </td>
+
+                      <td className="border p-2">
+                        <Input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleItemChange(idx, "quantity", Number(e.target.value))
+                          }
+                        />
+                      </td>
+
+                      <td className="border p-2">
+                        <Input
+                          type="number"
+                          value={item.unit_price}
+                          onChange={(e) =>
+                            handleItemChange(idx, "unit_price", Number(e.target.value))
+                          }
+                        />
+                      </td>
+
+                      <td className="border p-2">
+                        <Input
+                          value={item.unit}
+                          onChange={(e) =>
+                            handleItemChange(idx, "unit", e.target.value)
+                          }
+                        />
+                      </td>
+
+                      <td className="border p-2">
+                        <Input
+                          type="date"
+                          value={item.expiry_date || ""}
+                          onChange={(e) =>
+                            handleItemChange(idx, "expiry_date", e.target.value)
+                          }
+                        />
+                      </td>
+
+                      <td className="border p-2 text-center">
+                        <button onClick={() => removeItem(idx)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ================= MOBILE CARDS ================= */}
+            <div className="lg:hidden space-y-4">
+              {form.items.map((item, idx) => (
+                <Card key={idx} className="p-4 space-y-3 shadow-sm">
+                  {/* Product Name */}
+                  <div>
+                    <label className="text-xs text-gray-500">Product Name</label>
+                    <Input
+                      value={item.product_name}
+                      onChange={(e) =>
+                        handleItemChange(idx, "product_name", e.target.value)
+                      }
+                      placeholder="Enter product name"
+                    />
+                  </div>
+
+                  {/* Product Code */}
+                  <div>
+                    <label className="text-xs text-gray-500">Product Code</label>
+                    <Input
+                      value={item.product_code}
+                      onChange={(e) =>
+                        handleItemChange(idx, "product_code", e.target.value)
+                      }
+                      placeholder="Optional"
+                    />
+                  </div>
+
+                  {/* Qty + Price */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500">Qty</label>
+                      <Input
+                        type="number"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          handleItemChange(idx, "quantity", Number(e.target.value))
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Unit Price</label>
+                      <Input
+                        type="number"
+                        value={item.unit_price}
+                        onChange={(e) =>
+                          handleItemChange(idx, "unit_price", Number(e.target.value))
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Unit + Expiry */}
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-gray-500">Unit</label>
+                      <Input
+                        value={item.unit}
+                        onChange={(e) =>
+                          handleItemChange(idx, "unit", e.target.value)
+                        }
+                        placeholder="pcs/kg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-gray-500">Expiry</label>
+                      <Input
+                        type="date"
+                        value={item.expiry_date || ""}
+                        onChange={(e) =>
+                          handleItemChange(idx, "expiry_date", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Delete */}
+                  <div className="flex justify-end">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeItem(idx)}
+                      className="flex items-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Remove
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+
+              {form.items.length === 0 && (
+                <p className="text-center text-gray-500">No items added</p>
+              )}
+            </div>
+
+            {errors.items && (
+              <p className="text-red-500 text-sm mt-2">{errors.items}</p>
+            )}
           </div>
 
           {/* Summary */}

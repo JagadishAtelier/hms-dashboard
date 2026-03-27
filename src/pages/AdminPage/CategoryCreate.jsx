@@ -120,7 +120,7 @@ export default function CategoryCreate() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="md:p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Category" : "Create Category"}
       </h2>
@@ -155,7 +155,7 @@ export default function CategoryCreate() {
               rows={5}
               className="mt-1 w-full resize-y px-3 py-2 border rounded-md text-sm"
             />
-            <div className="flex justify-between items-center mt-1">
+            <div className="flex flex-col md:flex-row justify-between md:items-center mt-1">
               <p className="text-xs text-gray-500">{(form.description || "").length} characters</p>
               <p className="text-xs text-gray-500">Displayed across product listings</p>
             </div>

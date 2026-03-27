@@ -32,7 +32,7 @@ import AdmissionsDonutChart from "@/components/AdmissionsDonutChart";
 import { Eye } from "lucide-react";
 import RevenueOverviewCard from "@/components/RevenueOverviewCard";
 import OpdAppointmentsTrend from "@/components/OpdAppointmentsTrend";
-import Loading from "../Loading"; 
+import Loading from "../Loading";
 import { motion } from "framer-motion"; // ✅ Import Framer Motion
 
 export default function AdminDashboard() {
@@ -159,14 +159,14 @@ export default function AdminDashboard() {
 
   return (
     <motion.div
-      className="p-3 sm:p-4 space-y-8"
+      className="p-0 lg:p-4 space-y-8"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}
     >
       {/* ✅ Header */}
       <motion.div variants={slideRight}>
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div className="flex flex-col sm:flex-row md:flex-row justify-between md:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
               Admin Dashboard
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
 
       {/* ✅ Recent Admissions Table */}
       <motion.div
-        className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200"
+        className="md:bg-white md:p-4 sm:p-6 rounded-xl md:shadow-sm md:border border-gray-200"
         variants={slideUp}
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -271,68 +271,137 @@ export default function AdminDashboard() {
         {/* Table */}
         <div className="overflow-x-auto">
           {recent_admitted.length > 0 ? (
-            <Table className="min-w-[600px]">
-              <TableHeader>
-                <TableRow className="bg-gray-50 hover:bg-gray-50">
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Admission Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+            <div className="hidden md:block">
+              <Table className="min-w-[600px] md:min-w-[800px] lg:min-w-full ">
+                <TableHeader>
+                  <TableRow className="bg-gray-50 hover:bg-gray-50">
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Reason</TableHead>
+                    <TableHead>Admission Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recent_admitted.map((item, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>{item.patient.patient_code}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              item.patient.avatar ||
+                              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj8LgZC5q9DKpw9Ueip9qKZM7I3A_1H0WyiA&s"
+                            }
+                            alt={item.patient.first_name}
+                            className="w-8 h-8 rounded-full object-cover border"
+                          />
+                          <span className="font-medium text-gray-800">
+                            {item.patient.first_name} {item.patient.last_name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{item.reason || "—"}</TableCell>
+                      <TableCell>
+                        {new Date(item.admission_date).toLocaleDateString(
+                          "en-GB",
+                          { day: "2-digit", month: "short", year: "numeric" }
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`${item.status === "admitted"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-600"
+                            } text-xs px-3 py-1 rounded-full font-semibold`}
+                        >
+                          {item.status === "admitted"
+                            ? "Admitted"
+                            : "Discharged"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          to={`/admission/${item.id}`}
+                          className="text-blue-600 hover:underline text-sm font-medium"
+                        >
+                          <Eye size={18} />
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              </div>
+              {/* ✅ Mobile Cards */}
+              <div className="grid gap-3 md:hidden">
                 {recent_admitted.map((item, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell>{item.patient.patient_code}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            item.patient.avatar ||
-                            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj8LgZC5q9DKpw9Ueip9qKZM7I3A_1H0WyiA&s"
-                          }
-                          alt={item.patient.first_name}
-                          className="w-8 h-8 rounded-full object-cover border"
-                        />
-                        <span className="font-medium text-gray-800">
-                          {item.patient.first_name} {item.patient.last_name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.reason || "—"}</TableCell>
-                    <TableCell>
-                      {new Date(item.admission_date).toLocaleDateString(
-                        "en-GB",
-                        { day: "2-digit", month: "short", year: "numeric" }
-                      )}
-                    </TableCell>
-                    <TableCell>
+                  <div
+                    key={idx}
+                    className="bg-white border rounded-lg p-4 shadow-sm"
+                  >
+                    {/* Top Row */}
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs text-gray-500">
+                        #{item.patient.patient_code}
+                      </span>
+
                       <Badge
-                        className={`${
-                          item.status === "admitted"
+                        className={`${item.status === "admitted"
                             ? "bg-green-100 text-green-700"
                             : "bg-red-100 text-red-600"
-                        } text-xs px-3 py-1 rounded-full font-semibold`}
+                          } text-xs px-2 py-1 rounded-full`}
                       >
-                        {item.status === "admitted"
-                          ? "Admitted"
-                          : "Discharged"}
+                        {item.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
+                    </div>
+
+                    {/* Patient Info */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <img
+                        src={
+                          item.patient.avatar ||
+                          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQj8LgZC5q9DKpw9Ueip9qKZM7I3A_1H0WyiA&s"
+                        }
+                        className="w-10 h-10 rounded-full border"
+                      />
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {item.patient.first_name} {item.patient.last_name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {item.reason || "No reason"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>
+                        <span className="font-medium">Date: </span>
+                        {new Date(item.admission_date).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Action */}
+                    <div className="mt-3 flex justify-end">
                       <Link
                         to={`/admission/${item.id}`}
-                        className="text-blue-600 hover:underline text-sm font-medium"
+                        className="text-blue-600"
                       >
                         <Eye size={18} />
                       </Link>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           ) : (
             <div className="text-gray-500 text-center py-6">
               No recent admissions found

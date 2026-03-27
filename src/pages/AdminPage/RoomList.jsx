@@ -159,7 +159,7 @@ export default function RoomList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
@@ -181,7 +181,7 @@ export default function RoomList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -204,7 +204,7 @@ export default function RoomList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
             onClick={() => fetchRooms(currentPage)}
           >
             <RefreshCw size={14} /> Refresh
@@ -333,6 +333,79 @@ export default function RoomList() {
           </table>
         </div>
       </div>
+      {/* Mobile / Tab View */}
+<div className="md:hidden flex flex-col gap-3">
+  {displayRooms.length > 0 ? (
+    displayRooms.map((r) => (
+      <div
+        key={r.id}
+        className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">
+            Room {r.room_no}
+          </h3>
+
+          <span
+            className={`px-2 py-1 text-xs rounded-full ${
+              r.is_active
+                ? "bg-green-100 text-green-700"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {r.is_active ? "Active" : "Inactive"}
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-600">
+          <strong>Ward:</strong> {r.ward?.name || "—"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Type:</strong> {r.room_type}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Capacity:</strong> {r.capacity}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          <strong>Price:</strong> ₹{r.price_per_day}
+        </p>
+
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleEditRoom(r.id)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          {r.is_active ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDeleteRoom(r.id)}
+            >
+              <Trash2 size={14} />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleRestoreRoom(r.id)}
+            >
+              <RotateCw size={14} />
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">No rooms found.</p>
+  )}
+</div>
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">

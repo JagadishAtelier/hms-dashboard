@@ -78,7 +78,7 @@ export default function PharmacistList() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -100,7 +100,8 @@ export default function PharmacistList() {
 
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
-        <div className="hidden md:block">
+        {/* DESKTOP VIEW */}
+<div className="hidden md:block">
           <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
             <div className="min-w-[900px]">
               <table className="w-full table-auto border-collapse">
@@ -157,6 +158,38 @@ export default function PharmacistList() {
                 </tbody>
               </table>
             </div>
+             {/* TABLET VIEW */}
+{/* <div className="hidden md:block lg:hidden">
+  <div className="overflow-x-auto rounded-md border bg-white">
+    <table className="w-full">
+      <thead className="bg-[#F6F7FF]">
+        <tr>
+          {["Name", "Email", "Phone", "Department", "Status"].map((h, i) => (
+            <th key={i} className="px-3 py-2 text-left text-xs font-semibold text-[#475467]">
+              {h}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {display.map((p) => (
+          <tr key={p.id} className="border-t">
+            <td className="px-3 py-2 text-xs">{p.pharmacist_name}</td>
+            <td className="px-3 py-2 text-xs">{p.pharmacist_email}</td>
+            <td className="px-3 py-2 text-xs">{p.pharmacist_phone}</td>
+            <td className="px-3 py-2 text-xs">
+              {p.staff_profiles?.department?.name}
+            </td>
+            <td className="px-3 py-2 text-xs">
+              {p.is_active ? "Active" : "Inactive"}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div> */}
           </div>
         </div>
 

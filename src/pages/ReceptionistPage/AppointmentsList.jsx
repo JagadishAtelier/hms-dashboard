@@ -325,14 +325,14 @@ function AppointmentsList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-start lg:items-center mb-6 gap-4"
       >
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -351,7 +351,7 @@ function AppointmentsList() {
         </div>
 
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45 }} className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -387,7 +387,7 @@ function AppointmentsList() {
 
           {/* ADD APPOINTMENT BUTTON */}
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="bg-[#506EE4] hover:bg-[#3f56c2] ms-auto lg:ms-0 hover:text-white text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
             onClick={handleAddAppointment}
             aria-label="Add Appointment"
           >
@@ -492,6 +492,36 @@ function AppointmentsList() {
                 </motion.tbody>
               </table>
             </div>
+            {/* <div className="hidden md:block lg:hidden overflow-x-auto bg-white border rounded-md mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Appt No", "Patient", "Date", "Status"].map((h, i) => (
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {displayAppointments.map((item) => (
+        <tr key={item.id} className="border-t">
+          <td className="px-3 py-2 text-xs">{item.appointment_no}</td>
+          <td className="px-3 py-2 text-xs">
+            {item.patient?.first_name}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {new Date(item.scheduled_at).toLocaleDateString()}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.status}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div> */}
           </div>
         </div>
 
@@ -583,7 +613,7 @@ function AppointmentsList() {
 
         <div className="flex items-center gap-2">
           <Select value={String(limit)} onValueChange={(value) => { setLimit(Number(value)); setCurrentPage(1); }}>
-            <SelectTrigger className="h-8 w-[110px] text-xs border border-gray-200 bg-white rounded shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
+            <SelectTrigger className="hidden md:block h-8 w-[110px] text-xs border border-gray-200 bg-white rounded shadow-sm hover:bg-gray-50 focus:ring-1 focus:ring-indigo-100 focus:border-indigo-400 transition-all">
               <SelectValue placeholder="Items per page" />
             </SelectTrigger>
 

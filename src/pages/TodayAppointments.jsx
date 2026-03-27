@@ -250,7 +250,7 @@ function TodayAppointments() {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full h-full flex flex-col overflow-hidden text-sm ">
+    <div className="w-full h-full flex flex-col overflow-hidden text-sm ">
       {loading && <Loading />}
 
       {/* Header */}
@@ -393,6 +393,35 @@ function TodayAppointments() {
             </div>
           </div>
         </div>
+        <div className="hidden md:block lg:hidden overflow-x-auto bg-white border rounded mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Patient","Time","Status"].map((h,i)=>(
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {currentData.map((item)=>(
+        <tr key={item.id} className="border-t">
+          <td className="px-3 py-2 text-xs">
+            {item.patient?.first_name}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.scheduled_time}
+          </td>
+          <td className="px-3 py-2 text-xs">
+            {item.status}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
 
         {/* Mobile Card View */}
         <div className="md:hidden space-y-3 mt-3">

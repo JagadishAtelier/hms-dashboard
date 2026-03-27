@@ -163,7 +163,7 @@ export default function DesignationList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
@@ -187,7 +187,7 @@ export default function DesignationList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -210,7 +210,7 @@ export default function DesignationList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
             onClick={() => fetchDesignations(currentPage)}
           >
             <RefreshCw size={14} /> Refresh
@@ -219,7 +219,7 @@ export default function DesignationList() {
       </motion.div>
 
       {/* Table */}
-      <div className="hidden md:block flex-1 overflow-y-auto">
+     <div className="hidden md:block flex-1 overflow-y-auto">
         <div className="overflow-x-auto rounded-md border border-gray-200 shadow-md bg-white">
           <table className="w-full table-auto border-collapse">
             <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
@@ -328,7 +328,76 @@ export default function DesignationList() {
           </table>
         </div>
       </div>
+{/* Mobile View */}
+<div className="md:hidden space-y-3 mt-3">
+  {displayDesignations.length > 0 ? (
+    displayDesignations.map((d) => (
+      <div
+        key={d.id}
+        className="w-full border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">
+            {d.title || "—"}
+          </h3>
 
+          <span
+            className={`text-xs px-2 py-1 rounded ${
+              d.is_active
+                ? "bg-green-100 text-green-600"
+                : "bg-gray-100 text-gray-600"
+            }`}
+          >
+            {d.is_active ? "Active" : "Inactive"}
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-600">
+          {d.description || "No description"}
+        </p>
+
+        <p className="text-xs text-gray-600">
+          Created: {d.created_by_email || "—"}
+        </p>
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-3">
+          <Button
+            size="icon"
+            variant="outline"
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200"
+            onClick={() => handleEditDesignation(d.id)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          {d.is_active ? (
+            <Button
+              size="icon"
+              variant="outline"
+              className="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-600 border-gray-200"
+              onClick={() => handleDeleteDesignation(d.id)}
+            >
+              <Trash2 size={14} />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleRestoreDesignation(d.id)}
+            >
+              <RotateCw size={14} />
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No designations found.
+    </p>
+  )}
+</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">

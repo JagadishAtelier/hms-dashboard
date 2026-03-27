@@ -192,7 +192,7 @@ useEffect(() => {
 
   // ✅ Render
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="lg:p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Doctor" : "Create Doctor"}
       </h2>
@@ -210,7 +210,7 @@ useEffect(() => {
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
             Personal Information
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               First Name <span className="text-red-500">*</span>
               <Input
@@ -268,7 +268,7 @@ useEffect(() => {
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
             Professional Information
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               Department <span className="text-red-500">*</span>
               <select
@@ -339,6 +339,7 @@ useEffect(() => {
                 setForm({ ...form, consultation_fee: e.target.value })
               }
               required
+              className="mb-4"
             />
           </label>
 
@@ -368,7 +369,7 @@ useEffect(() => {
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
             Account Information
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               Email <span className="text-red-500">*</span>
               <Input
@@ -413,7 +414,7 @@ useEffect(() => {
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
             Emergency Contact
           </h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <label>
               Name
               <Input
@@ -444,7 +445,7 @@ useEffect(() => {
           </div>
 
           {/* BUTTONS */}
-          <div className="flex justify-end gap-3 pt-6">
+          <div className="flex flex-col md:flex-row justify-end gap-3 pt-6">
             <Button
               type="button"
               variant="outline"

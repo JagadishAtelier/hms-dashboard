@@ -111,7 +111,7 @@ const endIndex = Math.min(total, currentPage * limit);
       className="p-2 w-full h-full flex flex-col"
     >
       {/* Header */}
-      <div className="flex justify-between mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <div className="flex items-center gap-2">
           <div className="bg-white shadow-sm rounded-sm p-1.5 border border-gray-200">
             <TestTubeDiagonal size={20} className="text-gray-600" />
@@ -119,9 +119,9 @@ const endIndex = Math.min(total, currentPage * limit);
           <h2 className="text-xl font-bold">Lab Technicians</h2>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
-            className="bg-[#506EE4] text-white"
+            className="bg-[#506EE4] text-white w-full sm:w-auto"
             onClick={handleAdd}
           >
             <Plus size={14} /> Add Lab Technician
@@ -134,8 +134,8 @@ const endIndex = Math.min(total, currentPage * limit);
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
-        <div className="min-w-[900px]">
+     <div className="hidden md:block overflow-x-auto rounded-md border border-gray-200 shadow-sm bg-white">
+  <div className="min-w-[900px]">
           <table className="w-full table-auto border-collapse">
             <thead className="bg-[#F6F7FF]">
               <tr>
@@ -233,6 +233,71 @@ const endIndex = Math.min(total, currentPage * limit);
           </table>
         </div>
       </div>
+              {/* TABLET VIEW */}
+{/* <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Name","Email","Phone","Status"].map((h,i)=>(
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+      {displayData.map((item)=>(
+        <tr key={item.id} className="border-t">
+          <td className="px-3 py-2 text-xs">{item.labtech_name}</td>
+          <td className="px-3 py-2 text-xs">{item.labtech_email}</td>
+          <td className="px-3 py-2 text-xs">{item.labtech_phone}</td>
+          <td className="px-3 py-2 text-xs">
+            {item.is_active ? "Active" : "Inactive"}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div> */}
+
+{/* MOBILE VIEW */}
+<div className="md:hidden space-y-3 mt-3">
+  {displayData.map((item)=>(
+    <div key={item.id} className="w-full bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+
+      <div className="flex justify-between mb-2">
+        <div>
+          <p className="font-semibold text-sm text-[#0E1680]">
+            {item.labtech_name}
+          </p>
+          <p className="text-xs text-gray-500">
+            {item.labtech_email}
+          </p>
+        </div>
+
+        <span className={`text-xs px-2 py-1 rounded ${
+          item.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+        }`}>
+          {item.is_active ? "Active" : "Inactive"}
+        </span>
+      </div>
+
+      <p className="text-xs text-gray-600">
+        📞 {item.labtech_phone}
+      </p>
+
+      <div className="flex gap-2 mt-3">
+        <Button size="sm" className="flex-1" onClick={()=>handleEdit(item.id)}>
+          Edit
+        </Button>
+        <Button size="sm" variant="outline" className="flex-1" onClick={()=>handleDelete(item.id)}>
+          Delete
+        </Button>
+      </div>
+    </div>
+  ))}
+</div>
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">

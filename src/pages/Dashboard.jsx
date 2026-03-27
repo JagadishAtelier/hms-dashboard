@@ -8,7 +8,7 @@ import {
   ArrowUpCircle,
 } from "lucide-react";
 import { Line, Doughnut } from "react-chartjs-2";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,6 +35,16 @@ ChartJS.register(
 
 export default function Dashboard() {
   const chartRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // ✅ Doughnut Chart Data
   const data1 = {
@@ -47,6 +57,7 @@ export default function Dashboard() {
         borderColor: "#fff",
         spacing: 4,
         hoverOffset: 10,
+        
       },
     ],
   };
@@ -55,7 +66,8 @@ export default function Dashboard() {
     cutout: "60%",
     plugins: {
       legend: {
-        position: "right",
+        position: isMobile ? "bottom" : "right",
+        align: isMobile ? "start" : "center",
         labels: {
           boxWidth: 20,
           boxHeight: 20,
@@ -137,7 +149,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="p-2">
+    <div className="">
       <h1 className="text-3xl font-bold mb-8 text-foreground">Overview (Quick Stats)</h1>
 
       {/* ✅ 4 Light Stat Cards */}
@@ -173,23 +185,23 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-gray-800">560</div>
             <p className="text-sm text-gray-500">This month</p>
           </div>
-          <div className="h-70 w-full">
+          <div className="h-70 w-full flex justify-center items-center">
             <Line data={data} options={options} className="py-5" />
           </div>
         </div>
 
         {/* Doughnut Chart */}
-        <div className="bg-white p-5 rounded-lg shadow-sm lg:w-1/2 md:w-1/2 h-100 relative">
-          <div className="flex justify-between items-center mb-2">
+        <div className="bg-white p-5 rounded-lg shadow-sm lg:w-1/2 md:w-1/2 h-full relative">
+          <div className="flex justify-between items-center md:mb-2 mb-5">
             <h3 className="text-lg font-semibold">Patients Category</h3>
             <div className="flex items-center border p-2 rounded-md text-sm text-gray-500">
               <span>Month</span>
               <ChevronDown size={16} />
             </div>
           </div>
-          <div className="relative w-90 h-90">
+          <div className="relative lg:w-90 lg:h-90 h-80">
             <Doughnut ref={chartRef} data={data1} options={options1} />
-            <div className="absolute top-40 left-12 w-1/4 text-center font-semibold text-gray-600">
+            <div className="hidden md:block absolute lg:top-40 top-35  lg:left-12 md:left-10 w-1/4 text-center font-semibold text-gray-600 ">
               100% Data Recorded
             </div>
           </div>

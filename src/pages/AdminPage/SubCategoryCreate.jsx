@@ -235,7 +235,7 @@ export default function SubCategoryCreate() {
   const categoryLabel = (c) => c?.category_name ?? c?.name ?? "Unnamed category";
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="md:p-6 max-w-2xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Subcategory" : "Create Subcategory"}
       </h2>

@@ -1,7 +1,7 @@
 // src/pages/orders/OrderView.jsx
 import React, { useEffect, useRef, useState } from "react";
 import html2pdf from "html2pdf.js";
-import logo from "../../../public/Company_logo.png"; // adjust path if necessary
+import logo from "../../assets/Company_logo.png"; // adjust path if necessary
 import orderService from "../../service/orderService";
 import { useParams, useNavigate } from "react-router-dom";
 

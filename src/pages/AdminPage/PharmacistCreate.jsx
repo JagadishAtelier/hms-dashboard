@@ -152,7 +152,7 @@ export default function PharmacistCreate() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="md:p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Pharmacist" : "Create Pharmacist"}
       </h2>
@@ -166,7 +166,7 @@ export default function PharmacistCreate() {
 
           {/* Personal Information */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Personal Information</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               First Name <span className="text-red-500">*</span>
               <Input value={form.staff.first_name} onChange={(e) => handleStaffChange("first_name", e.target.value)} />
@@ -196,7 +196,7 @@ export default function PharmacistCreate() {
 
           {/* Professional Information */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Professional Information</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col md:grid md:grid-cols-2  gap-4 w-full">
             <label>
               Department
               <select className="border rounded-md p-2 w-full" value={form.staff.department_id} onChange={(e) => handleStaffChange("department_id", e.target.value)}>
@@ -227,7 +227,7 @@ export default function PharmacistCreate() {
 
           {/* Account Information */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Account Information</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4">
             <label>
               Email <span className="text-red-500">*</span>
               <Input value={form.pharmacist_email} onChange={(e) => setForm({ ...form, pharmacist_email: e.target.value })} />
@@ -246,7 +246,7 @@ export default function PharmacistCreate() {
 
           {/* Emergency Contact */}
           <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Emergency Contact</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <label>
               Name
               <Input value={form.staff.emergency_contact.name} onChange={(e) => handleEmergencyChange("name", e.target.value)} />
@@ -262,7 +262,7 @@ export default function PharmacistCreate() {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-3 pt-6">
+          <div className="flex flex-col md:flex-row justify-end gap-3 pt-6">
             <Button type="button" variant="outline" onClick={() => navigate("/pharmacists")}>Cancel</Button>
             <Button type="submit" className="bg-[#0E1680] text-white" disabled={loading}>
               {loading ? "Saving..." : isEdit ? "Update Pharmacist" : "Create Pharmacist"}

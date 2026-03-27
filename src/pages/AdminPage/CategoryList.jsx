@@ -149,7 +149,7 @@ function CategoryList() {
   const displayCategories = useMemo(() => categories || [], [categories]);
 
   return (
-    <div className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm">
       {loading && <Loading />}
 
       {/* Header */}
@@ -279,6 +279,57 @@ function CategoryList() {
             </div>
           </div>
         </div>
+        {/* Mobile / Tab View */}
+<div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
+  {displayCategories.length > 0 ? (
+    displayCategories.map((c) => (
+      <div
+        key={c.id}
+        className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
+      >
+        <h3 className="text-sm font-semibold text-gray-800 mb-1">
+          {c.category_name || c.name || "—"}
+        </h3>
+
+        <p className="text-xs text-gray-600 mb-2">
+          {c.description || "No description"}
+        </p>
+
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleEditCategory(c.id)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          {c.is_active === false || c.deleted_at ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleRestoreCategory(c.id)}
+            >
+              <RotateCw size={14} />
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleDeleteCategory(c.id)}
+            >
+              <Trash2 size={14} />
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No categories found.
+    </p>
+  )}
+</div>
       </div>
 
       {/* Pagination */}

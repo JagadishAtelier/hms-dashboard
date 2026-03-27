@@ -115,7 +115,7 @@ export default function RoomCreate() {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
+    <div className="md:p-6 max-w-lg mx-auto">
       <h2 className="text-2xl font-semibold text-[#0E1680] mb-6">
         {isEdit ? "Edit Room" : "Create Room"}
       </h2>
@@ -135,7 +135,7 @@ export default function RoomCreate() {
               value={form.ward_id}
               onValueChange={(value) => setForm((prev) => ({ ...prev, ward_id: value }))}
             >
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Select a ward" />
               </SelectTrigger>
               <SelectContent>
@@ -176,7 +176,7 @@ export default function RoomCreate() {
               value={form.room_type}
               onValueChange={(value) => setForm((prev) => ({ ...prev, room_type: value }))}
             >
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Select room type" />
               </SelectTrigger>
               <SelectContent>

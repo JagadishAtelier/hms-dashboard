@@ -87,7 +87,7 @@ function RecentActivities() {
 
 const tableHead = role === "doctor" ? [...baseTableHead, "Action"] : baseTableHead;
   return (
-    <div className="p-4 my-5">
+    <div className="my-5">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold mb-4">Recent Activities</h2>
         <a href="/" className="text-blue-700 underline">
@@ -96,7 +96,7 @@ const tableHead = role === "doctor" ? [...baseTableHead, "Action"] : baseTableHe
       </div>
 
       {/* Responsive table wrapper */}
-      <div className="overflow-x-auto max-sm:w-[570px] ">
+      <div className="hidden md:block overflow-x-auto">
         <Table className="min-w-[570px] rounded-2xl overflow-hidden border border-gray-200">
           <TableHeader>
             <TableRow className="bg-[#E5E7FB] rounded-2xl hover:bg-[#E5E7FB]">
@@ -143,6 +143,16 @@ const tableHead = role === "doctor" ? [...baseTableHead, "Action"] : baseTableHe
           </TableBody>
         </Table>
       </div>
+      <div className="block md:hidden space-y-4">
+  {allPagesData.map((patient, index) => (
+    <div key={index} className="border p-4 rounded-xl shadow-sm bg-white">
+      <p><b>Name:</b> {patient.name}</p>
+      <p><b>ID:</b> {patient.id}</p>
+      <p><b>Date:</b> {patient.date}</p>
+      <p><b>Status:</b> {patient.status}</p>
+    </div>
+  ))}
+</div>
     </div>
   );
 }

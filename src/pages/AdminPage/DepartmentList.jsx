@@ -163,7 +163,7 @@ export default function DepartmentList() {
       initial="hidden"
       animate="visible"
       variants={pageVariant}
-      className="p-2 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
+      className="p-0 sm:p-2 w-full h-full flex flex-col overflow-hidden text-sm rounded-lg"
     >
       {/* Header */}
       <motion.div
@@ -187,7 +187,7 @@ export default function DepartmentList() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto lg:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -210,7 +210,7 @@ export default function DepartmentList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
             onClick={() => fetchDepartments(currentPage)}
           >
             <RefreshCw size={14} /> Refresh
@@ -338,7 +338,62 @@ export default function DepartmentList() {
           </table>
         </div>
       </div>
+      {/* <div className="hidden md:block lg:hidden overflow-x-auto border rounded-md bg-white mt-3">
+  <table className="w-full">
+    <thead className="bg-[#F6F7FF]">
+      <tr>
+        {["Code", "Department", "Status"].map((h, i) => (
+          <th key={i} className="px-3 py-2 text-xs font-semibold text-left">
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
 
+    <tbody>
+      {displayDepartments.map((d) => (
+        <tr key={d.id} className="border-t">
+          <td className="px-3 py-2 text-xs">{d.code}</td>
+          <td className="px-3 py-2 text-xs">{d.name}</td>
+          <td className="px-3 py-2 text-xs">
+            {d.is_active ? "Active" : "Inactive"}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div> */}
+      <div className="md:hidden space-y-3 mt-3">
+  {displayDepartments.map((d) => (
+    <div key={d.id} className="bg-white border rounded-lg p-3 shadow-sm">
+      
+      <div className="flex justify-between">
+        <div>
+          <p className="font-semibold text-sm text-[#0E1680]">
+            {d.name}
+          </p>
+          <p className="text-xs text-gray-500">
+            Code: {d.code}
+          </p>
+        </div>
+
+        <span className={`text-xs px-2 py-1 rounded ${
+          d.is_active
+            ? "bg-green-100 text-green-700"
+            : "bg-gray-100 text-gray-700"
+        }`}>
+          {d.is_active ? "Active" : "Inactive"}
+        </span>
+      </div>
+
+      <div className="flex gap-2 mt-3">
+        <Button size="sm" onClick={() => handleEditDepartment(d.id)}>
+          Edit
+        </Button>
+      </div>
+    </div>
+  ))}
+</div>
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
         <p className="text-xs text-gray-500">

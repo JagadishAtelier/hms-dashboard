@@ -129,7 +129,7 @@ export default function InwardList() {
   const displayInwards = useMemo(() => inwards || [], [inwards]);
 
   return (
-    <div className="p-3 sm:p-5 w-full h-full flex flex-col overflow-hidden text-sm">
+    <div className="p-0 sm:p-5 w-full h-full flex flex-col overflow-hidden text-sm">
       {loading && <Loading />}
 
       {/* Header */}
@@ -150,7 +150,7 @@ export default function InwardList() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-64 ms-auto md:ms-0">
             <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
             <Input
               type="search"
@@ -199,7 +199,7 @@ export default function InwardList() {
           </Select>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
+            className="bg-[#506EE4] ms-auto md:ms-0 hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 text-sm"
             onClick={() => navigate("/inward/create")}
           >
             <Plus size={14} /> Add Inward
@@ -216,7 +216,7 @@ export default function InwardList() {
 
       {/* Table */}
       <div className="flex-1 overflow-y-auto">
-        <div className="overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
+        <div className=" hidden md:block overflow-x-auto rounded-md border border-gray-200 bg-white shadow-sm">
           <table className="w-full table-auto border-collapse text-[13px]">
             <thead className="bg-[#F6F7FF]">
               <tr>
@@ -317,7 +317,80 @@ export default function InwardList() {
           </table>
         </div>
       </div>
+{/* Mobile / Tab Card View */}
+<div className="md:hidden space-y-3 mt-3">
+  {displayInwards.length > 0 ? (
+    displayInwards.map((inv) => (
+      <div
+        key={inv.id}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-3"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-sm font-semibold text-[#0E1680]">
+            {inv.inward_no || "-"}
+          </h3>
+          <span
+            className={`px-2 py-0.5 text-[11px] rounded-full ${
+              inv.status === "pending"
+                ? "bg-yellow-100 text-yellow-700"
+                : inv.status === "completed"
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {inv.status}
+          </span>
+        </div>
 
+        <p className="text-xs text-gray-600">
+          Vendor: {getVendorName(inv.vendor_id)}
+        </p>
+        <p className="text-xs text-gray-600">
+          Date:{" "}
+          {inv.received_date
+            ? new Date(inv.received_date).toLocaleDateString()
+            : "—"}
+        </p>
+        <p className="text-xs text-gray-600">
+          Qty: {inv.total_quantity ?? 0}
+        </p>
+        <p className="text-xs text-gray-600">
+          Amount: ₹{inv.total_amount ?? "0.00"}
+        </p>
+
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setModalInward(inv)}
+          >
+            <Eye size={14} />
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate(`/inward/edit/${inv.id}`)}
+          >
+            <Edit2 size={14} />
+          </Button>
+
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => handleDelete(inv.id)}
+          >
+            <Trash2 size={14} />
+          </Button>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 text-sm">
+      No inwards found.
+    </p>
+  )}
+</div>
       {/* Pagination */}
       <div className="flex justify-between items-center mt-4 text-xs text-gray-600">
         <span>
