@@ -81,6 +81,13 @@ import PharmacistList from "./pages/AdminPage/PharmacistList";
 import PharmacistCreate from "./pages/AdminPage/PharmacistCreate";
 import SurgeriesList from "./pages/SurgeriesPage/SurgeriesList";
 import SurgeryForm from "./pages/SurgeriesPage/SurgeryForm";
+import DietTypeList from "./pages/AdminPage/DietTypeList";
+import FoodDashboard from "./pages/FoodPage/FoodDashboard";
+import MealPlansList from "./pages/FoodPage/MealPlansList";
+import FoodManagerList from "./pages/AdminPage/FoodManagerList";
+import FoodManagerCreate from "./pages/AdminPage/FoodManagerCreate";
+import ProceduresList from "./pages/SurgeriesPage/ProceduresList";
+import ProcedureForm from "./pages/SurgeriesPage/ProcedureForm";
 function App() {
   return (
     <SidebarProvider>
@@ -810,6 +817,15 @@ function App() {
           <Route path="/surgeries" element={<AdminLayout><SurgeriesList /></AdminLayout>} />
           <Route path="/surgeries/create" element={<AdminLayout><SurgeryForm /></AdminLayout>} />
           <Route path="/surgeries/edit/:id" element={<AdminLayout><SurgeryForm /></AdminLayout>} />
+          <Route path="/food-dashboard" element={<AdminLayout><FoodDashboard /></AdminLayout>} />
+          <Route path="/food/meal-plans" element={<AdminLayout><MealPlansList /></AdminLayout>} />
+          <Route path="/food-managers" element={<AdminLayout><FoodManagerList /></AdminLayout>} />
+          <Route path="/food-managers/create" element={<AdminLayout><FoodManagerCreate /></AdminLayout>} />
+          <Route path="/food-managers/edit/:id" element={<AdminLayout><FoodManagerCreate /></AdminLayout>} />
+          <Route path="/food/diet-types" element={<AdminLayout><DietTypeList /></AdminLayout>} />
+          <Route path="/procedures" element={<AdminLayout><ProceduresList /></AdminLayout>} />
+          <Route path="/procedures/create" element={<AdminLayout><ProcedureForm /></AdminLayout>} />
+          <Route path="/procedures/edit/:id" element={<AdminLayout><ProcedureForm /></AdminLayout>} />
         </Routes>
       </Router>
     </SidebarProvider>

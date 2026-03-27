@@ -1,9 +1,8 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-import { Outlet } from "react-router-dom";
 
-export default function AdminLayout() {
+export default function AdminLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -25,7 +24,7 @@ export default function AdminLayout() {
           />
         </div>
         <main className="p-4 bg-[#FBFBFD] dark:bg-gray-600 text-gray-900 dark:text-gray-100">
-          <Outlet />
+          {children}
         </main>
       </div>
     </div>

@@ -204,6 +204,12 @@ export default function Login() {
         case "patient":
           navigate("/patient-dashboard");
           break;
+        case "nurse":
+          navigate("/nurse-dashboard");
+          break;
+        case "foodmanager":
+          navigate("/food-dashboard");
+          break;
         default:
           navigate("/dashboard");
       }

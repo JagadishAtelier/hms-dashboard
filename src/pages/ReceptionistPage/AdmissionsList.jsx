@@ -17,6 +17,7 @@ import {
   FolderOpen,
   ClipboardList,
   Scissors,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +37,7 @@ const DEFAULT_LIMIT = 10;
 
 export default function AdmissionsList() {
   const navigate = useNavigate();
+  const role = localStorage.getItem("role") || "";
 
   const [admissions, setAdmissions] = useState([]);
   const [total, setTotal] = useState(0);
@@ -318,6 +320,15 @@ export default function AdmissionsList() {
                         >
                           <Scissors size={12} /> Surgery
                         </button>
+                        {(role === "admin" || role === "superadmin") && (
+                          <button
+                            onClick={() => navigate(`/admission/${item.id}`)}
+                            className="flex items-center gap-1 px-2 py-1 rounded text-gray-600 hover:bg-gray-50 border border-gray-200"
+                            title="Edit"
+                          >
+                            <Pencil size={12} /> Edit
+                          </button>
+                        )}
                         {item.status !== "discharged" && (
                           <button
                             onClick={() => handleDischarge(item.id)}

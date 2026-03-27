@@ -36,6 +36,8 @@ import {
   FileText,
   ClipboardList,
   ClipboardCheck,
+  Scissors,
+  UtensilsCrossed,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import AddPatientModal from "./Context/AddPatientModal";
@@ -293,6 +295,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
                 { to: "/nurses", label: "Nurses", icon: Thermometer },
                 { to: "/pharmacists", label: "Pharmacists", icon: Pill },
                 { to: "/accountant", label: "Accountant", icon: Users },
+                { to: "/food-managers", label: "Food Managers", icon: UtensilsCrossed },
             ]
         },
         { to: "/patient-list", label: "Patient List", icon: Users },
@@ -304,6 +307,23 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/room", label: "Room", icon: HousePlus },
         { to: "/bed", label: "Bed", icon: BedDouble },
         { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
+        {
+          label: "Food Management",
+          icon: UtensilsCrossed,
+          children: [
+            { to: "/food/diet-types", label: "Diet Types", icon: UtensilsCrossed },
+            { to: "/food/meal-plans", label: "Meal Plans", icon: ClipboardList },
+            { to: "/food-dashboard", label: "Food Dashboard", icon: LayoutDashboard },
+          ],
+        },
+        {
+          label: "Surgeries",
+          icon: Scissors,
+          children: [
+            { to: "/surgeries", label: "Surgeries", icon: Scissors },
+            { to: "/procedures", label: "Procedures", icon: ClipboardList },
+          ],
+        },
         {
           label: "Inventory / Store",
           icon: Boxes,
@@ -318,6 +338,33 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
           ],
         },
       ],
+      admin: [
+        { to: "/admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { 
+            label: "Staff Management", 
+            icon: IdCardLanyard,
+            children: [
+                { to: "/doctors", label: "Doctors", icon: Stethoscope },
+                { to: "/receptionist", label: "Receptionist", icon: Contact },
+                { to: "/labtechnician", label: "Lab Technician", icon: FlaskConical },
+                { to: "/nurses", label: "Nurses", icon: Thermometer },
+                { to: "/pharmacists", label: "Pharmacists", icon: Pill },
+                { to: "/food-managers", label: "Food Managers", icon: UtensilsCrossed },
+            ]
+        },
+        { to: "/patient-list", label: "Patient List", icon: Users },
+        { to: "/appointment", label: "Appointments", icon: CalendarDays },
+        { to: "/admissions", label: "Admissions", icon: Bed },
+        {
+          label: "Food Management",
+          icon: UtensilsCrossed,
+          children: [
+            { to: "/food/diet-types", label: "Diet Types", icon: UtensilsCrossed },
+            { to: "/food/meal-plans", label: "Meal Plans", icon: ClipboardList },
+            { to: "/food-dashboard", label: "Food Dashboard", icon: LayoutDashboard },
+          ],
+        },
+      ],
       pharmacist: [
         { to: "/pharma-dashboard", label: "Dashboard", icon: LayoutDashboard },
         { to: "/product", label: "Product", icon: Tag },
@@ -328,10 +375,15 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/nurse-dashboard", label: "Dashboard", icon: LayoutDashboard },
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/admissions", label: "Admissions", icon: Bed },
-      ]
+      ],
+      foodmanager: [
+        { to: "/food-dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/food/meal-plans", label: "Meal Plans", icon: UtensilsCrossed },
+        { to: "/food/diet-types", label: "Diet Types", icon: ClipboardList },
+      ],
     };
 
-    return rolesMapping[role] || [
+    return rolesMapping[role] || rolesMapping[role?.toLowerCase().replace(/\s+/g, '')] || [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/appointment", label: "Appointments", icon: CalendarDays },
       { to: "/patient-list", label: "Patient List", icon: Users },

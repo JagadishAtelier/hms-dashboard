@@ -29,6 +29,7 @@ import {
 import patientService from "../../service/patientService.js";
 import bedsService from "../../service/bedsService.js";
 import admissionsService from "../../service/addmissionsService.js";
+import foodService from "../../service/foodService.js";
 
 export default function AdmissionsCreate() {
   const navigate = useNavigate();
@@ -58,6 +59,8 @@ export default function AdmissionsCreate() {
 
   const [beds, setBeds] = useState([]);
   const [selectedBed, setSelectedBed] = useState(null);
+  const [dietTypes, setDietTypes] = useState([]);
+  const [selectedDietTypeId, setSelectedDietTypeId] = useState("");
 
   // Fetch admission details if editing
   useEffect(() => {
@@ -85,17 +88,23 @@ export default function AdmissionsCreate() {
         }
 
         if (data.bed) {
-          // Flatten bed structure for display/selection compatibility
           setSelectedBed({
             id: data.bed.id,
             bed_no: data.bed.bed_no,
-            is_occupied: true, // It is occupied by this admission
+            is_occupied: true,
             ward_name: data.ward?.name || "Ward N/A",
             ward_id: data.ward?.id || "",
             room_name: data.room?.room_no || "Room N/A",
             room_id: data.room?.id || "",
           });
         }
+
+        // Load existing meal plan diet type for this admission
+        try {
+          const mpRes = await foodService.getAllMealPlans({ admission_id: data.id, is_active: true });
+          const plans = mpRes.data?.data?.data || mpRes.data?.data || [];
+          if (plans.length > 0) setSelectedDietTypeId(plans[0].diet_type_id || "");
+        } catch { /* no meal plan yet — fine */ }
       } catch (err) {
         console.error("Error fetching admission:", err);
         toast.error("Failed to load admission details");
@@ -150,6 +159,9 @@ export default function AdmissionsCreate() {
     // Actually, we might want to change patient (unlikely for admission edit but possible)
     fetchPatients();
     fetchBeds();
+    foodService.getAllDietTypes({ is_active: true })
+      .then(res => setDietTypes(res.data?.data || []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -231,9 +243,44 @@ export default function AdmissionsCreate() {
       if (isEdit) {
         await admissionsService.updateAdmission(id, payload);
         toast.success("Admission updated successfully!");
+
+        // Update or create meal plan if diet type selected
+        if (selectedDietTypeId && form.patient_id) {
+          try {
+            const mpRes = await foodService.getAllMealPlans({ admission_id: id, is_active: true });
+            const plans = mpRes.data?.data?.data || mpRes.data?.data || [];
+            if (plans.length > 0) {
+              // Update existing meal plan's diet type
+              await foodService.updateMealPlan(plans[0].id, { diet_type_id: selectedDietTypeId });
+            } else {
+              // No meal plan yet — create one
+              await foodService.createMealPlanForAdmission({
+                admission_id: id,
+                patient_id: form.patient_id,
+                diet_type_id: selectedDietTypeId,
+              });
+            }
+          } catch (e) {
+            console.warn("Meal plan update failed:", e.message);
+          }
+        }
       } else {
-        await admissionsService.createAdmission(payload);
+        const res = await admissionsService.createAdmission(payload);
+        const admissionId = res?.data?.id || res?.id;
         toast.success("Patient admitted successfully!");
+
+        // Auto-create meal plan if diet type selected
+        if (admissionId && selectedDietTypeId && form.patient_id) {
+          try {
+            await foodService.createMealPlanForAdmission({
+              admission_id: admissionId,
+              patient_id: form.patient_id,
+              diet_type_id: selectedDietTypeId,
+            });
+          } catch (e) {
+            console.warn("Meal plan creation failed:", e.message);
+          }
+        }
       }
       navigate("/admissions");
     } catch (err) {
@@ -534,6 +581,43 @@ export default function AdmissionsCreate() {
                 <p className="text-sm text-red-500 mt-2 flex items-center">
                   <XCircle className="h-4 w-4 mr-1" /> {errors.reason}
                 </p>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* 4. DIET TYPE */}
+            <div>
+              <Label className="mb-2 flex items-center gap-2">
+                🍽️ Diet Type <span className="text-gray-400 text-xs font-normal">(optional — sets meal plan automatically)</span>
+              </Label>
+              {dietTypes.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">No diet types configured. Ask admin to add them.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                  <button type="button"
+                    onClick={() => setSelectedDietTypeId("")}
+                    className={`p-3 rounded-lg border text-left text-sm transition-all ${!selectedDietTypeId ? "border-blue-500 bg-blue-50 font-semibold text-blue-700" : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"}`}>
+                    <div className="font-medium">None</div>
+                    <div className="text-xs text-gray-400 mt-0.5">No meal plan</div>
+                  </button>
+                  {dietTypes.map(dt => (
+                    <button type="button" key={dt.id}
+                      onClick={() => setSelectedDietTypeId(dt.id)}
+                      className={`p-3 rounded-lg border text-left text-sm transition-all ${selectedDietTypeId === dt.id ? "border-blue-500 bg-blue-50 font-semibold text-blue-700" : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"}`}>
+                      <div className="font-medium">{dt.name}</div>
+                      {dt.description && <div className="text-xs text-gray-400 mt-0.5 truncate">{dt.description}</div>}
+                      {selectedDietTypeId === dt.id && (
+                        <div className="mt-2 space-y-0.5 text-xs text-blue-600">
+                          {dt.breakfast && <div>🌅 {dt.breakfast}</div>}
+                          {dt.lunch && <div>☀️ {dt.lunch}</div>}
+                          {dt.dinner && <div>🌙 {dt.dinner}</div>}
+                          {dt.snack && <div>🍎 {dt.snack}</div>}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </CardContent>
