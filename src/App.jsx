@@ -65,6 +65,8 @@ import LabTechnicianList from "./pages/AdminPage/LabTechnicianList";
 import LabTechnicianCreate from "./pages/AdminPage/LabTechnicianCreate";
 import AccountantList from "./pages/AdminPage/AccountantList.jsx";
 import AccountantCreate from "./pages/AdminPage/AccountantCreate.jsx";
+import AccountantDashboard from "./pages/AccountantPage/AccountantDashboard.jsx";
+import BillingList from "./pages/AccountantPage/BillingList.jsx";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
@@ -826,6 +828,11 @@ function App() {
           <Route path="/procedures" element={<AdminLayout><ProceduresList /></AdminLayout>} />
           <Route path="/procedures/create" element={<AdminLayout><ProcedureForm /></AdminLayout>} />
           <Route path="/procedures/edit/:id" element={<AdminLayout><ProcedureForm /></AdminLayout>} />
+          <Route path="/accountant" element={<AdminLayout><AccountantList /></AdminLayout>} />
+          <Route path="/accountant/create" element={<AdminLayout><AccountantCreate /></AdminLayout>} />
+          <Route path="/accountant/edit/:id" element={<AdminLayout><AccountantCreate /></AdminLayout>} />
+          <Route path="/accountant-dashboard" element={<AdminLayout><AccountantDashboard /></AdminLayout>} />
+          <Route path="/billing" element={<AdminLayout><BillingList /></AdminLayout>} />
         </Routes>
       </Router>
     </SidebarProvider>

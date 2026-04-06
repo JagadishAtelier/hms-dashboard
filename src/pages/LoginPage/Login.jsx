@@ -192,6 +192,12 @@ export default function Login() {
         case "superadmin":
           navigate("/admin-dashboard");
           break;
+        case "admin":
+          navigate("/admin-dashboard");
+          break;
+        case "receptionist":
+          navigate("/appointment");
+          break;
         case "doctor":
           navigate("/dashboard");
           break;
@@ -209,6 +215,9 @@ export default function Login() {
           break;
         case "foodmanager":
           navigate("/food-dashboard");
+          break;
+        case "accountant":
+          navigate("/accountant-dashboard");
           break;
         default:
           navigate("/dashboard");

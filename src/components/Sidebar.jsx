@@ -38,6 +38,7 @@ import {
   ClipboardCheck,
   Scissors,
   UtensilsCrossed,
+  ReceiptText,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import AddPatientModal from "./Context/AddPatientModal";
@@ -380,6 +381,13 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/food-dashboard", label: "Dashboard", icon: LayoutDashboard },
         { to: "/food/meal-plans", label: "Meal Plans", icon: UtensilsCrossed },
         { to: "/food/diet-types", label: "Diet Types", icon: ClipboardList },
+      ],
+      accountant: [
+        { to: "/accountant-dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/billing", label: "Billing", icon: ReceiptText },
+        { to: "/admissions", label: "Admissions", icon: Bed },
+        { to: "/appointment", label: "Appointments", icon: CalendarDays },
+        { to: "/patient-list", label: "Patients", icon: Users },
       ],
     };
 

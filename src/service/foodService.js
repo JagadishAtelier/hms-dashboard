@@ -24,6 +24,13 @@ const foodService = {
   updateMealPlan: (id, data) => axios.put(`${API}/meal-plan/${id}`, data, { headers: h() }),
   deleteMealPlan: (id) => axios.delete(`${API}/meal-plan/${id}`, { headers: h() }),
 
+  // Food Managers
+  getAllManagers: (p = {}) => axios.get(`${API}/manager`, { headers: h(), params: p }),
+  getManagerById: (id) => axios.get(`${API}/manager/${id}`, { headers: h() }),
+  createManager: (data) => axios.post(`${API}/manager`, data, { headers: h() }),
+  updateManager: (id, data) => axios.put(`${API}/manager/${id}`, data, { headers: h() }),
+  deleteManager: (id) => axios.delete(`${API}/manager/${id}`, { headers: h() }),
+
   // Meal Logs
   getAllMealLogs: (p = {}) => axios.get(`${API}/meal-log`, { headers: h(), params: p }),
   createMealLog: (data) => axios.post(`${API}/meal-log`, data, { headers: h() }),

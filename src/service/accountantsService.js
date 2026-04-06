@@ -51,6 +51,13 @@ const accountantsService = {
       headers: authHeader(),
     });
   },
+
+  // ✅ DASHBOARD
+  getDashboard: () => {
+    return axios.get(`${API_URL}/dashboard/stats`, {
+      headers: authHeader(),
+    });
+  },
 };
 
 export default accountantsService;
