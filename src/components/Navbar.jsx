@@ -79,38 +79,10 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) 
             <ReceiptText size={15} /> Billable Items
           </button>
         )}
-        {/* Academic Year Dropdown */}
-        <Select value={academicYear} onValueChange={setAcademicYear}>
-          <SelectTrigger className="hidden sm:flex w-[200px] h-[40px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded shadow-sm hover:bg-gray-50">
-            <Calendar size={16} className="mr-2 text-gray-500" />
-            <SelectValue placeholder="Select Year" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="2024/2025">Financial Year : 2024 / 2025</SelectItem>
-            <SelectItem value="2023/2024">Financial Year : 2023 / 2024</SelectItem>
-          </SelectContent>
-        </Select>
 
-        {/* Theme Toggle */}
-        <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
-          <Sun size={16} />
-        </Button>
+        
 
-        {/* Notification */}
-        <div className="relative">
-          <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
-            <Bell size={16} />
-          </Button>
-          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-        </div>
-
-        {/* Chat */}
-        <div className="relative">
-          <Button variant="outline" size="icon" className="border-gray-200 hover:bg-gray-50">
-            <MessageSquare size={16} />
-          </Button>
-          <span className="absolute top-1 right-1 h-2 w-2 bg-sky-400 rounded-full"></span>
-        </div>
+        
 
         {/* Avatar */}
         <DropdownMenu>
@@ -122,11 +94,7 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) 
             />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="text-sm">My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="w-4 h-4 mr-2 text-gray-500" /> Profile
-            </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="w-4 h-4 mr-2 text-gray-500" /> Settings
             </DropdownMenuItem>

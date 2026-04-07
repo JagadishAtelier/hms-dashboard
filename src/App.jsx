@@ -70,6 +70,8 @@ import BillingList from "./pages/AccountantPage/BillingList.jsx";
 import BillableItemsList from "./pages/BillableItems/BillableItemsList.jsx";
 import BillableItemForm from "./pages/BillableItems/BillableItemForm.jsx";
 import POSPage from "./pages/POSPage/POSPage.jsx";
+import POSList from "./pages/POSPage/POSList.jsx";
+import POSReceipt from "./pages/POSPage/POSReceipt.jsx";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
@@ -840,6 +842,8 @@ function App() {
           <Route path="/billable-items/create" element={<AdminLayout><BillableItemForm /></AdminLayout>} />
           <Route path="/billable-items/edit/:id" element={<AdminLayout><BillableItemForm /></AdminLayout>} />
           <Route path="/pos" element={<POSPage />} />
+          <Route path="/pos/sales" element={<AdminLayout><POSList /></AdminLayout>} />
+          <Route path="/receipt/:id" element={<POSReceipt />} />
         </Routes>
       </Router>
     </SidebarProvider>

@@ -254,11 +254,10 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
   const [openAddPatientModal, setOpenAddPatientModal] = useState(false);
   const [openLabModal, setOpenLabModal] = useState(false);
   const [role, setRole] = useState(() => localStorage.getItem("role") || "");
-  const [openMenus, setOpenMenus] = useState({});
 
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
-    if (storedRole && storedRole !== role) setRole(storedRole);
+    if (storedRole !== role) setRole(storedRole || "");
   }, [pathname]);
 
   const handleLogout = () => {
@@ -266,7 +265,10 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
     navigate("/login");
   };
 
+  const [openMenus, setOpenMenus] = useState({});
+
   const links = useMemo(() => {
+    const currentRole = role || localStorage.getItem("role") || "";
     const rolesMapping = {
       patient: [
         { to: "/patient-dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -289,7 +291,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/admissions", label: "Admissions", icon: Bed },
         { to: "/patient-list", label: "Patients", icon: Users },
-        { to: "/pos", label: "POS", icon: ReceiptText },
+        // { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
+        { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
         { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
       ],
       superadmin: [
@@ -317,7 +320,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/bed", label: "Bed", icon: BedDouble },
         { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
         { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
-        { to: "/pos", label: "POS", icon: ReceiptText },
+        { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
+        { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
         {
           label: "Food Management",
           icon: UtensilsCrossed,
@@ -366,6 +370,9 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/patient-list", label: "Patient List", icon: Users },
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/admissions", label: "Admissions", icon: Bed },
+        { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
+        { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
+        { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
         {
           label: "Food Management",
           icon: UtensilsCrossed,
@@ -401,7 +408,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
       ],
     };
 
-    return rolesMapping[role] || rolesMapping[role?.toLowerCase().replace(/\s+/g, '')] || [
+    return rolesMapping[currentRole] || rolesMapping[currentRole?.toLowerCase().replace(/\s+/g, '')] || [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/appointment", label: "Appointments", icon: CalendarDays },
       { to: "/patient-list", label: "Patient List", icon: Users },
