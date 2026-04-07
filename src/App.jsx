@@ -67,6 +67,9 @@ import AccountantList from "./pages/AdminPage/AccountantList.jsx";
 import AccountantCreate from "./pages/AdminPage/AccountantCreate.jsx";
 import AccountantDashboard from "./pages/AccountantPage/AccountantDashboard.jsx";
 import BillingList from "./pages/AccountantPage/BillingList.jsx";
+import BillableItemsList from "./pages/BillableItems/BillableItemsList.jsx";
+import BillableItemForm from "./pages/BillableItems/BillableItemForm.jsx";
+import POSPage from "./pages/POSPage/POSPage.jsx";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
@@ -833,6 +836,10 @@ function App() {
           <Route path="/accountant/edit/:id" element={<AdminLayout><AccountantCreate /></AdminLayout>} />
           <Route path="/accountant-dashboard" element={<AdminLayout><AccountantDashboard /></AdminLayout>} />
           <Route path="/billing" element={<AdminLayout><BillingList /></AdminLayout>} />
+          <Route path="/billable-items" element={<AdminLayout><BillableItemsList /></AdminLayout>} />
+          <Route path="/billable-items/create" element={<AdminLayout><BillableItemForm /></AdminLayout>} />
+          <Route path="/billable-items/edit/:id" element={<AdminLayout><BillableItemForm /></AdminLayout>} />
+          <Route path="/pos" element={<POSPage />} />
         </Routes>
       </Router>
     </SidebarProvider>

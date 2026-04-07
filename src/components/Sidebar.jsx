@@ -284,6 +284,14 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/labtechnician", label: "Lab Technicians", icon: FlaskConical },
         { to: "/lab-tech-prescriptions", label: "Lab Order", icon: FileText },
       ],
+      receptionist: [
+        { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/appointment", label: "Appointments", icon: CalendarDays },
+        { to: "/admissions", label: "Admissions", icon: Bed },
+        { to: "/patient-list", label: "Patients", icon: Users },
+        { to: "/pos", label: "POS", icon: ReceiptText },
+        { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
+      ],
       superadmin: [
         { to: "/admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
         { 
@@ -308,6 +316,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/room", label: "Room", icon: HousePlus },
         { to: "/bed", label: "Bed", icon: BedDouble },
         { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
+        { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
+        { to: "/pos", label: "POS", icon: ReceiptText },
         {
           label: "Food Management",
           icon: UtensilsCrossed,

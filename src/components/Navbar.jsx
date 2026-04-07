@@ -1,42 +1,29 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
-  Search,
-  Calendar,
-  Menu,
-  Bell,
-  MessageSquare,
-  Sun,
-  Command,
-  User,
-  Settings,
-  LogOut,
-  CircleChevronRight,
-  CircleChevronLeft,
+  Search, Calendar, Menu, Bell, MessageSquare, Sun, Command,
+  User, Settings, LogOut, CircleChevronRight, CircleChevronLeft, ReceiptText,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) {
   const [academicYear, setAcademicYear] = useState("2024/2025");
+  const navigate = useNavigate();
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+  const showBillableItems = ["admin", "superadmin", "receptionist"].includes(role);
 
   const handleLogout = () => {
-    console.log("User logged out");
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
@@ -83,6 +70,15 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) 
 
       {/* Right Section */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Billable Items button — Receptionist & Admin only */}
+        {showBillableItems && (
+          <button
+            onClick={() => navigate("/billable-items")}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-[#506EE4] text-[#506EE4] rounded-lg hover:bg-[#506EE4] hover:text-white transition-colors"
+          >
+            <ReceiptText size={15} /> Billable Items
+          </button>
+        )}
         {/* Academic Year Dropdown */}
         <Select value={academicYear} onValueChange={setAcademicYear}>
           <SelectTrigger className="hidden sm:flex w-[200px] h-[40px] text-[14px] font-medium text-gray-700 border border-gray-200 bg-white rounded shadow-sm hover:bg-gray-50">
