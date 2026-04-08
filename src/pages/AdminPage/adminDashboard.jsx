@@ -159,14 +159,14 @@ export default function AdminDashboard() {
 
   return (
     <motion.div
-      className="p-0 lg:p-4 space-y-8"
+      className="px-3 sm:px-4 md:px-6 lg:px-8 py-4 space-y-6"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}
     >
       {/* ✅ Header */}
       <motion.div variants={slideRight}>
-        <div className="flex flex-col sm:flex-row md:flex-row justify-between md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 lg:gap-5">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
               Admin Dashboard
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
 
       {/* ✅ Stat Cards */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5"
         variants={staggerContainer}
       >
         {stats.map((s, i) => (
@@ -218,11 +218,11 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* ✅ Chart Section */}
-      <motion.div className="grid grid-cols-1 lg:grid-cols-10 gap-3" variants={slideUp}>
-        <motion.div className="lg:col-span-7 w-full" variants={slideRight}>
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-10 gap-3 md:gap-4 lg:gap-5" variants={slideUp}>
+        <motion.div className="md:col-span-1 lg:col-span-7 w-full" variants={slideRight}>
           <AdmittedPatientsChart admitted_day_wise={admitted_day_wise} />
         </motion.div>
-        <motion.div className="lg:col-span-3" variants={slideUp}>
+        <motion.div className="md:col-span-1 lg:col-span-3" variants={slideUp}>
           <AdmissionsDonutChart
             data={[
               { label: "Male", value: 140, fill: "#6366f1" },
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
           {recent_admitted.length > 0 ? (
             <>
             <div className="hidden md:block">
-              <Table className="min-w-[600px] md:min-w-[800px] lg:min-w-full ">
+              <Table className="min-w-full">
                 <TableHeader>
                   <TableRow className="bg-gray-50 hover:bg-gray-50">
                     <TableHead>ID</TableHead>
@@ -429,11 +429,11 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* ✅ Revenue & OPD Chart */}
-      <motion.div className="grid grid-cols-1 lg:grid-cols-10 gap-3" variants={slideUp}>
-        <motion.div className="lg:col-span-3" variants={slideUp}>
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-10 gap-3 md:gap-4 lg:gap-5" variants={slideUp}>
+        <motion.div className="md:col-span-1 lg:col-span-3" variants={slideUp}>
           <RevenueOverviewCard />
         </motion.div>
-        <motion.div className="lg:col-span-7" variants={slideRight}>
+        <motion.div className="md:col-span-1 lg:col-span-7" variants={slideRight}>
           <OpdAppointmentsTrend />
         </motion.div>
       </motion.div>
