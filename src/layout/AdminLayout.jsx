@@ -7,7 +7,7 @@ export default function AdminLayout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[#FBFBFD] dark:bg-gray-800">
+        <div className="flex min-h-screen bg-[var(--dashboard-secondary)] font-sans transition-colors duration-300">
       <Sidebar 
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)} 
@@ -23,8 +23,8 @@ export default function AdminLayout({ children }) {
             setIsCollapsed={setIsCollapsed}
           />
         </div>
-        <main className="p-4 bg-[#FBFBFD] dark:bg-gray-600 text-gray-900 dark:text-gray-100">
-          {children}
+                <main className="flex-1 px-4 sm:px-5 py-3 overflow-x-hidden">
+            {children}
         </main>
       </div>
     </div>

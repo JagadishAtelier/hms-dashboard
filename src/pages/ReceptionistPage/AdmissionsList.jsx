@@ -212,7 +212,7 @@ export default function AdmissionsList() {
           </Button>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+  className="p-2 rounded-md bg-red-500 hover:bg-red-600 text-white border-none flex items-center justify-center"
             onClick={() => fetchAdmissions(1)}
           >
             <RefreshCw size={14} />

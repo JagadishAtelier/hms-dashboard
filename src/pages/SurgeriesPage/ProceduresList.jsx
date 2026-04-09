@@ -63,7 +63,7 @@ export default function ProceduresList() {
             onClick={() => navigate("/procedures/create")}>
             <Plus size={14} /> Add Procedure
           </Button>
-          <Button className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9" onClick={() => fetch(page)}>
+          <Button className="bg-red-500 hover:bg-red-600 text-white h-9" onClick={() => fetch(page)}>
             <RefreshCw size={14} />
           </Button>
         </div>
