@@ -5,4 +5,5 @@
 // Production (uncomment when deploying)
 export const FRONTEND_Url = "https://hospital-management-system.theateliercreation.com/";
 
+
 export default FRONTEND_Url;
