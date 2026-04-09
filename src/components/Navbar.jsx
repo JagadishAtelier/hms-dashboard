@@ -52,20 +52,14 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) 
         </button>
 
         {/* Search */}
-        <div className="relative w-56 sm:w-64 hidden sm:block">
-          <Input
-            type="text"
-            placeholder="Search"
-            className="pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 shadow-sm p-1 rounded-sm border border-gray-100 bg-white hover:bg-gray-50 cursor-pointer">
-            <Command size={16} className="text-gray-400" />
-          </div>
-        </div>
+         <div className="relative hidden md:block">
+                    <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dashboard-text-light)]" />
+                    <input
+                        type="text"
+                        placeholder="Search patients, appointments..."
+                        className="pl-10 pr-4 py-2 w-64 bg-[var(--dashboard-secondary)] border-none rounded-full text-[var(--dashboard-text)] focus:ring-2 focus:ring-[var(--dashboard-primary)]/20 focus:bg-[var(--card-bg)] transition-all outline-none"
+                    />
+                </div>
       </div>
 
       {/* Right Section */}

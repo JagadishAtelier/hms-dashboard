@@ -65,7 +65,8 @@ export default function BillableItemsList() {
                         <option value="Product">Product</option>
                         <option value="Medication">Medication</option>
                     </select>
-                    <button onClick={() => fetchItems(page)} className="p-2 border border-gray-200 rounded-md bg-white text-gray-500 hover:bg-gray-50"><RefreshCw size={14} /></button>
+                    <button onClick={() => fetchItems(page)}   className="p-2 rounded-md bg-red-500 hover:bg-red-600 text-white border-none flex items-center justify-center"
+><RefreshCw size={14} /></button>
                     <button onClick={() => navigate("/billable-items/create")}
                         className="flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-[#506EE4] text-white hover:bg-[#3f56c2]">
                         <Plus size={14} /> Add Item

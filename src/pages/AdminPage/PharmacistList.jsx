@@ -92,7 +92,9 @@ export default function PharmacistList() {
           <Button className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm" onClick={() => navigate("/pharmacists/create")}>
             <Plus size={14} /> Add Pharmacist
           </Button>
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => fetchPharmacists(currentPage)}>
+          <Button
+  className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm bg-red-500 hover:bg-red-600 text-white border-none"
+  onClick={() => fetchPharmacists(currentPage)}>
             <RefreshCw size={14} /> Refresh
           </Button>
         </div>

@@ -60,7 +60,7 @@ export default function MealPlansList() {
             <p className="text-xs text-gray-500">Meal plans auto-created at admission time</p>
           </div>
         </div>
-        <button onClick={fetchPlans} className="p-2 rounded-md border border-gray-200 bg-white text-gray-500">
+        <button onClick={fetchPlans}   className="p-2 rounded-md bg-red-500 hover:bg-red-600 text-white border-none flex items-center justify-center">
           <RefreshCw size={14} />
         </button>
       </div>

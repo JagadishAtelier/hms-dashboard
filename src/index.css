@@ -9,14 +9,14 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  background-color: #e9f2f7;
+  background-color: #F8FAFC;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --radius: 0.625rem;
-  --background: #e9f2f7;
+  --background: #F8FAFC;
   --foreground: #1b1b1d;
   --card: oklch(1 0 0);
   --card-foreground: #0a0a0a;

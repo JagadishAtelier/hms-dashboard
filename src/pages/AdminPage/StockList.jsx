@@ -318,8 +318,8 @@ export default function StockList() {
           </div>
 
           <Button
-            className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
-            onClick={() => fetchStocks(1, searchQuery)}
+            className="bg-red-500 hover:bg-red-600 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+  onClick={() => fetchStocks(1, searchQuery)}
           >
             <RefreshCw size={14} />
           </Button>

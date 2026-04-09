@@ -202,8 +202,8 @@ export default function BedList() {
 
           <Button
             variant="outline"
-            className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm ms-auto lg:ms-0"
-            onClick={() => fetchBeds(currentPage)}
+             className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm bg-red-500 hover:bg-red-600 text-white border-none"
+  onClick={() => fetchBeds(currentPage)}
           >
             <RefreshCw size={14} /> Refresh
           </Button>

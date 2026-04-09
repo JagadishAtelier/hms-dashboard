@@ -117,7 +117,9 @@ function AccountantList() {
             <Plus size={14} /> Add Accountant
           </Button>
 
-          <Button variant="outline" onClick={() => fetchData(currentPage)}>
+         <Button
+  className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm bg-red-500 hover:bg-red-600 text-white border-none"
+  onClick={() => fetchData(currentPage)}>
             <RefreshCw size={14} /> Refresh
           </Button>
         </div>
@@ -163,8 +165,16 @@ function AccountantList() {
           </td>
           <td className="px-4 py-3">{a.ledger_code || "-"}</td>
           <td className="px-4 py-3">
-            {a.is_active ? "Active" : "Inactive"}
-          </td>
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-medium ${
+      a.is_active
+        ? "bg-green-100 text-green-700"
+        : "bg-red-100 text-red-600"
+    }`}
+  >
+    {a.is_active ? "Active" : "Inactive"}
+  </span>
+</td>
 
           <td className="px-4 py-3 flex gap-2">
             <Button

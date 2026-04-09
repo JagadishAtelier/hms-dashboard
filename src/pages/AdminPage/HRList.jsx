@@ -54,7 +54,9 @@ export default function HRList() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => fetchData(page)}><RefreshCw size={14} /></Button>
+                    <Button
+  className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm bg-red-500 hover:bg-red-600 text-white border-none"
+  onClick={() => fetchData(page)}><RefreshCw size={14} /></Button>
                     <Button className="bg-[#506EE4] text-white" onClick={() => navigate("/hr/create")}>
                         <Plus size={14} /> Add HR
                     </Button>

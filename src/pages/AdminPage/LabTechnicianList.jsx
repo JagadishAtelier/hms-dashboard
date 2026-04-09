@@ -127,7 +127,9 @@ const endIndex = Math.min(total, currentPage * limit);
             <Plus size={14} /> Add Lab Technician
           </Button>
 
-          <Button variant="outline" onClick={fetchData}>
+         <Button
+  className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm bg-red-500 hover:bg-red-600 text-white border-none"
+  onClick={fetchData}>
             <RefreshCw size={14} /> Refresh
           </Button>
         </div>
@@ -188,9 +190,17 @@ const endIndex = Math.min(total, currentPage * limit);
                           : "-"}
                       </td>
 
-                      <td className="px-4 py-3 text-[12px]">
-                        {item.is_active ? "Active" : "Inactive"}
-                      </td>
+                     <td className="px-4 py-3 text-[12px]">
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-medium ${
+      item.is_active
+        ? "bg-green-100 text-green-700"
+        : "bg-red-100 text-red-600"
+    }`}
+  >
+    {item.is_active ? "Active" : "Inactive"}
+  </span>
+</td>
 
                       <td className="px-4 py-3 flex gap-2">
                         <Button
