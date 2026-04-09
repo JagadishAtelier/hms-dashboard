@@ -21,7 +21,7 @@ export default function AdmissionsDonutChart() {
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Card className="p-2 rounded-xl shadow-sm border border-gray-100">
+    <Card className="p-2 sm:p-3 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
@@ -33,7 +33,7 @@ export default function AdmissionsDonutChart() {
             </CardDescription>
           </div>
           <Select defaultValue="today">
-      <SelectTrigger className="w-[140px] h-9 border-gray-200 text-sm text-gray-600">
+      <SelectTrigger className="w-[100px] sm:w-[120px] md:w-[140px] h-9 border-gray-200 text-sm text-gray-600">
         <SelectValue placeholder="Select Range" />
       </SelectTrigger>
       <SelectContent>
@@ -44,26 +44,26 @@ export default function AdmissionsDonutChart() {
     </Select>
         </div>
 
-        <div className="flex justify-between space-x-4 mt-4 text-center">
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 text-center">
           <div className="">
-            <p className="text-[18px] font-semibold text-gray-800">140</p>
+            <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">140</p>
             <p className="text-xs text-gray-500">Male</p>
           </div>
-          <div className="border-r-2 border-gray-300"></div>
+          <div className="hidden sm:block border-r border-gray-300"></div>
           <div>
-            <p className="text-[18px] font-semibold text-gray-800">110</p>
+            <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">110</p>
             <p className="text-xs text-gray-500">Female</p>
           </div>
-          <div className="border-r-2 border-gray-300"></div>
+         <div className="hidden sm:block border-r border-gray-300"></div>
           <div>
-            <p className="text-[18px] font-semibold text-gray-800">50</p>
+           <p className="text-sm sm:text-base md:text-lg font-semibold text-gray-800">50</p>
             <p className="text-xs text-gray-500">Children</p>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="relative flex flex-col items-center justify-center">
-        <div className="w-[200px] h-[200px] relative">
+        <div className="w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] md:w-[200px] md:h-[200px] relative">
           <ResponsiveContainer>
             <PieChart>
               <Pie
