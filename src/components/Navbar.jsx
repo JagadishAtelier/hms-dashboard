@@ -19,7 +19,7 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed }) 
   const [academicYear, setAcademicYear] = useState("2024/2025");
   const navigate = useNavigate();
   const role = (localStorage.getItem("role") || "").toLowerCase();
-  const showBillableItems = ["admin", "superadmin", "receptionist"].includes(role);
+  const showBillableItems = ["admin", "superadmin", "receptionist", "hr"].includes(role);
 
   const handleLogout = () => {
     localStorage.clear();

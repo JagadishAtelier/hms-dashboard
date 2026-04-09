@@ -67,6 +67,15 @@ import AccountantList from "./pages/AdminPage/AccountantList.jsx";
 import AccountantCreate from "./pages/AdminPage/AccountantCreate.jsx";
 import AccountantDashboard from "./pages/AccountantPage/AccountantDashboard.jsx";
 import BillingList from "./pages/AccountantPage/BillingList.jsx";
+import HRList from "./pages/AdminPage/HRList.jsx";
+import HRCreate from "./pages/AdminPage/HRCreate.jsx";
+import LeaveConfig from "./pages/HRMSPage/LeaveConfig.jsx";
+import LeaveApplications from "./pages/HRMSPage/LeaveApplications.jsx";
+import Attendance from "./pages/HRMSPage/Attendance.jsx";
+import SalaryConfig from "./pages/HRMSPage/SalaryConfig.jsx";
+import SalarySlips from "./pages/HRMSPage/SalarySlips.jsx";
+import StaffDocuments from "./pages/HRMSPage/StaffDocuments.jsx";
+import MyHRMS from "./pages/HRMSPage/MyHRMS.jsx";
 import BillableItemsList from "./pages/BillableItems/BillableItemsList.jsx";
 import BillableItemForm from "./pages/BillableItems/BillableItemForm.jsx";
 import POSPage from "./pages/POSPage/POSPage.jsx";
@@ -838,6 +847,16 @@ function App() {
           <Route path="/accountant/edit/:id" element={<AdminLayout><AccountantCreate /></AdminLayout>} />
           <Route path="/accountant-dashboard" element={<AdminLayout><AccountantDashboard /></AdminLayout>} />
           <Route path="/billing" element={<AdminLayout><BillingList /></AdminLayout>} />
+          <Route path="/hr" element={<AdminLayout><HRList /></AdminLayout>} />
+          <Route path="/hr/create" element={<AdminLayout><HRCreate /></AdminLayout>} />
+          <Route path="/hr/edit/:id" element={<AdminLayout><HRCreate /></AdminLayout>} />
+          <Route path="/hrms/leave-config" element={<AdminLayout><LeaveConfig /></AdminLayout>} />
+          <Route path="/hrms/leave" element={<AdminLayout><LeaveApplications /></AdminLayout>} />
+          <Route path="/hrms/attendance" element={<AdminLayout><Attendance /></AdminLayout>} />
+          <Route path="/hrms/salary-config" element={<AdminLayout><SalaryConfig /></AdminLayout>} />
+          <Route path="/hrms/salary-slips" element={<AdminLayout><SalarySlips /></AdminLayout>} />
+          <Route path="/hrms/documents" element={<AdminLayout><StaffDocuments /></AdminLayout>} />
+          <Route path="/my-hrms" element={<AdminLayout><MyHRMS /></AdminLayout>} />
           <Route path="/billable-items" element={<AdminLayout><BillableItemsList /></AdminLayout>} />
           <Route path="/billable-items/create" element={<AdminLayout><BillableItemForm /></AdminLayout>} />
           <Route path="/billable-items/edit/:id" element={<AdminLayout><BillableItemForm /></AdminLayout>} />

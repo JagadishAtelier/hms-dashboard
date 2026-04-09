@@ -188,6 +188,23 @@ export default function Login() {
       localStorage.setItem("userid", user._id || user.id || "");
       localStorage.setItem("user", JSON.stringify(user));
 
+      // Fetch staff profile if this user is a staff member
+      const staffRoles = ["doctor","nurse","receptionist","pharmacist","labtechnician","accountant","foodmanager","hr"];
+      if (staffRoles.includes(normalizedRole)) {
+        try {
+          const BASE_API = (await import("../../api/baseurl.js")).default;
+          const profileRes = await fetch(`${BASE_API}/hms/staff/staffprofile/me/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const profileData = await profileRes.json();
+          const staffProfile = profileData?.data;
+          if (staffProfile?.id) {
+            localStorage.setItem("staffProfileId", staffProfile.id);
+            localStorage.setItem("staffProfile", JSON.stringify(staffProfile));
+          }
+        } catch { /* non-critical */ }
+      }
+
       switch (normalizedRole) {
         case "superadmin":
           navigate("/admin-dashboard");
@@ -218,6 +235,9 @@ export default function Login() {
           break;
         case "accountant":
           navigate("/accountant-dashboard");
+          break;
+        case "hr":
+          navigate("/admin-dashboard");
           break;
         default:
           navigate("/dashboard");
