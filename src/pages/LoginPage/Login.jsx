@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import logo from "/favicon.png";
 
-// --- Mock UI Components for Background ---
+
 
 const BackgroundCard = ({ className, index = 1 }) => {
   const isEven = index % 2 === 0;
