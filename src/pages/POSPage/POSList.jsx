@@ -103,7 +103,7 @@ export default function POSList() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => fetchSales(page)} className="p-2 rounded-md border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                    <button onClick={() => fetchSales(page)}              className="p-2 rounded-md bg-red-500 hover:bg-red-600 text-white border-none flex items-center justify-center">
                         <RefreshCw size={14} />
                     </button>
                     <button onClick={() => navigate("/pos")}

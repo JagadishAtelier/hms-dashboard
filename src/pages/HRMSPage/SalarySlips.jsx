@@ -54,7 +54,8 @@ export default function SalarySlips() {
                         {months.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                     </select>
                     <input type="number" value={filterYear} onChange={e => setFilterYear(Number(e.target.value))} className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-24" />
-                    <button onClick={load} className="p-2 border border-gray-200 rounded-lg bg-white text-gray-500 hover:bg-gray-50"><RefreshCw size={14} /></button>
+                    <button onClick={load}   className="p-2 border border-red-500 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
+><RefreshCw size={14} /></button>
                     <button onClick={() => setShowGenerate(true)} className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg bg-[#506EE4] text-white hover:bg-[#3f56c2]">
                         <Plus size={14} /> Generate
                     </button>
