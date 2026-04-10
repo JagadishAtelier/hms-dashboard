@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { LogIn, LogOut, Plus, X, CheckCircle, Clock, CalendarDays, FileText } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { LogIn, LogOut, Plus, X, CheckCircle, CalendarDays, FileText, FolderOpen, Eye, Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import dayjs from "dayjs";
 import hrmsService from "../../service/hrmsService.js";
+import uploadService from "../../service/uploadService.js";
 
 const LEAVE_TYPES = ["Paid", "Sick", "Casual", "Maternity", "Paternity", "Unpaid", "Permission", "Half Day"];
 
@@ -33,12 +34,22 @@ export default function MyHRMS() {
     const [attendance, setAttendance] = useState([]);
     const [leaves, setLeaves] = useState([]);
     const [balance, setBalance] = useState([]);
+    const [documents, setDocuments] = useState([]);
     const [todayRecord, setTodayRecord] = useState(null);
     const [showApply, setShowApply] = useState(false);
     const [form, setForm] = useState({ leave_type: "Paid", from_date: "", to_date: "", reason: "" });
     const [saving, setSaving] = useState(false);
     const [signingIn, setSigningIn] = useState(false);
     const [signingOut, setSigningOut] = useState(false);
+
+    // Document upload state
+    const [showDocUpload, setShowDocUpload] = useState(false);
+    const [docName, setDocName] = useState("");
+    const [docType, setDocType] = useState("Other");
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const fileRef = useRef(null);
+    const DOC_TYPES = ["ID Proof", "Address Proof", "Educational", "Experience", "Contract", "Other"];
 
     const today = dayjs().format("YYYY-MM-DD");
 
@@ -49,10 +60,11 @@ export default function MyHRMS() {
 
     const loadAll = async () => {
         try {
-            const [attRes, leaveRes, balRes] = await Promise.allSettled([
+            const [attRes, leaveRes, balRes, docRes] = await Promise.allSettled([
                 hrmsService.getAttendanceByStaff(staffProfileId, { month: dayjs().month() + 1, year: dayjs().year(), limit: 31 }),
                 hrmsService.getAllLeaves({ staff_profile_id: staffProfileId, limit: 20 }),
                 hrmsService.getLeaveBalance(staffProfileId, dayjs().year()),
+                hrmsService.getDocumentsByStaff(staffProfileId),
             ]);
 
             if (attRes.status === "fulfilled") {
@@ -67,6 +79,9 @@ export default function MyHRMS() {
             }
             if (balRes.status === "fulfilled") {
                 setBalance(balRes.value?.data?.data ?? []);
+            }
+            if (docRes.status === "fulfilled") {
+                setDocuments(docRes.value?.data?.data ?? []);
             }
         } catch { toast.error("Failed to load HRMS data"); }
     };
@@ -97,6 +112,21 @@ export default function MyHRMS() {
             loadAll();
         } catch (e) { toast.error(e?.response?.data?.message || "Failed to apply leave"); }
         finally { setSaving(false); }
+    };
+
+    const handleDocUpload = async () => {
+        if (!docName.trim()) { toast.error("Document name is required"); return; }
+        if (!selectedFile) { toast.error("Please select a file"); return; }
+        setUploading(true);
+        try {
+            const upRes = await uploadService.uploadStaffDocument(selectedFile);
+            const { file_url, file_name } = upRes?.data?.data;
+            await hrmsService.uploadDocument({ staff_profile_id: staffProfileId, document_name: docName, document_type: docType, file_url, file_name });
+            toast.success("Document uploaded");
+            setShowDocUpload(false); setDocName(""); setDocType("Other"); setSelectedFile(null);
+            loadAll();
+        } catch (e) { toast.error(e?.response?.data?.message || "Upload failed"); }
+        finally { setUploading(false); }
     };
 
     if (!staffProfileId) {
@@ -165,6 +195,7 @@ export default function MyHRMS() {
                     { key: "attendance", label: "Attendance", icon: CalendarDays },
                     { key: "leaves", label: "My Leaves", icon: FileText },
                     { key: "balance", label: "Leave Balance", icon: CheckCircle },
+                    { key: "documents", label: "My Documents", icon: FolderOpen },
                 ].map(t => (
                     <button key={t.key} onClick={() => setTab(t.key)}
                         className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t.key ? "border-[#506EE4] text-[#506EE4]" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
@@ -256,6 +287,43 @@ export default function MyHRMS() {
                 </div>
             )}
 
+            {/* Documents Tab */}
+            {tab === "documents" && (
+                <div className="space-y-3">
+                    <div className="flex justify-end">
+                        <button onClick={() => setShowDocUpload(true)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg bg-[#506EE4] text-white hover:bg-[#3f56c2]">
+                            <Upload size={14} /> Upload Document
+                        </button>
+                    </div>
+                    {documents.length === 0 ? (
+                        <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-400">No documents yet.</div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {documents.map(d => (
+                                <div key={d.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <FileText size={18} className="text-gray-500 shrink-0" />
+                                        <div className="min-w-0">
+                                            <p className="font-medium text-gray-800 text-sm truncate">{d.document_name}</p>
+                                            <p className="text-xs text-gray-400 truncate">{d.file_name}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`self-start px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                        { "ID Proof":"bg-blue-100 text-blue-700","Address Proof":"bg-green-100 text-green-700","Educational":"bg-purple-100 text-purple-700","Experience":"bg-yellow-100 text-yellow-700","Contract":"bg-orange-100 text-orange-700","Other":"bg-gray-100 text-gray-600" }[d.document_type] ?? "bg-gray-100 text-gray-600"
+                                    }`}>{d.document_type}</span>
+                                    <p className="text-xs text-gray-400">{dayjs(d.createdAt).format("DD MMM YYYY")}</p>
+                                    <a href={d.file_url} target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-1 text-xs text-[#506EE4] hover:underline mt-auto">
+                                        <Eye size={12} /> View / Download
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Apply Leave Modal */}
             {showApply && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -295,6 +363,51 @@ export default function MyHRMS() {
                             <button onClick={() => setShowApply(false)} className="flex-1 border border-gray-200 rounded-lg py-2 text-sm hover:bg-gray-50">Cancel</button>
                             <button onClick={applyLeave} disabled={saving} className="flex-1 bg-[#506EE4] text-white rounded-lg py-2 text-sm font-medium disabled:opacity-60">
                                 {saving ? "Applying..." : "Apply Leave"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Document Upload Modal */}
+            {showDocUpload && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div className="bg-white w-[440px] rounded-xl shadow-xl p-6 relative">
+                        <button onClick={() => setShowDocUpload(false)} className="absolute top-3 right-3 text-gray-400 hover:text-black"><X size={18} /></button>
+                        <h2 className="text-lg font-semibold mb-4">Upload Document</h2>
+                        <div className="space-y-3 text-sm">
+                            <div><label className="text-xs font-medium text-gray-500 uppercase">Document Name *</label>
+                                <input value={docName} onChange={e => setDocName(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 mt-1 text-sm" placeholder="e.g. Aadhar Card" /></div>
+                            <div><label className="text-xs font-medium text-gray-500 uppercase">Document Type</label>
+                                <select value={docType} onChange={e => setDocType(e.target.value)}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 mt-1 text-sm">
+                                    {DOC_TYPES.map(t => <option key={t}>{t}</option>)}
+                                </select></div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-500 uppercase">File *</label>
+                                <div onClick={() => fileRef.current?.click()}
+                                    className="mt-1 border-2 border-dashed border-gray-200 rounded-lg p-4 text-center cursor-pointer hover:border-[#506EE4] hover:bg-blue-50 transition-colors">
+                                    {selectedFile ? (
+                                        <p className="text-sm text-gray-700 font-medium">{selectedFile.name} <span className="text-gray-400">({(selectedFile.size/1024).toFixed(0)} KB)</span></p>
+                                    ) : (
+                                        <div className="text-gray-400">
+                                            <Upload size={20} className="mx-auto mb-1" />
+                                            <p className="text-sm">Click to select file</p>
+                                            <p className="text-xs mt-0.5">PDF, JPG, PNG, DOC, XLS (max 10MB)</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <input ref={fileRef} type="file" className="hidden"
+                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xlsx,.xls"
+                                    onChange={e => setSelectedFile(e.target.files[0] || null)} />
+                            </div>
+                        </div>
+                        <div className="flex gap-3 mt-5">
+                            <button onClick={() => setShowDocUpload(false)} className="flex-1 border border-gray-200 rounded-lg py-2 text-sm hover:bg-gray-50">Cancel</button>
+                            <button onClick={handleDocUpload} disabled={uploading}
+                                className="flex-1 bg-[#506EE4] text-white rounded-lg py-2 text-sm font-medium disabled:opacity-60 flex items-center justify-center gap-2">
+                                {uploading ? <><Loader2 size={14} className="animate-spin" /> Uploading...</> : <><Upload size={14} /> Upload</>}
                             </button>
                         </div>
                     </div>
