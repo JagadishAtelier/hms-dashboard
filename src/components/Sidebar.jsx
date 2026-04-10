@@ -280,6 +280,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarCheck },
         { to: "/admissions", label: "Admissions", icon: Bed },
         { to: "/records", label: "Medical Records", icon: ClipboardList },
+        { to: "/session-plans", label: "Session Plans", icon: CalendarDays },
         { to: "/my-hrms", label: "My HRMS", icon: IdCardLanyard },
       ],
       labtechnician: [
@@ -296,6 +297,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         // { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
         { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
         { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
+        { to: "/session-plans", label: "Session Plans", icon: CalendarCheck },
+        { to: "/session-plans/due-tomorrow", label: "Due Tomorrow", icon: CalendarDays },
         { to: "/my-hrms", label: "My HRMS", icon: IdCardLanyard },
       ],
       superadmin: [

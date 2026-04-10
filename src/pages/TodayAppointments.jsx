@@ -296,7 +296,7 @@ function TodayAppointments() {
           </select>
 
           <Button
-            className="bg-[#506EE4] text-white h-[36px] flex items-center gap-2 w-full sm:w-auto text-sm"
+             className="p-2 rounded-md bg-red-500 hover:bg-red-600 text-white border-none flex items-center justify-center"
             onClick={() => fetchAppointments(1)}
           >
             <RefreshCw size={14} />
@@ -352,7 +352,6 @@ function TodayAppointments() {
                         <td className="px-4 py-3 text-gray-600 text-xs">{item.notes || "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <Button className="bg-[#506EE4] text-white text-xs h-6 px-2 rounded" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
                             <button
                               onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
                               className="px-2 py-1 text-[11px] rounded bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
@@ -468,7 +467,6 @@ function TodayAppointments() {
                   )}
 
                   <div className="col-span-2">
-                    <Button className="bg-[#0E1680] text-white w-full mt-3 text-sm" onClick={() => handleTakeForConsultation(item)}>Consultation</Button>
                     <button
                       onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
                       className="w-full mt-2 px-3 py-2 text-sm rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
