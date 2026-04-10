@@ -81,6 +81,10 @@ import BillableItemForm from "./pages/BillableItems/BillableItemForm.jsx";
 import POSPage from "./pages/POSPage/POSPage.jsx";
 import POSList from "./pages/POSPage/POSList.jsx";
 import POSReceipt from "./pages/POSPage/POSReceipt.jsx";
+import SessionPlans from "./pages/SessionPage/SessionPlans.jsx";
+import SessionPlanCreate from "./pages/SessionPage/SessionPlanCreate.jsx";
+import SessionsDueTomorrow from "./pages/SessionPage/SessionsDueTomorrow.jsx";
+import SessionPlanDetail from "./pages/SessionPage/SessionPlanDetail.jsx";
 import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
 import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
 import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
@@ -863,6 +867,10 @@ function App() {
           <Route path="/pos" element={<POSPage />} />
           <Route path="/pos/sales" element={<AdminLayout><POSList /></AdminLayout>} />
           <Route path="/receipt/:id" element={<POSReceipt />} />
+          <Route path="/session-plans" element={<AdminLayout><SessionPlans /></AdminLayout>} />
+          <Route path="/session-plans/create" element={<AdminLayout><SessionPlanCreate /></AdminLayout>} />
+          <Route path="/session-plans/due-tomorrow" element={<AdminLayout><SessionsDueTomorrow /></AdminLayout>} />
+          <Route path="/session-plans/:id" element={<AdminLayout><SessionPlanDetail /></AdminLayout>} />
         </Routes>
       </Router>
     </SidebarProvider>
