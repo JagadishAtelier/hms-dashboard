@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
+import DashboardDispatcher from "./pages/Dashboards/DashboardDispatcher";
 // import Posts from "./pages/Posts";
 // import Users from "./pages/Users";
 import AdminLayout from "./layout/AdminLayout";
@@ -115,7 +115,7 @@ function App() {
             path="/dashboard"
             element={
               <AdminLayout>
-                <Dashboard />
+                <DashboardDispatcher />
               </AdminLayout>
             }
           />

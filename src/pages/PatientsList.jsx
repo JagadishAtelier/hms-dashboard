@@ -291,7 +291,14 @@ function PatientsList() {
 
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.45 }} className="flex flex-wrap gap-3 items-center w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
-            {/* If you have a search input you can place it here. kept empty to match original */}
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              type="text"
+              placeholder="Search Name, Email, Phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-white text-sm"
+            />
           </div>
 
           <Button
@@ -329,7 +336,13 @@ function PatientsList() {
                     </th>
                     <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Phone</th>
                     <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Email</th>
-                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Gender</th>
+                    <th 
+                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
+                      onClick={() => toggleSort("gender")}
+                    >
+                      Gender{" "}
+                      {sortBy === "gender" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
+                    </th>
                     <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Status</th>
                     <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Action</th>
                   </tr>

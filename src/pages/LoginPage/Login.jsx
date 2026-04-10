@@ -207,28 +207,27 @@ export default function Login() {
 
       switch (normalizedRole) {
         case "superadmin":
-          navigate("/admin-dashboard");
-          break;
         case "admin":
-          navigate("/admin-dashboard");
+          navigate("/dashboard");
           break;
         case "receptionist":
-          navigate("/appointment");
+          // Or you can push them to "/dashboard" to use the new ReceptionistDashboard
+          navigate("/dashboard");
           break;
         case "doctor":
           navigate("/dashboard");
           break;
         case "pharmacist":
-          navigate("/pharma-dashboard");
+          navigate("/dashboard");
           break;
         case "labtechnician":
-          navigate("/labtech-dashboard");
+          navigate("/dashboard");
           break;
         case "patient":
           navigate("/patient-dashboard");
           break;
         case "nurse":
-          navigate("/nurse-dashboard");
+          navigate("/nurse-dashboard"); // Needs confirmation if we made one, else keep
           break;
         case "foodmanager":
           navigate("/food-dashboard");
@@ -237,7 +236,7 @@ export default function Login() {
           navigate("/accountant-dashboard");
           break;
         case "hr":
-          navigate("/admin-dashboard");
+          navigate("/dashboard");
           break;
         default:
           navigate("/dashboard");

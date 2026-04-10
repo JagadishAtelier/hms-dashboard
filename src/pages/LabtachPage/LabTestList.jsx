@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import labTestOrderService from "../../service/labtestorderService";
 import Loading from "../Loading.jsx";
 
@@ -30,6 +30,7 @@ const DEFAULT_LIMIT = 10;
 
 export default function LabTestList() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [labOrders, setLabOrders] = useState([]);
   const [total, setTotal] = useState(0);
@@ -37,7 +38,10 @@ export default function LabTestList() {
   const [animateKey, setAnimateKey] = useState(0);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("status") || "";
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [sortBy, setSortBy] = useState("order_date");
