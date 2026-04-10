@@ -94,7 +94,9 @@ function NurseList() {
           <Button className="bg-[#506EE4] hover:bg-[#3f56c2] text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm" onClick={() => navigate("/nurses/create")}>
             <Plus size={14} /> Add Nurse
           </Button>
-          <Button variant="outline" className="h-9 flex items-center gap-2 text-sm" onClick={() => fetchNurses(currentPage)}>
+          <Button
+  className="h-9 flex items-center gap-2 w-full sm:w-auto text-sm bg-red-500 hover:bg-red-600 text-white border-none"
+  onClick={() => fetchNurses(currentPage)}>
             <RefreshCw size={14} /> Refresh
           </Button>
         </div>

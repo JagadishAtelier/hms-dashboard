@@ -217,8 +217,8 @@ export default function OrderList() {
           </Button>
 
           <Button
-            className="bg-[#506EE4] text-white h-9 flex items-center gap-2 text-sm"
-            onClick={() => fetchOrders(1)}
+           className="bg-red-500 hover:bg-red-600 text-white h-9 flex items-center gap-2 w-full sm:w-auto text-sm"
+  onClick={() => fetchOrders(1)}
           >
             <RefreshCw size={14} />
           </Button>
