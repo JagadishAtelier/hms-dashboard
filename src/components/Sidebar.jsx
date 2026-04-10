@@ -294,6 +294,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/admissions", label: "Admissions", icon: Bed },
         { to: "/patient-list", label: "Patients", icon: Users },
+        { to: "/prescription", label: "Prescriptions", icon: ClipboardCheck },
         // { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
         { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
         { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
@@ -395,6 +396,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
         { to: "/product", label: "Product", icon: Tag },
         { to: "/stock", label: "Stock & Inventory", icon: Package },
         { to: "/prescription", label: "Prescriptions", icon: ClipboardCheck },
+        { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
+        { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
         { to: "/my-hrms", label: "My HRMS", icon: IdCardLanyard },
       ],
       nurse: [

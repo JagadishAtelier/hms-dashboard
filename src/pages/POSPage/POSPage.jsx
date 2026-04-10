@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Search, Trash2, X, ArrowLeft, User, Phone, ChevronDown, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import posService from "../../service/posService.js";
@@ -23,6 +23,7 @@ const typeColor = (type) => ({
 export default function POSPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const editId = searchParams.get("edit");
     const isEdit = Boolean(editId);
     const dropdownRef = useRef(null);
@@ -53,9 +54,12 @@ export default function POSPage() {
     const [showPayment, setShowPayment] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("cash");
     const [saleStatus, setSaleStatus] = useState("completed");
-    const [paidAmount, setPaidAmount] = useState("");  // what customer actually pays
+    const [paidAmount, setPaidAmount] = useState("");
     const [completedSale, setCompletedSale] = useState(null);
     const [sendingWA, setSendingWA] = useState(false);
+    // Session payment
+    const [showSessionPay, setShowSessionPay] = useState(false);
+    const [sessionAmount, setSessionAmount] = useState("");
 
     // Load billable items catalogue
     useEffect(() => {
@@ -65,6 +69,20 @@ export default function POSPage() {
             .catch(() => toast.error("Failed to load items"))
             .finally(() => setLoading(false));
     }, []);
+
+    // Pre-fill from prescription (navigate state)
+    useEffect(() => {
+        const prefill = location.state?.prefill;
+        if (!prefill) return;
+        if (prefill.customerName) setCustomerName(prefill.customerName);
+        if (prefill.customerPhone) setCustomerPhone(prefill.customerPhone);
+        if (prefill.notes) setNotes(prefill.notes);
+        if (Array.isArray(prefill.cart) && prefill.cart.length > 0) {
+            setCart(prefill.cart);
+        }
+        // Clear state so refresh doesn't re-apply
+        window.history.replaceState({}, document.title);
+    }, [location.state]);
 
     // If edit mode — load existing sale and prefill everything
     useEffect(() => {
@@ -366,13 +384,62 @@ export default function POSPage() {
                         <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>{fmt(subtotal)}</span></div>
                         <div className="flex justify-between text-sm text-gray-600"><span>Tax</span><span>{fmt(tax)}</span></div>
                         <div className="flex justify-between text-lg font-bold text-gray-800 pt-1 border-t border-gray-100"><span>Total</span><span>{fmt(total)}</span></div>
-                        <div className="grid grid-cols-3 gap-2 pt-2">
+
+                        {/* Session payment quick-add */}
+                        {showSessionPay ? (
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 space-y-2">
+                                <p className="text-xs font-semibold text-indigo-700">Session Payment</p>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={sessionAmount}
+                                        onChange={e => setSessionAmount(e.target.value)}
+                                        placeholder="Enter session amount..."
+                                        className="flex-1 border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                                        autoFocus
+                                    />
+                                    <button onClick={() => {
+                                        if (!sessionAmount || parseFloat(sessionAmount) <= 0) { toast.error("Enter a valid amount"); return; }
+                                        // Add session fee as a cart item
+                                        const sessionItem = {
+                                            id: `session-${Date.now()}`,
+                                            name: `Session Fee`,
+                                            type: "Service",
+                                            price: parseFloat(sessionAmount),
+                                            qty: 1,
+                                            tax_rate: 0,
+                                        };
+                                        setCart(prev => {
+                                            const existing = prev.find(p => p.id.startsWith("session-"));
+                                            if (existing) return prev.map(p => p.id.startsWith("session-") ? { ...p, price: parseFloat(sessionAmount) } : p);
+                                            return [...prev, sessionItem];
+                                        });
+                                        setShowSessionPay(false);
+                                        setSessionAmount("");
+                                        toast.success(`Session fee ₹${sessionAmount} added to cart`);
+                                    }} className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">
+                                        Add
+                                    </button>
+                                    <button onClick={() => { setShowSessionPay(false); setSessionAmount(""); }} className="px-3 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50">
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        ) : null}
+
+                        <div className="grid grid-cols-4 gap-2 pt-2">
                             {["cash", "card", "upi"].map(m => (
                                 <button key={m} onClick={() => { setPaymentMethod(m); setPaidAmount(total.toFixed(2)); setShowPayment(true); }}
                                     className={`py-2 rounded-lg text-sm font-medium ${m === "cash" ? "bg-green-600 text-white" : m === "card" ? "bg-blue-600 text-white" : "bg-purple-600 text-white"}`}>
                                     {m.toUpperCase()}
                                 </button>
                             ))}
+                            <button onClick={() => setShowSessionPay(v => !v)}
+                                className="py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700">
+                                Session
+                            </button>
                         </div>
                     </div>
                 </div>
