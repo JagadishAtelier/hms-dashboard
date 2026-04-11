@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, RefreshCw, Search as SearchIcon, FileText, Eye, Trash2, ClipboardCheck, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, Search as SearchIcon, FileText, Eye, Trash2, ClipboardCheck, ChevronUp, ChevronDown, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import prescriptionService from "../../service/prescriptionService.js";
+import posService from "../../service/posService.js";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Loading from "../Loading.jsx";
 import dayjs from "dayjs";
@@ -21,6 +23,7 @@ const computeTotal = (items = []) =>
   items.reduce((sum, it) => sum + parseFloat(it.total_price ?? (it.quantity && it.unit_price ? it.quantity * it.unit_price : 0) ?? 0), 0).toFixed(2);
 
 export default function PrescriptionList() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -150,6 +153,44 @@ export default function PrescriptionList() {
   };
 
 
+  const generateBill = async (rx) => {
+    try {
+      let fullRx = rx;
+      if (!rx.items || rx.items.length === 0) {
+        const res = await prescriptionService.getPrescriptionById(rx.id);
+        fullRx = res?.data?.data ?? res?.data ?? rx;
+      }
+      const patName = fullRx.patient
+        ? `${fullRx.patient.first_name ?? ""} ${fullRx.patient.last_name ?? ""}`.trim()
+        : fullRx.patient_name ?? "Patient";
+
+      const cartItems = (fullRx.items ?? []).map(it => ({
+        id: it.product_id || it.id,
+        name: it.product?.product_name ?? it.medicine_name ?? "Medicine",
+        type: "Medication",
+        price: parseFloat(it.unit_price || 0),
+        qty: it.quantity || 1,
+        tax_rate: 0,
+      })).filter(i => i.price > 0);
+
+      if (cartItems.length === 0) { toast.error("No billable items in prescription"); return; }
+
+      // Navigate to POS with pre-filled data via state
+      navigate("/pos", {
+        state: {
+          prefill: {
+            customerName: patName,
+            customerPhone: fullRx.patient?.phone ?? "",
+            cart: cartItems,
+            notes: `Prescription #${fullRx.prescription_no || fullRx.id}`,
+          }
+        }
+      });
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to load prescription");
+    }
+  };
+
   return (
     <div className="p-2 sm:p-4 w-full h-full flex flex-col overflow-hidden text-sm">
       {/* Header */}
@@ -222,6 +263,7 @@ export default function PrescriptionList() {
                           <div className="flex gap-1">
                             <Button variant="outline" size="icon" className="h-7 w-7 hover:bg-indigo-50 hover:text-indigo-600" onClick={() => handleView(rx)}><Eye size={13} /></Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-blue-50 hover:text-blue-600" onClick={() => exportPDF(rx)}><FileText size={13} /></Button>
+                            <Button variant="ghost" size="icon" title="Generate Bill" className="h-7 w-7 hover:bg-green-50 hover:text-green-600" onClick={() => generateBill(rx)}><ReceiptText size={13} /></Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-red-50 hover:text-red-600" onClick={() => handleDelete(rx.id)}><Trash2 size={13} /></Button>
                           </div>
                         </td>
@@ -254,6 +296,7 @@ export default function PrescriptionList() {
                     <div className="flex gap-2">
                       <Button className="flex-1 h-8 text-xs bg-[#506EE4] text-white" onClick={() => handleView(rx)}>View</Button>
                       <Button variant="outline" className="h-8 text-xs" onClick={() => exportPDF(rx)}><FileText size={13} /></Button>
+                      <Button variant="outline" title="Generate Bill" className="h-8 text-xs text-green-600 border-green-200 hover:bg-green-50" onClick={() => generateBill(rx)}><ReceiptText size={13} /></Button>
                       <Button variant="outline" className="h-8 text-xs text-red-600 border-red-200" onClick={() => handleDelete(rx.id)}><Trash2 size={13} /></Button>
                     </div>
                   </article>
