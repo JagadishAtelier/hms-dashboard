@@ -66,12 +66,33 @@ function PatientProfile() {
 
   // ✅ Navigate to Today Consultation page
   const handleTodayConsultation = () => {
-    navigate(`/doctor-notes/${appointmentId}`); // <-- Adjust this route as per your project
+    if (appointmentId) {
+      navigate(`/doctor-notes/${appointmentId}`);
+    } else if (history?.latestAppointment?.id) {
+      navigate(`/doctor-notes/${history.latestAppointment.id}`);
+    } else {
+      navigate(`/today-appoinments`);
+    }
   };
 
   return (
-    <div className="">
+    <div className="space-y-6">
       {/* HEADER */}
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+        <button
+          onClick={() => navigate('/patient-list')}
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Patients List
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400">Patient Code:</span>
+          <span className="text-xs font-mono font-semibold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">
+            {patient_code || "N/A"}
+          </span>
+        </div>
+      </div>
 
       <div className="flex gap-10">
         {/* LEFT CONTENT */}

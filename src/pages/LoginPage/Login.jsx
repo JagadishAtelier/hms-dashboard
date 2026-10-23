@@ -316,6 +316,8 @@ export default function Login() {
                 <Mail size={18} />
               </div>
               <input
+                id="login-identifier"
+                name="identifier"
                 type="text"
                 placeholder="doctor@hospital.com"
                 value={formData.identifier}
@@ -333,6 +335,8 @@ export default function Login() {
                 <Lock size={18} />
               </div>
               <input
+                id="login-password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••••••"
                 value={formData.password}

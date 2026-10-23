@@ -486,44 +486,63 @@ function DoctorNotes() {
 
   // ---------- UI: return JSX ----------
   return (
-    <div className="p-6 w-full flex flex-col gap-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-[#0E1680]">Doctor’s Consultation Notes</h2>
-        <div className="flex gap-3">
-          <Button onClick={handleLabTestOrder} className="bg-gradient-to-r from-[#0E1680] to-[#2433D3] text-white shadow-md">Lab Test Order</Button>
-          <Button onClick={handleViewTest} className="bg-gradient-to-r from-[#0E1680] to-[#2433D3] text-white shadow-md">View Test</Button>
+    <div className="p-6 w-full flex flex-col gap-6">
+      <div className="flex justify-between items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Doctor’s Clinical Consultation</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Appointment #{appointment_id || "—"} · Record encounter, vitals, diagnosis, and e-prescription
+          </p>
+        </div>
+        <div className="flex gap-2.5">
+          <Button onClick={handleLabTestOrder} variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs font-semibold">
+            Lab Test Order
+          </Button>
+          <Button onClick={handleViewTest} variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold">
+            View Tests
+          </Button>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex bg-[#EEF0FF] rounded-2xl p-1 w-fit shadow-inner">
+        <TabsList className="flex bg-slate-100 border border-slate-200 rounded-xl p-1 w-fit shadow-xs gap-1">
           {[
-            { value: "encounter", label: "Encounter", icon: <Stethoscope size={18} /> },
-            { value: "vitals", label: "Vitals", icon: <HeartPulse size={18} /> },
-            { value: "diagnosis", label: "Diagnosis", icon: <ClipboardList size={18} /> },
-            { value: "clinical", label: "Clinical Note", icon: <FileText size={18} /> },
-            { value: "prescriptions", label: "Prescriptions", icon: <FileText size={18} /> },
+            { value: "encounter", label: "Encounter", icon: <Stethoscope size={16} />, saved: Boolean(encounterId) },
+            { value: "vitals", label: "Vitals", icon: <HeartPulse size={16} />, saved: Boolean(vitalsId) },
+            { value: "diagnosis", label: "Diagnosis", icon: <ClipboardList size={16} />, saved: Boolean(diagnosisId) },
+            { value: "clinical", label: "Clinical Note", icon: <FileText size={16} />, saved: Boolean(clinicalId) },
+            { value: "prescriptions", label: "Prescriptions", icon: <FileText size={16} />, saved: presc.items?.length > 0 },
           ].map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className={`flex items-center gap-2 px-6 py-2 mx-1 rounded-lg text-sm font-semibold transition-all duration-300
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all
                 ${activeTab === tab.value
-                  ? "bg-gradient-to-r from-[#0E1680] to-[#2433D3] text-white shadow-md scale-105"
-                  : "text-[#0E1680]/70 hover:bg-[#DDE0FF] hover:text-[#0E1680]"
+                  ? "bg-indigo-600 text-white shadow-xs"
+                  : "text-slate-600 hover:bg-white hover:text-slate-900"
                 }`}
             >
               {tab.icon}
               {tab.label}
+              {tab.saved && (
+                <span className={`w-1.5 h-1.5 rounded-full ${activeTab === tab.value ? "bg-white" : "bg-emerald-500"}`} />
+              )}
             </TabsTrigger>
           ))}
         </TabsList>
 
         {/* Encounter */}
         <TabsContent value="encounter">
-          <Card>
+          <Card className="border border-slate-200 shadow-xs">
             <CardContent className="p-6 space-y-5">
-              <h3 className="text-lg font-semibold text-[#0E1680]">Encounter Details</h3>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900">Encounter Details</h3>
+                {encounterId && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium px-2 py-0.5 rounded-full">
+                    Encounter Saved
+                  </span>
+                )}
+              </div>
               {[
                 ["chief_complaint", "Chief Complaint"],
                 ["history", "Medical History"],
@@ -531,12 +550,12 @@ function DoctorNotes() {
                 ["plan", "Treatment Plan"],
               ].map(([name, label]) => (
                 <div key={name}>
-                  <label className="text-sm font-medium">{label}</label>
-                  <Textarea name={name} value={encounter[name]} onChange={(e) => handleChange(e, setEncounter)} placeholder={`Enter ${label.toLowerCase()}`} />
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">{label}</label>
+                  <Textarea name={name} value={encounter[name]} onChange={(e) => handleChange(e, setEncounter)} placeholder={`Enter ${label.toLowerCase()}...`} className="mt-1" />
                 </div>
               ))}
-              <div className="flex justify-end">
-                <Button className="bg-[#0E1680] text-white px-8" onClick={handleSaveEncounter}>
+              <div className="flex justify-end pt-2">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 font-medium shadow-sm" onClick={handleSaveEncounter}>
                   {encounterId ? "Update Encounter" : "Save Encounter"}
                 </Button>
               </div>
@@ -546,10 +565,17 @@ function DoctorNotes() {
 
         {/* Vitals */}
         <TabsContent value="vitals">
-          <Card>
+          <Card className="border border-slate-200 shadow-xs">
             <CardContent className="p-6 space-y-5">
-              <h3 className="text-lg font-semibold text-[#0E1680]">Patient Vitals</h3>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900">Patient Vitals</h3>
+                {vitalsId && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium px-2 py-0.5 rounded-full">
+                    Vitals Recorded
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {[
                   ["height", "Height (cm)"],
                   ["weight", "Weight (kg)"],
@@ -560,13 +586,13 @@ function DoctorNotes() {
                   ["spo2", "SpO₂ (%)"],
                 ].map(([name, label]) => (
                   <div key={name}>
-                    <label className="text-sm font-medium">{label}</label>
-                    <Input name={name} value={vitals[name]} onChange={(e) => handleChange(e, setVitals)} placeholder={label} />
+                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">{label}</label>
+                    <Input name={name} value={vitals[name]} onChange={(e) => handleChange(e, setVitals)} placeholder={label} className="mt-1" />
                   </div>
                 ))}
               </div>
-              <div className="flex justify-end">
-                <Button className="bg-[#0E1680] text-white px-8" onClick={handleSaveVitals}>
+              <div className="flex justify-end pt-2">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 font-medium shadow-sm" onClick={handleSaveVitals}>
                   {vitalsId ? "Update Vitals" : "Save Vitals"}
                 </Button>
               </div>
@@ -576,25 +602,32 @@ function DoctorNotes() {
 
         {/* Diagnosis */}
         <TabsContent value="diagnosis">
-          <Card>
+          <Card className="border border-slate-200 shadow-xs">
             <CardContent className="p-6 space-y-5">
-              <h3 className="text-lg font-semibold text-[#0E1680]">Diagnosis Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900">Diagnosis Details</h3>
+                {diagnosisId && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium px-2 py-0.5 rounded-full">
+                    Diagnosis Recorded
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">ICD Code</label>
-                  <Input name="icd_code" value={diagnosis.icd_code} onChange={(e) => handleChange(e, setDiagnosis)} placeholder="Enter ICD code" />
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">ICD Code</label>
+                  <Input name="icd_code" value={diagnosis.icd_code} onChange={(e) => handleChange(e, setDiagnosis)} placeholder="e.g. J06.9 (Acute URI)" className="mt-1" />
                 </div>
                 <div className="flex items-center gap-2 mt-6">
-                  <input type="checkbox" name="primary" checked={diagnosis.primary} onChange={(e) => handleChange(e, setDiagnosis)} className="w-4 h-4 accent-[#0E1680]" />
-                  <label className="text-sm font-medium">Primary Diagnosis</label>
+                  <input type="checkbox" name="primary" checked={diagnosis.primary} onChange={(e) => handleChange(e, setDiagnosis)} className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 accent-indigo-600" />
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Primary Diagnosis</label>
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Description</label>
-                <Textarea name="description" value={diagnosis.description} onChange={(e) => handleChange(e, setDiagnosis)} placeholder="Enter diagnosis description" />
+                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Clinical Description</label>
+                <Textarea name="description" value={diagnosis.description} onChange={(e) => handleChange(e, setDiagnosis)} placeholder="Enter detailed diagnostic findings..." className="mt-1" />
               </div>
-              <div className="flex justify-end">
-                <Button className="bg-[#0E1680] text-white px-8" onClick={handleSaveDiagnosis}>
+              <div className="flex justify-end pt-2">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 font-medium shadow-sm" onClick={handleSaveDiagnosis}>
                   {diagnosisId ? "Update Diagnosis" : "Save Diagnosis"}
                 </Button>
               </div>
@@ -604,15 +637,22 @@ function DoctorNotes() {
 
         {/* Clinical */}
         <TabsContent value="clinical">
-          <Card>
+          <Card className="border border-slate-200 shadow-xs">
             <CardContent className="p-6 space-y-5">
-              <h3 className="text-lg font-semibold text-[#0E1680]">Doctor’s Clinical Note</h3>
-              <div>
-                <label className="text-sm font-medium">Clinical Note</label>
-                <Textarea name="note" value={clinical.note} onChange={(e) => handleChange(e, setClinical)} placeholder="Enter clinical note" />
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900">Doctor’s Clinical Note</h3>
+                {clinicalId && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium px-2 py-0.5 rounded-full">
+                    Note Recorded
+                  </span>
+                )}
               </div>
-              <div className="flex justify-end">
-                <Button className="bg-[#0E1680] text-white px-8" onClick={handleSaveClinicalNote}>
+              <div>
+                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Clinical Note</label>
+                <Textarea name="note" value={clinical.note} rows={4} onChange={(e) => handleChange(e, setClinical)} placeholder="Enter comprehensive clinical assessment notes..." className="mt-1" />
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 font-medium shadow-sm" onClick={handleSaveClinicalNote}>
                   {clinicalId ? "Update Note" : "Save Note"}
                 </Button>
               </div>
@@ -620,102 +660,98 @@ function DoctorNotes() {
           </Card>
         </TabsContent>
 
-        {/* Prescriptions (no Prescription No field; patient name auto-filled from vitals) */}
+        {/* Prescriptions */}
         <TabsContent value="prescriptions">
           <div className="grid grid-cols-1 gap-6">
-            {/* LEFT: form */}
-            <div className="bg-white rounded-md p-4 shadow-sm">
-              <div className="flex justify-between items-center mb-3">
-                <div className="text-blue-600 font-semibold">Prescription Details</div>
-                <div className="text-sm text-gray-500">{presc.billing_date}</div>
+            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+              <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <div className="text-slate-900 font-bold text-base">e-Prescription & Pharmacy Order</div>
+                <div className="text-xs font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">{presc.billing_date}</div>
               </div>
 
-              <form onSubmit={handleSubmitPresc} className="space-y-3">
-                {/* NOTE: Prescription No removed (server will auto-generate) */}
-
-                <div className="grid grid-cols-2 gap-2">
+              <form onSubmit={handleSubmitPresc} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm">Date</label>
-                    <input type="date" value={presc.billing_date} onChange={(e) => setPresc((p) => ({ ...p, billing_date: e.target.value }))} className="w-full border rounded px-2 py-1" />
+                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Date</label>
+                    <input type="date" value={presc.billing_date} onChange={(e) => setPresc((p) => ({ ...p, billing_date: e.target.value }))} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
                   </div>
                   <div>
-                    <label className="text-sm">Patient Name</label>
-                    {/* auto-filled from vitals; user can still edit if needed */}
-                    <Input value={presc.customer_name} onChange={(e) => setPresc((p) => ({ ...p, customer_name: e.target.value }))} />
+                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Patient Name</label>
+                    <Input value={presc.customer_name} onChange={(e) => setPresc((p) => ({ ...p, customer_name: e.target.value }))} className="mt-1" placeholder="Patient name" />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm">Phone</label>
-                    <Input value={presc.customer_phone} onChange={(e) => setPresc((p) => ({ ...p, customer_phone: e.target.value }))} />
+                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Phone</label>
+                    <Input value={presc.customer_phone} onChange={(e) => setPresc((p) => ({ ...p, customer_phone: e.target.value }))} className="mt-1" placeholder="Phone number" />
                   </div>
                   <div>
-                    <label className="text-sm">Remarks</label>
-                    <Input value={presc.remarks} onChange={(e) => setPresc((p) => ({ ...p, remarks: e.target.value }))} />
+                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Doctor Remarks</label>
+                    <Input value={presc.remarks} onChange={(e) => setPresc((p) => ({ ...p, remarks: e.target.value }))} className="mt-1" placeholder="Instructions for patient/pharmacist" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm">Scan / Enter Product Code</label>
-                  <div className="flex gap-2">
-                    <Input value={productCodePresc} onChange={(e) => setProductCodePresc(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleProductCodePresc(productCodePresc); } }} />
-                    <button type="button" onClick={() => handleProductCodePresc(productCodePresc)} className="px-3 py-2 bg-[#0E1680] text-white rounded">Add</button>
+                  <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Search / Scan Medication Product Code</label>
+                  <div className="flex gap-2 mt-1">
+                    <Input value={productCodePresc} onChange={(e) => setProductCodePresc(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleProductCodePresc(productCodePresc); } }} placeholder="Scan barcode or enter medication code..." />
+                    <Button type="button" onClick={() => handleProductCodePresc(productCodePresc)} className="bg-indigo-600 hover:bg-indigo-700 text-white shrink-0">Add Item</Button>
                   </div>
                 </div>
 
                 {/* Items table */}
-                <div className="overflow-x-auto border rounded">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100">
+                <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
-                        <th className="p-2 text-left">#</th>
-                        <th className="p-2 text-left">Product</th>
-                        <th className="p-2">Qty</th>
-                        <th className="p-2">Unit Price</th>
-                        <th className="p-2">Discount</th>
-                        <th className="p-2">Tax</th>
-                        <th className="p-2">Total</th>
-                        <th className="p-2"></th>
+                        <th className="p-3 text-left font-semibold text-slate-600">#</th>
+                        <th className="p-3 text-left font-semibold text-slate-600">Product / Medication</th>
+                        <th className="p-3 text-center font-semibold text-slate-600">Qty</th>
+                        <th className="p-3 text-right font-semibold text-slate-600">Unit Price</th>
+                        <th className="p-3 text-right font-semibold text-slate-600">Discount</th>
+                        <th className="p-3 text-right font-semibold text-slate-600">Tax</th>
+                        <th className="p-3 text-right font-semibold text-slate-600">Total</th>
+                        <th className="p-3 text-center font-semibold text-slate-600">Action</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100">
                       {presc.items && presc.items.length > 0 ? presc.items.map((it, idx) => (
-                        <tr key={idx} className="border-t">
-                          <td className="p-2">{idx + 1}</td>
-                          <td className="p-2">{it.product_name} <div className="text-xs text-gray-400">{it.product_code}</div></td>
-                          <td className="p-2">
-                            <input type="number" min="1" value={it.quantity} onChange={(e) => handleItemChangePresc(idx, "quantity", Number(e.target.value || 0))} className="w-20 border rounded px-1 py-0.5" />
+                        <tr key={idx} className="hover:bg-slate-50/50">
+                          <td className="p-3 text-slate-400">{idx + 1}</td>
+                          <td className="p-3 font-medium text-slate-800">{it.product_name} <div className="text-[11px] text-slate-400 font-mono">{it.product_code}</div></td>
+                          <td className="p-3 text-center">
+                            <input type="number" min="1" value={it.quantity} onChange={(e) => handleItemChangePresc(idx, "quantity", Number(e.target.value || 0))} className="w-16 text-center border border-slate-200 rounded px-1.5 py-0.5 text-xs" />
                           </td>
-                          <td className="p-2">₹<input type="number" min="0" value={it.unit_price} onChange={(e) => handleItemChangePresc(idx, "unit_price", Number(e.target.value || 0))} className="w-24 border rounded px-1 py-0.5 inline-block" /></td>
-                          <td className="p-2">
-                            <input type="number" min="0" value={it.discount_amount || 0} onChange={(e) => handleItemChangePresc(idx, "discount_amount", Number(e.target.value || 0))} className="w-20 border rounded px-1 py-0.5" />
+                          <td className="p-3 text-right font-mono">₹<input type="number" min="0" value={it.unit_price} onChange={(e) => handleItemChangePresc(idx, "unit_price", Number(e.target.value || 0))} className="w-20 text-right border border-slate-200 rounded px-1.5 py-0.5 text-xs inline-block" /></td>
+                          <td className="p-3 text-right font-mono">
+                            <input type="number" min="0" value={it.discount_amount || 0} onChange={(e) => handleItemChangePresc(idx, "discount_amount", Number(e.target.value || 0))} className="w-16 text-right border border-slate-200 rounded px-1.5 py-0.5 text-xs" />
                           </td>
-                          <td className="p-2">₹{(it.tax_amount || 0).toFixed(2)}</td>
-                          <td className="p-2">₹{(it.total_price || 0).toFixed(2)}</td>
-                          <td className="p-2">
-                            <button type="button" onClick={() => removeItemPresc(idx)} className="text-red-600">Remove</button>
+                          <td className="p-3 text-right font-mono text-slate-600">₹{(it.tax_amount || 0).toFixed(2)}</td>
+                          <td className="p-3 text-right font-mono font-semibold text-slate-900">₹{(it.total_price || 0).toFixed(2)}</td>
+                          <td className="p-3 text-center">
+                            <button type="button" onClick={() => removeItemPresc(idx)} className="text-rose-600 hover:text-rose-700 font-medium">Remove</button>
                           </td>
                         </tr>
                       )) : (
                         <tr>
-                          <td className="p-4 text-center text-gray-500" colSpan={8}>No items added</td>
+                          <td className="p-6 text-center text-slate-400 text-xs" colSpan={8}>No medication items added yet. Search or scan above to add.</td>
                         </tr>
                       )}
                     </tbody>
                   </table>
                 </div>
 
-                <div className="flex justify-end items-center gap-3">
-                  <div className="text-sm text-gray-600">Subtotal: <strong>₹{prescSummary.subtotal.toFixed(2)}</strong></div>
+                <div className="flex justify-end items-center gap-3 pt-2">
+                  <div className="text-sm text-slate-600">Estimated Total: <strong className="font-mono text-slate-900 text-base">₹{prescSummary.subtotal.toFixed(2)}</strong></div>
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button type="button" onClick={() => { setPresc({ billing_date: dayjs().format("YYYY-MM-DD"), customer_name: presc.customer_name || "", customer_phone: "", payment_method: "cash", remarks: "", items: [] }); setProductCodePresc(""); }}>
-                    Save Draft
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <Button type="button" variant="outline" onClick={() => { setPresc({ billing_date: dayjs().format("YYYY-MM-DD"), customer_name: presc.customer_name || "", customer_phone: "", payment_method: "cash", remarks: "", items: [] }); setProductCodePresc(""); }} className="border-slate-200 text-slate-700 hover:bg-slate-50">
+                    Clear Form
                   </Button>
-                  <Button type="submit" className="bg-[#0E1680] text-white" disabled={loadingPresc}>
-                    {loadingPresc ? "Saving..." : "Add Prescription"}
+                  <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm font-medium" disabled={loadingPresc}>
+                    {loadingPresc ? "Submitting..." : "Submit Prescription"}
                   </Button>
                 </div>
               </form>

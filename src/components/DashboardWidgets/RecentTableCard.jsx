@@ -2,9 +2,9 @@ import React from 'react';
 
 export default function RecentTableCard({ title, columns, data, onActionClick }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm w-full overflow-hidden border border-gray-100">
-      <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+    <div className="bg-white rounded-xl shadow-[0_1px_3px_0_rgba(15,23,42,0.06),0_1px_2px_-1px_rgba(15,23,42,0.04)] hover:shadow-md transition-shadow duration-200 w-full overflow-hidden border border-slate-200/90">
+      <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+        <h3 className="text-base font-bold text-slate-800 tracking-tight">{title}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">

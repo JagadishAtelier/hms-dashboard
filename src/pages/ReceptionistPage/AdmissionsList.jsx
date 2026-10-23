@@ -32,6 +32,7 @@ import {
 import Loading from "../Loading.jsx";
 import DischargedPatients from "./DischargedPatients.jsx";
 import { motion } from "framer-motion";
+import StatusBadge from "@/components/shared/StatusBadge";
 
 const DEFAULT_LIMIT = 10;
 
@@ -276,19 +277,8 @@ export default function AdmissionsList() {
                     <td className="px-4 py-3 text-[12px] text-gray-700">
                       {item.admittedBy?.username || "—"}
                     </td>
-                    <td className="px-4 py-3 text-[12px]">
-                      <span
-                        className={`px-2.5 py-1.5 uppercase rounded-full text-[12px] font-semibold ${item.status === "admitted"
-                            ? "bg-blue-100 text-blue-700"
-                            : item.status === "transferred"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : item.status === "discharged"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                          }`}
-                      >
-                        {item.status}
-                      </span>
+                    <td className="px-4 py-3 text-xs">
+                      <StatusBadge status={item.status === "admitted" ? "occupied" : item.status} label={item.status} />
                     </td>
                     <td className="px-4 py-3 text-[12px] text-gray-700">
                       <div className="flex flex-wrap items-center gap-1.5">

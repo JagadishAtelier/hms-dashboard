@@ -301,42 +301,39 @@ export default function AdmissionsCreate() {
   }
 
   return (
-    <div className="p-2 sm:p-2 max-w-5xl mx-auto bg-white rounded-lg shadow-sm">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
       {/* HEADER */}
-      <div className="flex justify-between items-center p-1">
-        <div className="flex flex-col md:flex-row items-start mb-4 gap-3">
-          <div
-            className="bg-white cursor-pointer hover:bg-gray-100 hover:border-gray-300 rounded-full p-1 shadow-sm border border-gray-100"
-            title="Go Back"
-          >
-            <ChevronLeft
-              size={22}
-              className="cursor-pointer"
-              onClick={() => navigate(-1)}
-            />
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-[#0E1680]">
-              {isEdit ? "Edit Admission Details" : "New Patient Admission"}
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {isEdit
-                ? "Update patient admission details and bed assignment."
-                : "Fill in the details to assign a patient to an available bed."}
-            </p>
-          </div>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate(-1)}
+          className="h-9 w-9 rounded-full shadow-xs"
+          title="Go Back"
+        >
+          <ChevronLeft size={18} />
+        </Button>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            {isEdit ? "Edit Patient Admission" : "New Patient Admission"}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {isEdit
+              ? "Update patient admission details and bed assignment."
+              : "Fill in the details to assign a patient to an available bed."}
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* CARD WRAPPER */}
-        <Card className="border-0 shadow-none p-0">
-          <CardHeader className="p-2">
-            <CardTitle className="text-xl text-[#0E1680]">
+        <Card className="border border-border/70 shadow-sm bg-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-foreground">
               Admission Details
             </CardTitle>
-            <CardDescription>
-              Select the patient, assign a bed, and note the reason.
+            <CardDescription className="text-sm text-muted-foreground">
+              Select the patient, assign an available ward bed, and record the admission reason.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 p-2">
@@ -635,8 +632,8 @@ export default function AdmissionsCreate() {
           </Button>
           <Button
             type="submit"
-            className="bg-[#0E1680] hover:bg-blue-700 mb-2 text-white font-semibold transition-colors"
             disabled={loading}
+            className="gap-2"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

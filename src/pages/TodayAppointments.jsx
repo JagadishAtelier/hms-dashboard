@@ -16,6 +16,7 @@ import labTestOrderService from "../service/labtestorderService";
 import prescriptionService from "../service/prescriptionService";
 import { toast } from "sonner";
 import Loading from "./Loading.jsx";
+import StatusBadge from "@/components/shared/StatusBadge";
 
 const DEFAULT_LIMIT = 7;
 
@@ -337,46 +338,53 @@ function TodayAppointments() {
                     </tr>
                   ) : currentData.length > 0 ? (
                     currentData.map((item, idx) => (
-                      <tr key={item.id ?? idx} className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100">
-                        <td className="px-4 py-3 font-medium text-gray-800 text-xs">{item.appointment_no}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.patient ? `${item.patient.first_name || ""} ${item.patient.last_name || ""}`.trim() : "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.patient?.patient_code || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-xs">{item.scheduled_time || formatDate(item.scheduled_at) || "—"}</td>
+                      <tr key={item.id ?? idx} className="hover:bg-slate-50/70 transition-colors duration-150 border-t border-slate-100">
+                        <td className="px-4 py-3 font-mono font-medium text-slate-800 text-xs">{item.appointment_no}</td>
+                        <td className="px-4 py-3 text-slate-900 font-semibold text-xs">{item.patient ? `${item.patient.first_name || ""} ${item.patient.last_name || ""}`.trim() : "—"}</td>
+                        <td className="px-4 py-3 font-mono text-slate-600 text-xs">{item.patient?.patient_code || "—"}</td>
+                        <td className="px-4 py-3 text-slate-700 text-xs">{item.scheduled_time || formatDate(item.scheduled_at) || "—"}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.visit_type === "OPD" ? "bg-blue-100 text-blue-700" : item.visit_type === "teleconsult" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>{item.visit_type}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.visit_type === "OPD" ? "bg-indigo-50 text-indigo-700 border border-indigo-200" : item.visit_type === "teleconsult" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-700 border border-slate-200"}`}>{item.visit_type}</span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${item.status === "Pending" ? "bg-yellow-100 text-yellow-700" : item.status === "Confirmed" ? "bg-green-100 text-green-700" : item.status === "Cancelled" ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"}`}>{item.status}</span>
+                          <StatusBadge status={item.status} />
                         </td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">{item.reason || "—"}</td>
-                        <td className="px-4 py-3 text-gray-600 text-xs">{item.notes || "—"}</td>
+                        <td className="px-4 py-3 text-slate-600 text-xs">{item.reason || "—"}</td>
+                        <td className="px-4 py-3 text-slate-600 text-xs">{item.notes || "—"}</td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <button
+                              onClick={() => navigate(`/doctor-notes/${item.id}`)}
+                              className="px-2.5 py-1 text-[11px] rounded-md bg-indigo-600 text-white hover:bg-indigo-700 font-semibold shadow-xs transition-colors"
+                              title="Open Doctor Consultation Notes"
+                            >
+                              Consult
+                            </button>
                             <button
                               onClick={() => navigate(`/records/patient/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
-                              className="px-2 py-1 text-[11px] rounded bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 font-medium"
+                              className="px-2 py-1 text-[11px] rounded-md bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 font-medium transition-colors"
                             >
                               Records
                             </button>
                             <button
                               onClick={() => navigate(`/labtestorder/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
-                              className={`px-2 py-1 text-[11px] rounded font-medium border ${
+                              className={`px-2 py-1 text-[11px] rounded-md font-medium border transition-colors ${
                                 labTestMap[item.id]
-                                  ? "bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100"
-                                  : "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                               }`}
                             >
-                              {labTestMap[item.id] ? "Edit Lab Test" : "Lab Test"}
+                              {labTestMap[item.id] ? "Edit Lab" : "Lab Test"}
                             </button>
                             <button
                               onClick={() => navigate(`/prescription/${item.patient_id || item.patient?.id}?appointment_id=${item.id}`)}
-                              className={`px-2 py-1 text-[11px] rounded font-medium border ${
+                              className={`px-2 py-1 text-[11px] rounded-md font-medium border transition-colors ${
                                 prescriptionMap[item.id]
-                                  ? "bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100"
-                                  : "bg-pink-50 text-pink-600 border-pink-200 hover:bg-pink-100"
+                                  ? "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
+                                  : "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100"
                               }`}
                             >
-                              {prescriptionMap[item.id] ? "Edit Prescription" : "Prescription"}
+                              {prescriptionMap[item.id] ? "Edit Rx" : "Prescription"}
                             </button>
                           </div>
                         </td>

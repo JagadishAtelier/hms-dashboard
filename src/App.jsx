@@ -1,118 +1,122 @@
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import DashboardDispatcher from "./pages/Dashboards/DashboardDispatcher";
-// import Posts from "./pages/Posts";
-// import Users from "./pages/Users";
 import AdminLayout from "./layout/AdminLayout";
-import "./App.css";
-import { Pages } from "./pages/Pages";
-import AllPageView from "./pages/NewPage/AllPageView";
-import ProductsList from "./pages/PatientsList";
 import Login from "./pages/LoginPage/Login";
-import Signup from "./pages/LoginPage/Signup";
+import PageSkeleton from "./components/shared/PageSkeleton";
 import { SidebarProvider } from "./components/Context/SidebarContext";
-import PatientProfile from "./pages/PatientProfile/PatientProfile";
-import DoctorNotes from "./pages/PatientProfile/DoctorNotes";
-import LabResult from "./pages/PatientProfile/LabResult";
-import PatientDocument from "./pages/PatientProfile/PatientDocument";
-import Triage from "./pages/PatientProfile/Triage";
-import RoomAllocation from "./pages/RoomAllocation";
-import PharmacistDashboard from "./pages/PharmacistPage/PharmacistDashboard";
-import PharmaPrescriptions from "./pages/PharmacistPage/PharmaPrescriptions";
-import PharmaStock from "./pages/PharmacistPage/PharmaStock";
-import PharmaUpdatePage from "./pages/PharmacistPage/PharmaUpdatePage";
-import LabTechDashboard from "./pages/LabtachPage/LabTechDashboard";
-import LabTestList from "./pages/LabtachPage/LabTestList";
-import TodayAppointments from "./pages/TodayAppointments";
-import AppointmentsList from "./pages/ReceptionistPage/AppointmentsList";
-import AppointmentsCreate from "./pages/ReceptionistPage/AppointmentsCreate";
-import LabTestOrder from "./pages/PatientProfile/LabtestOrder";
-import LabTestResults from "./pages/PatientProfile/LabtestResults";
-import PatientsCreate from "./pages/ReceptionistPage/PatientsCreate";
-import AdmissionsList from "./pages/ReceptionistPage/AdmissionsList";
-import AdmissionsCreate from "./pages/ReceptionistPage/AdmissionsCreate";
-import DepartmentList from "./pages/AdminPage/DepartmentList";
-import DepartmentCreate from "./pages/AdminPage/DepartmentCreate"
-import DesignationList from "./pages/AdminPage/DesignationList"
-import DesignationCreate from "./pages/AdminPage/DesignationCreate"
-import DoctorList from "./pages/AdminPage/DoctorList";
-import DoctorCreate from "./pages/AdminPage/DoctorCreate";
-import ReceptionistList from "./pages/AdminPage/ReceptionistList";
-import ReceptionistCreate from "./pages/AdminPage/ReceptionistCreate";
-import WardList from "./pages/AdminPage/WardList";
-import WardCreate from "./pages/AdminPage/WardCreate";
-import RoomList from "./pages/AdminPage/RoomList"
-import RoomCreate from "./pages/AdminPage/RoomCreate";
-import BedList from "./pages/AdminPage/BedList";
-import BedCreate from "./pages/AdminPage/BedCreate"
-import LabtestList from "./pages/AdminPage/LabtestList";
-import LabtestCreate from "./pages/AdminPage/LabtestCreate"
-import CategoryList from "./pages/AdminPage/CategoryList";
-import CategoryCreate from "./pages/AdminPage/CategoryCreate";
-import SubCategoryList from "./pages/AdminPage/SubCategoryList";
-import SubCategoryCreate from "./pages/AdminPage/SubCategoryCreate";
-import ProductList from "./pages/AdminPage/ProductList";
-import ProductCreate from "./pages/AdminPage/ProductCreate";
-import VendorList from "./pages/AdminPage/VendorList";
-import VendorCreate from "./pages/AdminPage/VendorCreate";
-import OrderList from "./pages/AdminPage/OrderList";
-import OrderCreate from "./pages/AdminPage/OrderCreate";
-import OrderView from "./pages/AdminPage/OrderView";
-import InwardList from "./pages/AdminPage/InwardList";
-import InwardCreate from "./pages/AdminPage/InwardCreate";
-import StockList from "./pages/AdminPage/StockList";
-import AdminDashboard from "./pages/AdminPage/adminDashboard";
-import LabTechnicianList from "./pages/AdminPage/LabTechnicianList";
-import LabTechnicianCreate from "./pages/AdminPage/LabTechnicianCreate";
-import AccountantList from "./pages/AdminPage/AccountantList.jsx";
-import AccountantCreate from "./pages/AdminPage/AccountantCreate.jsx";
-import AccountantDashboard from "./pages/AccountantPage/AccountantDashboard.jsx";
-import BillingList from "./pages/AccountantPage/BillingList.jsx";
-import HRList from "./pages/AdminPage/HRList.jsx";
-import HRCreate from "./pages/AdminPage/HRCreate.jsx";
-import LeaveConfig from "./pages/HRMSPage/LeaveConfig.jsx";
-import LeaveApplications from "./pages/HRMSPage/LeaveApplications.jsx";
-import Attendance from "./pages/HRMSPage/Attendance.jsx";
-import SalaryConfig from "./pages/HRMSPage/SalaryConfig.jsx";
-import SalarySlips from "./pages/HRMSPage/SalarySlips.jsx";
-import StaffDocuments from "./pages/HRMSPage/StaffDocuments.jsx";
-import MyHRMS from "./pages/HRMSPage/MyHRMS.jsx";
-import BillableItemsList from "./pages/BillableItems/BillableItemsList.jsx";
-import BillableItemForm from "./pages/BillableItems/BillableItemForm.jsx";
-import POSPage from "./pages/POSPage/POSPage.jsx";
-import POSList from "./pages/POSPage/POSList.jsx";
-import POSReceipt from "./pages/POSPage/POSReceipt.jsx";
-import SessionPlans from "./pages/SessionPage/SessionPlans.jsx";
-import SessionPlanCreate from "./pages/SessionPage/SessionPlanCreate.jsx";
-import SessionsDueTomorrow from "./pages/SessionPage/SessionsDueTomorrow.jsx";
-import SessionPlanDetail from "./pages/SessionPage/SessionPlanDetail.jsx";
-import PrescriptionList from "./pages/PharmacistPage/PrescriptionList"
-import PatientDashboard from "./pages/PatientDashboard/PatientDashboard";
-import PatientAppointment from "./pages/PatientDashboard/PatientAppointment";
-import PatientAppointmentList from "./pages/PatientDashboard/PatientAppointmentList";
-import Records from "./pages/RecordsPage/Records";
-import CreateRecord from "./pages/RecordsPage/CreateRecord";
-import CreateTemplate from "./pages/RecordsPage/CreateTemplate";
-import PatientRecords from "./pages/RecordsPage/PatientRecords";
-import Prescription from "./pages/PrescriptionPage/Prescription";
-import NurseList from "./pages/AdminPage/NurseList";
-import NurseCreate from "./pages/AdminPage/NurseCreate";
-import NurseDashboard from "./pages/NursePage/NurseDashboard";
-import PharmacistList from "./pages/AdminPage/PharmacistList";
-import PharmacistCreate from "./pages/AdminPage/PharmacistCreate";
-import SurgeriesList from "./pages/SurgeriesPage/SurgeriesList";
-import SurgeryForm from "./pages/SurgeriesPage/SurgeryForm";
-import DietTypeList from "./pages/AdminPage/DietTypeList";
-import FoodDashboard from "./pages/FoodPage/FoodDashboard";
-import MealPlansList from "./pages/FoodPage/MealPlansList";
-import FoodManagerList from "./pages/AdminPage/FoodManagerList";
-import FoodManagerCreate from "./pages/AdminPage/FoodManagerCreate";
-import ProceduresList from "./pages/SurgeriesPage/ProceduresList";
-import ProcedureForm from "./pages/SurgeriesPage/ProcedureForm";
+import "./App.css";
+
+// Lazy-loaded routes for optimal bundle chunking
+const Signup = lazy(() => import("./pages/LoginPage/Signup"));
+const Pages = lazy(() => import("./pages/Pages").then((m) => ({ default: m.Pages })));
+const AllPageView = lazy(() => import("./pages/NewPage/AllPageView"));
+const ProductsList = lazy(() => import("./pages/PatientsList"));
+const PatientProfile = lazy(() => import("./pages/PatientProfile/PatientProfile"));
+const DoctorNotes = lazy(() => import("./pages/PatientProfile/DoctorNotes"));
+const LabResult = lazy(() => import("./pages/PatientProfile/LabResult"));
+const PatientDocument = lazy(() => import("./pages/PatientProfile/PatientDocument"));
+const Triage = lazy(() => import("./pages/PatientProfile/Triage"));
+const RoomAllocation = lazy(() => import("./pages/RoomAllocation"));
+const PharmacistDashboard = lazy(() => import("./pages/PharmacistPage/PharmacistDashboard"));
+const PharmaPrescriptions = lazy(() => import("./pages/PharmacistPage/PharmaPrescriptions"));
+const PharmaStock = lazy(() => import("./pages/PharmacistPage/PharmaStock"));
+const PharmaUpdatePage = lazy(() => import("./pages/PharmacistPage/PharmaUpdatePage"));
+const LabTechDashboard = lazy(() => import("./pages/LabtachPage/LabTechDashboard"));
+const LabTestList = lazy(() => import("./pages/LabtachPage/LabTestList"));
+const TodayAppointments = lazy(() => import("./pages/TodayAppointments"));
+const AppointmentsList = lazy(() => import("./pages/ReceptionistPage/AppointmentsList"));
+const AppointmentsCreate = lazy(() => import("./pages/ReceptionistPage/AppointmentsCreate"));
+const LabTestOrder = lazy(() => import("./pages/PatientProfile/LabtestOrder"));
+const LabTestResults = lazy(() => import("./pages/PatientProfile/LabtestResults"));
+const PatientsCreate = lazy(() => import("./pages/ReceptionistPage/PatientsCreate"));
+const AdmissionsList = lazy(() => import("./pages/ReceptionistPage/AdmissionsList"));
+const AdmissionsCreate = lazy(() => import("./pages/ReceptionistPage/AdmissionsCreate"));
+const DepartmentList = lazy(() => import("./pages/AdminPage/DepartmentList"));
+const DepartmentCreate = lazy(() => import("./pages/AdminPage/DepartmentCreate"));
+const DesignationList = lazy(() => import("./pages/AdminPage/DesignationList"));
+const DesignationCreate = lazy(() => import("./pages/AdminPage/DesignationCreate"));
+const DoctorList = lazy(() => import("./pages/AdminPage/DoctorList"));
+const DoctorCreate = lazy(() => import("./pages/AdminPage/DoctorCreate"));
+const ReceptionistList = lazy(() => import("./pages/AdminPage/ReceptionistList"));
+const ReceptionistCreate = lazy(() => import("./pages/AdminPage/ReceptionistCreate"));
+const WardList = lazy(() => import("./pages/AdminPage/WardList"));
+const WardCreate = lazy(() => import("./pages/AdminPage/WardCreate"));
+const RoomList = lazy(() => import("./pages/AdminPage/RoomList"));
+const RoomCreate = lazy(() => import("./pages/AdminPage/RoomCreate"));
+const BedList = lazy(() => import("./pages/AdminPage/BedList"));
+const BedCreate = lazy(() => import("./pages/AdminPage/BedCreate"));
+const LabtestList = lazy(() => import("./pages/AdminPage/LabtestList"));
+const LabtestCreate = lazy(() => import("./pages/AdminPage/LabtestCreate"));
+const CategoryList = lazy(() => import("./pages/AdminPage/CategoryList"));
+const CategoryCreate = lazy(() => import("./pages/AdminPage/CategoryCreate"));
+const SubCategoryList = lazy(() => import("./pages/AdminPage/SubCategoryList"));
+const SubCategoryCreate = lazy(() => import("./pages/AdminPage/SubCategoryCreate"));
+const ProductList = lazy(() => import("./pages/AdminPage/ProductList"));
+const ProductCreate = lazy(() => import("./pages/AdminPage/ProductCreate"));
+const VendorList = lazy(() => import("./pages/AdminPage/VendorList"));
+const VendorCreate = lazy(() => import("./pages/AdminPage/VendorCreate"));
+const OrderList = lazy(() => import("./pages/AdminPage/OrderList"));
+const OrderCreate = lazy(() => import("./pages/AdminPage/OrderCreate"));
+const OrderView = lazy(() => import("./pages/AdminPage/OrderView"));
+const InwardList = lazy(() => import("./pages/AdminPage/InwardList"));
+const InwardCreate = lazy(() => import("./pages/AdminPage/InwardCreate"));
+const StockList = lazy(() => import("./pages/AdminPage/StockList"));
+const AdminDashboard = lazy(() => import("./pages/AdminPage/adminDashboard"));
+const LabTechnicianList = lazy(() => import("./pages/AdminPage/LabTechnicianList"));
+const LabTechnicianCreate = lazy(() => import("./pages/AdminPage/LabTechnicianCreate"));
+const AccountantList = lazy(() => import("./pages/AdminPage/AccountantList.jsx"));
+const AccountantCreate = lazy(() => import("./pages/AdminPage/AccountantCreate.jsx"));
+const AccountantDashboard = lazy(() => import("./pages/AccountantPage/AccountantDashboard.jsx"));
+const BillingList = lazy(() => import("./pages/AccountantPage/BillingList.jsx"));
+const HRList = lazy(() => import("./pages/AdminPage/HRList.jsx"));
+const HRCreate = lazy(() => import("./pages/AdminPage/HRCreate.jsx"));
+const LeaveConfig = lazy(() => import("./pages/HRMSPage/LeaveConfig.jsx"));
+const LeaveApplications = lazy(() => import("./pages/HRMSPage/LeaveApplications.jsx"));
+const Attendance = lazy(() => import("./pages/HRMSPage/Attendance.jsx"));
+const SalaryConfig = lazy(() => import("./pages/HRMSPage/SalaryConfig.jsx"));
+const SalarySlips = lazy(() => import("./pages/HRMSPage/SalarySlips.jsx"));
+const StaffDocuments = lazy(() => import("./pages/HRMSPage/StaffDocuments.jsx"));
+const MyHRMS = lazy(() => import("./pages/HRMSPage/MyHRMS.jsx"));
+const BillableItemsList = lazy(() => import("./pages/BillableItems/BillableItemsList.jsx"));
+const BillableItemForm = lazy(() => import("./pages/BillableItems/BillableItemForm.jsx"));
+const POSPage = lazy(() => import("./pages/POSPage/POSPage.jsx"));
+const POSList = lazy(() => import("./pages/POSPage/POSList.jsx"));
+const POSReceipt = lazy(() => import("./pages/POSPage/POSReceipt.jsx"));
+const SessionPlans = lazy(() => import("./pages/SessionPage/SessionPlans.jsx"));
+const SessionPlanCreate = lazy(() => import("./pages/SessionPage/SessionPlanCreate.jsx"));
+const SessionsDueTomorrow = lazy(() => import("./pages/SessionPage/SessionsDueTomorrow.jsx"));
+const SessionPlanDetail = lazy(() => import("./pages/SessionPage/SessionPlanDetail.jsx"));
+const PrescriptionList = lazy(() => import("./pages/PharmacistPage/PrescriptionList"));
+const PatientDashboard = lazy(() => import("./pages/PatientDashboard/PatientDashboard"));
+const PatientAppointment = lazy(() => import("./pages/PatientDashboard/PatientAppointment"));
+const PatientAppointmentList = lazy(() => import("./pages/PatientDashboard/PatientAppointmentList"));
+const Records = lazy(() => import("./pages/RecordsPage/Records"));
+const CreateRecord = lazy(() => import("./pages/RecordsPage/CreateRecord"));
+const CreateTemplate = lazy(() => import("./pages/RecordsPage/CreateTemplate"));
+const PatientRecords = lazy(() => import("./pages/RecordsPage/PatientRecords"));
+const Prescription = lazy(() => import("./pages/PrescriptionPage/Prescription"));
+const NurseList = lazy(() => import("./pages/AdminPage/NurseList"));
+const NurseCreate = lazy(() => import("./pages/AdminPage/NurseCreate"));
+const NurseDashboard = lazy(() => import("./pages/NursePage/NurseDashboard"));
+const PharmacistList = lazy(() => import("./pages/AdminPage/PharmacistList"));
+const PharmacistCreate = lazy(() => import("./pages/AdminPage/PharmacistCreate"));
+const SurgeriesList = lazy(() => import("./pages/SurgeriesPage/SurgeriesList"));
+const SurgeryForm = lazy(() => import("./pages/SurgeriesPage/SurgeryForm"));
+const DietTypeList = lazy(() => import("./pages/AdminPage/DietTypeList"));
+const FoodDashboard = lazy(() => import("./pages/FoodPage/FoodDashboard"));
+const MealPlansList = lazy(() => import("./pages/FoodPage/MealPlansList"));
+const FoodManagerList = lazy(() => import("./pages/AdminPage/FoodManagerList"));
+const FoodManagerCreate = lazy(() => import("./pages/AdminPage/FoodManagerCreate"));
+const ProceduresList = lazy(() => import("./pages/SurgeriesPage/ProceduresList"));
+const ProcedureForm = lazy(() => import("./pages/SurgeriesPage/ProcedureForm"));
+
 function App() {
   return (
     <SidebarProvider>
       <Router>
-        <Routes>
+        <Suspense fallback={<PageSkeleton />}>
+          <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route
@@ -125,6 +129,14 @@ function App() {
           />
           <Route
             path="/patient-list"
+            element={
+              <AdminLayout>
+                <ProductsList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patients"
             element={
               <AdminLayout>
                 <ProductsList />
@@ -172,7 +184,7 @@ function App() {
             }
           />
           <Route
-            path="admission/create"
+            path="/admission/create"
             element={
               <AdminLayout>
                 <AdmissionsCreate />
@@ -200,6 +212,30 @@ function App() {
             element={
               <AdminLayout>
                 <PatientsCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patients/view/:id"
+            element={
+              <AdminLayout>
+                <PatientProfile />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patients/:id"
+            element={
+              <AdminLayout>
+                <PatientProfile />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/patients/overview/:id"
+            element={
+              <AdminLayout>
+                <PatientProfile />
               </AdminLayout>
             }
           />
@@ -279,7 +315,7 @@ function App() {
             path="/admin-dashboard"
             element={
               <AdminLayout>
-                <AdminDashboard />
+                <DashboardDispatcher />
               </AdminLayout>
             }
           />
@@ -706,14 +742,6 @@ function App() {
             }
           />
           <Route
-            path="/lab-tech-prescriptions"
-            element={
-              <AdminLayout>
-                <LabTestList />
-              </AdminLayout>
-            }
-          />
-          <Route
             path="/patient-dashboard"
             element={
               <AdminLayout>
@@ -872,6 +900,7 @@ function App() {
           <Route path="/session-plans/due-tomorrow" element={<AdminLayout><SessionsDueTomorrow /></AdminLayout>} />
           <Route path="/session-plans/:id" element={<AdminLayout><SessionPlanDetail /></AdminLayout>} />
         </Routes>
+        </Suspense>
       </Router>
     </SidebarProvider>
   );

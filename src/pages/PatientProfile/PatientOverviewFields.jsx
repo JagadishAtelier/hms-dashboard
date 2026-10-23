@@ -13,13 +13,13 @@ function PatientOverviewFields({ patient, history }) {
 
   // ✅ Flattened lab test items from all orders
   const labTests = labOrders.flatMap((order) =>
-    order.items.map((item) => ({
+    (order?.items || []).map((item) => ({
       orderNo: order.order_no,
       status: order.status,
       priority: order.priority,
-      sampleType: item.sample_type,
-      result: item.result_value,
-      resultUrl: item.result_file_url,
+      sampleType: item?.sample_type,
+      result: item?.result_value,
+      resultUrl: item?.result_file_url,
     }))
   );
 

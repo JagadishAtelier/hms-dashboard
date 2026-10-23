@@ -21,6 +21,9 @@ import patientService from "../service/patientService.js";
 import { toast } from "sonner";
 import Loading from "./Loading.jsx";
 import { motion, AnimatePresence } from "framer-motion";
+import PageHeader from "@/components/shared/PageHeader";
+import StatusBadge from "@/components/shared/StatusBadge";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 const DEFAULT_LIMIT = 10;
 
@@ -175,39 +178,59 @@ function PatientsList() {
     navigate(`/patients/view/${id}`);
   };
 
-  const handleDeletePatient = async (id) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this patient? This will soft-delete the patient."
-      )
-    )
-      return;
-    try {
-      setLoading(true);
-      await patientService.deletePatient(id);
-      toast.success("Patient deleted");
-      fetchPatients(currentPage);
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to delete patient");
-    } finally {
-      setLoading(false);
-    }
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    title: "",
+    description: "",
+    confirmText: "Confirm",
+    variant: "destructive",
+    onConfirm: null,
+  });
+
+  const handleDeletePatient = (id) => {
+    setConfirmDialog({
+      open: true,
+      title: "Delete Patient",
+      description: "Are you sure you want to soft-delete this patient record? You can restore it later if needed.",
+      confirmText: "Delete Patient",
+      variant: "destructive",
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await patientService.deletePatient(id);
+          toast.success("Patient deleted");
+          fetchPatients(currentPage);
+        } catch (err) {
+          console.error(err);
+          toast.error(err?.response?.data?.message || "Failed to delete patient");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
-  const handleRestorePatient = async (id) => {
-    if (!confirm("Restore this patient?")) return;
-    try {
-      setLoading(true);
-      await patientService.restorePatient(id);
-      toast.success("Patient restored");
-      fetchPatients(currentPage);
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to restore patient");
-    } finally {
-      setLoading(false);
-    }
+  const handleRestorePatient = (id) => {
+    setConfirmDialog({
+      open: true,
+      title: "Restore Patient",
+      description: "Are you sure you want to restore this patient record?",
+      confirmText: "Restore Patient",
+      variant: "default",
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await patientService.restorePatient(id);
+          toast.success("Patient restored");
+          fetchPatients(currentPage);
+        } catch (err) {
+          console.error(err);
+          toast.error(err?.response?.data?.message || "Failed to restore patient");
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
   // Pagination math
@@ -302,8 +325,7 @@ function PatientsList() {
           </div>
 
           <Button
-            variant="outline"
-            className="bg-[#506EE4] hover:bg-[#3f56c2] hover:text-white text-white h-9 flex items-center gap-2 w-fit ms-auto md:ms-0 sm:w-auto text-sm"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white h-9 flex items-center gap-2 w-fit ms-auto md:ms-0 sm:w-auto text-sm shadow-xs transition-colors"
             onClick={handleAddPatient}
             aria-label="Add Patient"
           >
@@ -315,36 +337,36 @@ function PatientsList() {
       {/* Table desktop */}
       <motion.div variants={pageVariant} initial="hidden" animate="visible" className="flex-1 md:overflow-y-auto">
         <div className="hidden md:block">
-          <div className="overflow-x-auto rounded-sm border border-gray-200 shadow-sm bg-white">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-xs bg-white">
             <div className="min-w-[800px]">
               <table className="w-full table-auto border-collapse">
-                <thead className="sticky top-0 z-10 bg-[#F6F7FF]">
+                <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th
-                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 cursor-pointer select-none"
                       onClick={() => toggleSort("patient_code")}
                     >
                       Code{" "}
                       {sortBy === "patient_code" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
                     <th
-                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 cursor-pointer select-none"
                       onClick={() => toggleSort("last_name")}
                     >
                       Patient{" "}
                       {sortBy === "last_name" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
-                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Phone</th>
-                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Phone</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Email</th>
                     <th 
-                      className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467] cursor-pointer"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 cursor-pointer select-none"
                       onClick={() => toggleSort("gender")}
                     >
                       Gender{" "}
                       {sortBy === "gender" ? (sortOrder === "ASC" ? "↑" : "↓") : ""}
                     </th>
-                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Status</th>
-                    <th className="px-4 py-3 text-left text-[13px] font-semibold text-[#475467]">Action</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">Action</th>
                   </tr>
                 </thead>
 
@@ -354,31 +376,40 @@ function PatientsList() {
                       <motion.tr
                         key={p.id}
                         variants={rowVariant}
-                        className="hover:bg-[#FBFBFF] transition-colors duration-150 border-t border-gray-100"
+                        className="hover:bg-slate-50/70 transition-colors duration-150 border-t border-slate-100"
                       >
-                        <td className="px-4 py-3 font-medium text-gray-800 text-[12px]">{p.patient_code || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.first_name} {p.last_name || ""}</td>
-                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.phone || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.email || "—"}</td>
-                        <td className="px-4 py-3 text-gray-700 text-[12px]">{p.gender || "—"}</td>
+                        <td className="px-4 py-3 font-mono text-slate-700 text-xs font-medium">{p.patient_code || "—"}</td>
+                        <td className="px-4 py-3 text-slate-900 text-xs font-semibold">
+                          <button
+                            onClick={() => handleViewPatient(p.id)}
+                            className="hover:text-indigo-600 hover:underline text-left cursor-pointer transition-colors"
+                            title="View patient profile"
+                          >
+                            {p.first_name} {p.last_name || ""}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 text-xs font-mono">{p.phone || "—"}</td>
+                        <td className="px-4 py-3 text-slate-600 text-xs">{p.email || "—"}</td>
+                        <td className="px-4 py-3 text-slate-600 text-xs">{p.gender || "—"}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2.5 py-1.5 rounded-full text-[12px] font-semibold ${p.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-                            {p.is_active ? "Active" : "Inactive"}
-                          </span>
+                          <StatusBadge status={p.is_active ? "active" : "inactive"} />
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="icon" className="text-xs px-2 rounded-sm" onClick={() => handleEditPatient(p.id)} title="Edit">
-                              <Edit2 size={14} />
+                          <div className="flex gap-1.5 items-center">
+                            <Button variant="outline" size="icon" className="h-7 w-7 text-xs rounded-md text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => handleViewPatient(p.id)} title="View Profile">
+                              <Eye size={13} />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-7 w-7 text-xs rounded-md border-slate-200 text-slate-700 hover:bg-slate-50" onClick={() => handleEditPatient(p.id)} title="Edit">
+                              <Edit2 size={13} />
                             </Button>
 
                             {p.is_active ? (
-                              <Button variant="ghost" size="icon" className="text-xs rounded-sm" onClick={() => handleDeletePatient(p.id)} title="Delete">
-                                <Trash2 size={14} />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-xs rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50" onClick={() => handleDeletePatient(p.id)} title="Delete">
+                                <Trash2 size={13} />
                               </Button>
                             ) : (
-                              <Button variant="ghost" size="icon" className="text-xs rounded-sm" onClick={() => handleRestorePatient(p.id)} title="Restore">
-                                <RotateCw size={14} />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-xs rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50" onClick={() => handleRestorePatient(p.id)} title="Restore">
+                                <RotateCw size={13} />
                               </Button>
                             )}
                           </div>
@@ -428,58 +459,61 @@ function PatientsList() {
               <motion.article key={p.id} variants={mobileCardVariant} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
                 <div className="flex justify-between items-start mb-2 gap-2">
                   <div>
-                    <p className="font-semibold text-[#0E1680] text-sm">{p.first_name} {p.last_name}</p>
-                    <p className="text-xs text-gray-600 mt-1">{p.patient_code || "—"}</p>
+                    <button
+                      onClick={() => handleViewPatient(p.id)}
+                      className="font-semibold text-slate-900 text-sm hover:text-indigo-600 text-left"
+                    >
+                      {p.first_name} {p.last_name}
+                    </button>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">{p.patient_code || "—"}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1">
-                    <span className={`px-2 py-0.5 text-[11px] rounded-full ${p.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-                      {p.is_active ? "Active" : "Inactive"}
-                    </span>
-                    <span className="text-[11px] text-gray-500">{p.phone || "—"}</span>
+                    <StatusBadge status={p.is_active ? "active" : "inactive"} />
+                    <span className="text-[11px] text-slate-500 font-mono">{p.phone || "—"}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-700">
                   <div>
-                    <div className="text-[11px] text-gray-500">Email</div>
-                    <div className="text-sm">{p.email || "—"}</div>
+                    <div className="text-[11px] text-slate-500">Email</div>
+                    <div className="text-sm truncate">{p.email || "—"}</div>
                   </div>
 
                   <div>
-                    <div className="text-[11px] text-gray-500">Blood</div>
+                    <div className="text-[11px] text-slate-500">Blood</div>
                     <div className="text-sm">{p.blood_group || "—"}</div>
                   </div>
 
                   <div className="col-span-2">
-                    <div className="text-[11px] text-gray-500">Address</div>
-                    <div className="text-xs text-gray-700">{p.address || "—"}</div>
+                    <div className="text-[11px] text-slate-500">Address</div>
+                    <div className="text-xs text-slate-600">{p.address || "—"}</div>
                   </div>
 
                   <div className="col-span-2 flex gap-2 mt-2">
-                    <Button className="bg-[#0E1680] text-white w-1/3 text-sm" onClick={() => handleViewPatient(p.id)}>View</Button>
-                    <Button className="w-1/3" variant="outline" onClick={() => handleEditPatient(p.id)}><Edit2 size={14} /></Button>
+                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white w-1/3 text-xs" onClick={() => handleViewPatient(p.id)}>View</Button>
+                    <Button className="w-1/3 text-xs" variant="outline" onClick={() => handleEditPatient(p.id)}><Edit2 size={13} /> Edit</Button>
                     {p.is_active ? (
-                      <Button className="w-1/3" variant="ghost" onClick={() => handleDeletePatient(p.id)}><Trash2 size={14} /></Button>
+                      <Button className="w-1/3 text-xs text-rose-600 hover:bg-rose-50" variant="ghost" onClick={() => handleDeletePatient(p.id)}><Trash2 size={13} /> Delete</Button>
                     ) : (
-                      <Button className="w-1/3" variant="ghost" onClick={() => handleRestorePatient(p.id)}><RotateCw size={14} /></Button>
+                      <Button className="w-1/3 text-xs text-emerald-600 hover:bg-emerald-50" variant="ghost" onClick={() => handleRestorePatient(p.id)}><RotateCw size={13} /> Restore</Button>
                     )}
                   </div>
                 </div>
               </motion.article>
             ))
           ) : (
-            <p className="text-center text-gray-500 text-xs">No patients found.</p>
+            <p className="text-center text-slate-400 text-xs py-4">No patients found.</p>
           )}
         </motion.div>
       </motion.div>
 
       {/* Pagination */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col sm:flex-row justify-between items-center mt-5 gap-3">
-        <p className="text-xs text-gray-500">Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} patients</p>
+        <p className="text-xs text-slate-500">Showing {total === 0 ? 0 : startIndex}-{endIndex} of {total} patients</p>
 
         <div className="flex items-center gap-2">
-          <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setCurrentPage(1); }} className="h-8 text-xs border rounded px-2 bg-white">
+          <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setCurrentPage(1); }} className="h-8 text-xs border border-slate-200 rounded px-2 bg-white">
             <option value={5}>5 / page</option>
             <option value={10}>10 / page</option>
             <option value={20}>20 / page</option>
@@ -487,22 +521,34 @@ function PatientsList() {
           </select>
 
           <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1} className="text-xs">
-            <ChevronLeft />
+            <ChevronLeft size={14} />
           </Button>
 
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => (
-              <Button key={i} size="sm" variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)} className={`text-xs ${currentPage === i + 1 ? "bg-[#506EE4] text-white" : ""}`}>
+              <Button key={i} size="sm" variant={currentPage === i + 1 ? "default" : "outline"} onClick={() => setCurrentPage(i + 1)} className={`text-xs ${currentPage === i + 1 ? "bg-indigo-600 text-white" : ""}`}>
                 {i + 1}
               </Button>
             ))}
           </div>
 
           <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages} className="text-xs">
-            <ChevronRight />
+            <ChevronRight size={14} />
           </Button>
         </div>
       </motion.div>
+
+      {/* Accessible Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmText={confirmDialog.confirmText}
+        variant={confirmDialog.variant}
+        onConfirm={confirmDialog.onConfirm}
+        loading={loading}
+      />
     </motion.div>
   );
 }

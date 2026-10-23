@@ -3,13 +3,17 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setRole } from '../../store/slices/dashboardSlice';
 
-// We will lazy load or import the dashboards here directly
+// Role-specific Dashboards
 import AdminDashboard from './AdminDashboard';
 import DoctorDashboard from './DoctorDashboard';
 import ReceptionistDashboard from './ReceptionistDashboard';
 import LabDashboard from './LabDashboard';
 import PharmacyDashboard from './PharmacyDashboard';
 import HRDashboard from './HRDashboard';
+import NurseDashboard from '../NursePage/NurseDashboard';
+import FoodDashboard from '../FoodPage/FoodDashboard';
+import AccountantDashboard from '../AccountantPage/AccountantDashboard';
+import PatientDashboard from '../PatientDashboard/PatientDashboard';
 
 export default function DashboardDispatcher() {
     const { currentRole } = useSelector((state) => state.dashboard);
@@ -17,28 +21,48 @@ export default function DashboardDispatcher() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Sync Redux with explicit localStorage rule to prevent stale state after client-side login redirect
+        // Sync Redux with explicit localStorage rule
         const savedRole = localStorage.getItem('role');
         if (savedRole && savedRole !== currentRole) {
             dispatch(setRole(savedRole));
         }
     }, [dispatch, currentRole]);
 
-    // Mapping roles to their respective dashboards
+    // Normalized role key
+    const normalizedRole = (currentRole || localStorage.getItem('role') || 'admin')
+        .toLowerCase()
+        .replace(/\s+/g, '');
+
+    // Mapping all system roles to their respective dashboards
     const roleMap = {
+        'superadmin': <AdminDashboard />,
         'admin': <AdminDashboard />,
         'doctor': <DoctorDashboard />,
         'receptionist': <ReceptionistDashboard />,
         'lab': <LabDashboard />,
+        'labtechnician': <LabDashboard />,
         'pharmacy': <PharmacyDashboard />,
+        'pharmacist': <PharmacyDashboard />,
         'hr': <HRDashboard />,
+        'nurse': <NurseDashboard />,
+        'foodmanager': <FoodDashboard />,
+        'accountant': <AccountantDashboard />,
+        'patient': <PatientDashboard />,
     };
 
     // Safe fallback if role not matched
-    const RenderedDashboard = roleMap[currentRole?.toLowerCase()] || (
-        <div className="flex flex-col items-center justify-center h-96">
-            <h2 className="text-xl font-bold text-gray-700">Role Undefined</h2>
-            <p className="text-sm text-gray-500">Please contact support or sign in again.</p>
+    const RenderedDashboard = roleMap[normalizedRole] || (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center bg-white rounded-2xl border border-slate-200">
+            <h2 className="text-xl font-bold text-slate-800">Role Dashboard Initializing</h2>
+            <p className="text-sm text-slate-500 mt-1 max-w-md">
+                Logged in as <span className="font-semibold text-indigo-600">{currentRole || 'User'}</span>. If this screen persists, please sign in again.
+            </p>
+            <button
+                onClick={() => navigate('/login')}
+                className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+            >
+                Return to Login
+            </button>
         </div>
     );
 

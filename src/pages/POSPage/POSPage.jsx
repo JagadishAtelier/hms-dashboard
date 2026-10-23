@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { Search, Trash2, X, ArrowLeft, User, Phone, ChevronDown, MessageCircle } from "lucide-react";
+import { Search, Trash2, X, ArrowLeft, User, Phone, ChevronDown, MessageCircle, LayoutDashboard, Printer } from "lucide-react";
 import { toast } from "sonner";
 import posService from "../../service/posService.js";
 import patientService from "../../service/patientService.js";
@@ -265,14 +265,24 @@ export default function POSPage() {
     return (
         <div className="h-screen w-full bg-gray-50 flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shrink-0">
-                <button onClick={() => navigate("/pos/sales")} className="flex items-center gap-2 text-sm text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50">
-                    <ArrowLeft size={14} /> Sales List
-                </button>
-                <h1 className="text-lg font-bold text-[#0E1680]">
-                    {isEdit ? "Edit Sale" : "Point of Sale"}
-                </h1>
-                <div className="w-24" />
+            <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                    <button onClick={() => navigate("/dashboard")} className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors" title="Return to Atelier HMS Dashboard">
+                        <LayoutDashboard size={14} className="text-indigo-600" /> Dashboard
+                    </button>
+                    <button onClick={() => navigate("/pos/sales")} className="flex items-center gap-1.5 text-xs font-medium text-slate-600 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                        <ArrowLeft size={14} /> Sales List
+                    </button>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h1 className="text-base font-bold text-slate-900 tracking-tight">
+                        {isEdit ? "Edit Sale" : "Atelier POS Terminal"}
+                    </h1>
+                </div>
+                <div className="text-xs font-mono text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+                    {dayjs().format("DD MMM YYYY")}
+                </div>
             </div>
 
             <div className="flex flex-1 overflow-hidden min-h-0">
@@ -592,42 +602,46 @@ export default function POSPage() {
                 </div>
                 );
             })()}
-            {/* WhatsApp Receipt Modal */}
+            {/* Receipt & WhatsApp Modal */}
             {completedSale && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white w-[400px] rounded-xl shadow-xl p-6 text-center">
-                        <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <MessageCircle size={28} className="text-green-600" />
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white w-[420px] rounded-2xl shadow-2xl p-6 text-center border border-slate-100">
+                        <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <MessageCircle size={28} className="text-emerald-600" />
                         </div>
-                        <h2 className="text-lg font-semibold text-gray-800 mb-1">
-                            {isEdit ? "Sale Updated!" : "Sale Completed!"}
+                        <h2 className="text-xl font-bold text-slate-900 mb-1">
+                            {isEdit ? "Sale Updated Successfully!" : "Sale Completed!"}
                         </h2>
-                        <p className="text-sm text-gray-500 mb-1">
+                        <p className="text-sm text-slate-500 font-mono mb-4">
                             {completedSale.sale_no} · ₹{parseFloat(completedSale.total_amount || total).toLocaleString("en-IN")}
                         </p>
-                        {completedSale.customer_phone ? (
-                            <>
-                                <p className="text-sm text-gray-500 mb-5">
-                                    Send receipt to <span className="font-medium text-gray-700">{completedSale.customer_phone}</span> via WhatsApp?
-                                </p>
-                                <div className="flex gap-3">
-                                    <button onClick={() => { setCompletedSale(null); navigate("/pos/sales"); }}
-                                        className="flex-1 border border-gray-200 rounded-lg py-2 text-sm hover:bg-gray-50">
-                                        Skip
-                                    </button>
-                                    <button onClick={handleSendWhatsApp} disabled={sendingWA}
-                                        className="flex-1 bg-[#25D366] text-white rounded-lg py-2 text-sm font-medium hover:bg-[#1ebe5d] disabled:opacity-60 flex items-center justify-center gap-2">
-                                        <MessageCircle size={15} />
-                                        {sendingWA ? "Sending..." : "Send on WhatsApp"}
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <button onClick={() => { setCompletedSale(null); navigate("/pos/sales"); }}
-                                className="w-full bg-[#506EE4] text-white rounded-lg py-2 text-sm font-medium hover:bg-[#3f56c2]">
-                                Go to Sales List
+
+                        <div className="flex flex-col gap-2.5 mb-2">
+                            <button
+                                onClick={() => window.open(`/receipt/${completedSale.id || completedSale.sale_no}`, '_blank')}
+                                className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+                            >
+                                <Printer size={16} /> Print Thermal Receipt
                             </button>
-                        )}
+
+                            {completedSale.customer_phone ? (
+                                <button
+                                    onClick={handleSendWhatsApp}
+                                    disabled={sendingWA}
+                                    className="w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 transition-colors shadow-sm"
+                                >
+                                    <MessageCircle size={16} />
+                                    {sendingWA ? "Sending..." : `Send WhatsApp to ${completedSale.customer_phone}`}
+                                </button>
+                            ) : null}
+
+                            <button
+                                onClick={() => { setCompletedSale(null); navigate("/pos/sales"); }}
+                                className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl py-2 text-sm font-medium transition-colors"
+                            >
+                                Done / Return to Sales List
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

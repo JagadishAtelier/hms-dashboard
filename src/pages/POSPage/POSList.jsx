@@ -5,12 +5,9 @@ import { toast } from "sonner";
 import posService from "../../service/posService.js";
 import whatsappService from "../../service/whatsappService.js";
 import dayjs from "dayjs";
-
-const statusColor = (s) => ({
-    completed: "bg-green-100 text-green-700",
-    pending: "bg-yellow-100 text-yellow-700",
-    cancelled: "bg-red-100 text-red-600",
-}[s] ?? "bg-gray-100 text-gray-600");
+import PageHeader from "@/components/shared/PageHeader";
+import StatusBadge from "@/components/shared/StatusBadge";
+import { Button } from "@/components/ui/button";
 
 const fmt = (v) => `₹${parseFloat(v || 0).toLocaleString("en-IN")}`;
 
@@ -92,79 +89,95 @@ export default function POSList() {
     const change = paying > due ? paying - due : 0;
 
     return (
-        <div className="p-4 space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <ReceiptText size={20} className="text-gray-600" />
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-800">POS Sales</h2>
-                        <p className="text-xs text-gray-500">{total} total transactions</p>
+        <div className="p-6 space-y-5">
+            {/* Page Header */}
+            <PageHeader
+                title="POS Sales Ledger"
+                description={`${total} total sales transactions recorded in system`}
+                breadcrumbs={[
+                    { label: "Overview", href: "/dashboard" },
+                    { label: "Point of Sale", href: "/pos" },
+                    { label: "Sales Ledger" },
+                ]}
+                action={
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => fetchSales(page)}
+                            title="Refresh sales ledger"
+                            className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                        >
+                            <RefreshCw size={14} />
+                        </Button>
+                        <Button
+                            onClick={() => navigate("/pos")}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs font-medium flex items-center gap-1.5"
+                        >
+                            <Plus size={14} /> New POS Sale
+                        </Button>
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    <button onClick={() => fetchSales(page)}              className="p-2 rounded-md bg-red-500 hover:bg-red-600 text-white border-none flex items-center justify-center">
-                        <RefreshCw size={14} />
-                    </button>
-                    <button onClick={() => navigate("/pos")}
-                        className="flex items-center gap-2 px-4 py-2 text-sm rounded-md bg-[#506EE4] text-white hover:bg-[#3f56c2]">
-                        <Plus size={14} /> New Sale
-                    </button>
-                </div>
-            </div>
+                }
+            />
 
             {/* Table */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-x-auto">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-100">
+                    <thead className="bg-slate-50 border-b border-slate-200">
                         <tr>
-                            {["Sale No", "Customer", "Phone", "Items", "Total", "Paid", "Due", "Payment", "Status", "Date", "Actions"].map(h => (
-                                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 whitespace-nowrap">{h}</th>
+                            {["Sale No", "Customer", "Phone", "Items", "Total", "Paid", "Due", "Payment Mode", "Status", "Date & Time", "Actions"].map(h => (
+                                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-600 whitespace-nowrap">{h}</th>
                             ))}
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-slate-100">
                         {loading ? (
-                            <tr><td colSpan={11} className="py-10 text-center text-gray-400">Loading...</td></tr>
+                            <tr><td colSpan={11} className="py-10 text-center text-slate-400 text-xs">Loading sales transactions...</td></tr>
                         ) : sales.length === 0 ? (
-                            <tr><td colSpan={11} className="py-10 text-center text-gray-400">No sales found.</td></tr>
+                            <tr><td colSpan={11} className="py-10 text-center text-slate-400 text-xs">No sales found.</td></tr>
                         ) : sales.map(s => {
                             const hasDue = parseFloat(s.due_amount || 0) > 0;
                             return (
-                                <tr key={s.id} className={`border-t border-gray-50 hover:bg-gray-50 ${hasDue ? "bg-yellow-50/40" : ""}`}>
-                                    <td className="px-4 py-3 font-medium text-[#506EE4]">{s.sale_no}</td>
-                                    <td className="px-4 py-3 text-gray-700">{s.customer_name || "Walk-in"}</td>
-                                    <td className="px-4 py-3 text-gray-500">{s.customer_phone || "—"}</td>
-                                    <td className="px-4 py-3 text-gray-500">{s.items?.length ?? 0}</td>
-                                    <td className="px-4 py-3 font-medium text-gray-800">{fmt(s.total_amount)}</td>
-                                    <td className="px-4 py-3 text-green-600">{fmt(s.paid_amount)}</td>
-                                    <td className="px-4 py-3">
+                                <tr key={s.id} className={`hover:bg-slate-50/70 transition-colors ${hasDue ? "bg-amber-50/30" : ""}`}>
+                                    <td className="px-4 py-3 font-mono font-semibold text-indigo-600 text-xs">
+                                        <button
+                                            onClick={() => window.open(`/receipt/${s.id}`, '_blank')}
+                                            className="hover:underline cursor-pointer"
+                                            title="View / Print Receipt"
+                                        >
+                                            {s.sale_no}
+                                        </button>
+                                    </td>
+                                    <td className="px-4 py-3 text-slate-800 font-medium text-xs">{s.customer_name || "Walk-in"}</td>
+                                    <td className="px-4 py-3 text-slate-500 font-mono text-xs">{s.customer_phone || "—"}</td>
+                                    <td className="px-4 py-3 text-slate-600 text-xs">{s.items?.length ?? 0}</td>
+                                    <td className="px-4 py-3 font-semibold text-slate-900 font-mono text-xs">{fmt(s.total_amount)}</td>
+                                    <td className="px-4 py-3 text-emerald-700 font-semibold font-mono text-xs">{fmt(s.paid_amount)}</td>
+                                    <td className="px-4 py-3 text-xs">
                                         {hasDue
-                                            ? <span className="font-semibold text-red-500">{fmt(s.due_amount)}</span>
-                                            : <span className="text-gray-400">—</span>}
+                                            ? <span className="font-semibold text-rose-600 font-mono">{fmt(s.due_amount)}</span>
+                                            : <span className="text-slate-400">—</span>}
                                     </td>
-                                    <td className="px-4 py-3 text-gray-500 capitalize">{s.payment_method?.replace("_", " ")}</td>
+                                    <td className="px-4 py-3 text-slate-600 text-xs capitalize">{s.payment_method?.replace("_", " ")}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${statusColor(s.status)}`}>
-                                            {s.status}
-                                        </span>
+                                        <StatusBadge status={s.status} />
                                     </td>
-                                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{dayjs(s.sale_date).format("DD MMM YYYY HH:mm")}</td>
+                                    <td className="px-4 py-3 text-slate-500 text-xs font-mono whitespace-nowrap">{dayjs(s.sale_date).format("DD MMM YYYY HH:mm")}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-1.5 items-center">
                                             {/* Collect pending payment */}
                                             {hasDue && (
                                                 <button onClick={() => openCollect(s)}
-                                                    className="p-1.5 border border-yellow-300 rounded hover:bg-yellow-50 text-yellow-600" title="Collect Pending Payment">
+                                                    className="p-1.5 border border-amber-300 rounded-md hover:bg-amber-50 text-amber-700" title="Collect Pending Payment">
                                                     <IndianRupee size={13} />
                                                 </button>
                                             )}
                                             <button onClick={() => navigate(`/pos?edit=${s.id}`)}
-                                                className="p-1.5 border border-gray-200 rounded hover:bg-gray-100 text-gray-600" title="Edit">
+                                                className="p-1.5 border border-slate-200 rounded-md hover:bg-slate-100 text-slate-600" title="Edit Sale">
                                                 <Edit2 size={13} />
                                             </button>
                                             <button onClick={() => sendWhatsApp(s)} disabled={sendingWA === s.id}
-                                                className="p-1.5 border border-green-200 rounded hover:bg-green-50 text-green-600 disabled:opacity-50" title="Send WhatsApp Receipt">
+                                                className="p-1.5 border border-emerald-200 rounded-md hover:bg-emerald-50 text-emerald-600 disabled:opacity-50" title="Send WhatsApp Receipt">
                                                 <MessageCircle size={13} />
                                             </button>
                                         </div>

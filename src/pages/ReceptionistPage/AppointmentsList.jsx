@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import Loading from "../Loading.jsx";
 import { motion, AnimatePresence } from "framer-motion";
+import ConfirmDialog from "../../components/shared/ConfirmDialog.jsx";
 
 /**
  * AppointmentsList.jsx
@@ -73,6 +74,10 @@ function AppointmentsList() {
   // Sorting
   const [sortBy, setSortBy] = useState("scheduled_at");
   const [sortOrder, setSortOrder] = useState("DESC");
+
+  // Cancel Appointment Confirmation Dialog State
+  const [cancelAppointmentId, setCancelAppointmentId] = useState(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   // Debounce search input (simple)
   useEffect(() => {
@@ -225,18 +230,23 @@ function AppointmentsList() {
   };
 
   // Action: Cancel appointment
-  const handleCancelAppointment = async (appointmentId) => {
-    if (!confirm("Are you sure you want to cancel this appointment?")) return;
+  const handleCancelAppointment = (appointmentId) => {
+    setCancelAppointmentId(appointmentId);
+  };
+
+  const confirmCancelAppointment = async () => {
+    if (!cancelAppointmentId) return;
     try {
-      setLoading(true);
-      await appointmentsService.cancelAppointment(appointmentId);
-      toast.success("Appointment cancelled");
+      setCancelLoading(true);
+      await appointmentsService.cancelAppointment(cancelAppointmentId);
+      toast.success("Appointment cancelled successfully");
       fetchAppointments(currentPage);
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to cancel appointment");
     } finally {
-      setLoading(false);
+      setCancelLoading(false);
+      setCancelAppointmentId(null);
     }
   };
 
@@ -654,6 +664,18 @@ function AppointmentsList() {
           </Button>
         </div>
       </motion.div>
+
+      {/* Cancel Appointment Confirmation Dialog */}
+      <ConfirmDialog
+        open={Boolean(cancelAppointmentId)}
+        onOpenChange={(open) => !open && setCancelAppointmentId(null)}
+        title="Cancel Appointment"
+        description="Are you sure you want to cancel this scheduled appointment? This action will notify the patient and update the clinic scheduling ledger."
+        confirmText="Cancel Appointment"
+        variant="destructive"
+        loading={cancelLoading}
+        onConfirm={confirmCancelAppointment}
+      />
     </motion.div>
   );
 }
