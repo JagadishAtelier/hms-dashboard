@@ -10,10 +10,11 @@ const authHeader = () => ({
 });
 
 const adminDashboardService = {
-  async getDashboard() {
+  async getDashboard(params = {}) {
     try {
       const res = await axios.get(API_URL, {
         headers: authHeader(),
+        params,
       });
       return res.data;
     } catch (err) {

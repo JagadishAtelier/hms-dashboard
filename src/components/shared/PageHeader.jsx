@@ -6,8 +6,10 @@ export default function PageHeader({
   description,
   breadcrumbs = [],
   action,
+  actions,
   className,
 }) {
+  const actionContent = action || actions;
   return (
     <div
       className={cn(
@@ -43,7 +45,7 @@ export default function PageHeader({
         )}
       </div>
 
-      {action && <div className="flex items-center gap-2 pt-2 md:pt-0">{action}</div>}
+      {actionContent && <div className="flex items-center gap-2 pt-2 md:pt-0">{actionContent}</div>}
     </div>
   );
 }

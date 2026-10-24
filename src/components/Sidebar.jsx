@@ -39,6 +39,7 @@ import {
   Scissors,
   UtensilsCrossed,
   ReceiptText,
+  TrendingUp,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import AddPatientModal from "./Context/AddPatientModal";
@@ -55,7 +56,8 @@ const SidebarItem = ({
   toggleMenu, 
   openMenus, 
   setOpenLabModal, 
-  setOpenAddPatientModal 
+  setOpenAddPatientModal,
+  onNavigate
 }) => {
   const Icon = link.icon;
   const isActive = pathname === link.to || (link.children && link.children.some(c => pathname === c.to));
@@ -71,7 +73,12 @@ const SidebarItem = ({
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setIsFlyoutOpen(false);
-    }, 300);
+    }, 250);
+  };
+
+  const handleItemClick = () => {
+    onClose?.();
+    onNavigate?.();
   };
 
   const ItemWithTooltip = ({ children }) => (
@@ -83,12 +90,12 @@ const SidebarItem = ({
         {isCollapsed && !link.children && (
           <Tooltip.Portal>
             <Tooltip.Content
-              className="select-none rounded-md bg-gray-900 px-[15px] py-[10px] text-[13px] leading-none text-white shadow-xl animate-in fade-in zoom-in duration-200 z-[101]"
+              className="select-none rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold leading-none text-white shadow-xl animate-in fade-in zoom-in-95 duration-150 z-[101]"
               side="right"
-              sideOffset={10}
+              sideOffset={12}
             >
               {link.label}
-              <Tooltip.Arrow className="fill-gray-900" />
+              <Tooltip.Arrow className="fill-slate-900" />
             </Tooltip.Content>
           </Tooltip.Portal>
         )}
@@ -99,27 +106,30 @@ const SidebarItem = ({
   if (link.children) {
     const flyoutContent = (
       <div 
-        className="flex flex-col gap-1 p-2 min-w-[200px] bg-white rounded-xl shadow-2xl border border-gray-100 z-[101]"
+        className="flex flex-col gap-1 p-2 min-w-[210px] bg-white rounded-2xl shadow-2xl border border-slate-100 z-[101]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="px-3 py-2 mb-1 border-b border-gray-50">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{link.label}</span>
+        <div className="px-3 py-2 mb-1 border-b border-slate-100">
+          <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{link.label}</span>
         </div>
         {link.children.map((child) => (
           <Link
             key={child.to}
             to={child.to}
-            onClick={() => setIsFlyoutOpen(false)}
+            onClick={() => {
+              setIsFlyoutOpen(false);
+              handleItemClick();
+            }}
             className={cn(
-              "flex items-center gap-3 p-2.5 rounded-lg text-sm transition-all duration-200 group",
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group",
               pathname === child.to
-                ? "text-indigo-600 font-semibold bg-indigo-50"
+                ? "text-indigo-600 bg-indigo-50 font-bold"
                 : "text-slate-600 hover:text-indigo-600 hover:bg-slate-50"
             )}
           >
-            <child.icon size={16} className={cn("transition-transform", pathname === child.to ? "scale-110" : "group-hover:scale-110")} />
-            <span>{child.label}</span>
+            <child.icon size={16} className={cn("transition-transform shrink-0", pathname === child.to ? "scale-110" : "group-hover:scale-110")} />
+            <span className="truncate">{child.label}</span>
           </Link>
         ))}
       </div>
@@ -132,24 +142,26 @@ const SidebarItem = ({
             <div 
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              className="relative"
+              className="relative flex justify-center py-0.5"
             >
               <button
+                type="button"
                 className={cn(
-                  "flex items-center justify-center w-full aspect-square rounded-xl transition-all duration-300 group cursor-pointer",
+                  "flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 group cursor-pointer active:scale-95",
                   isActive 
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30" 
-                    : "text-slate-600 hover:bg-slate-100 hover:text-indigo-600"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30" 
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 )}
+                aria-label={link.label}
               >
-                <Icon size={20} className={cn("transition-transform group-hover:scale-110")} />
+                <Icon size={20} className="transition-transform group-hover:scale-110" />
               </button>
               <Popover.Portal>
                 <Popover.Content
                   side="right"
-                  sideOffset={15}
+                  sideOffset={14}
                   align="start"
-                  className="z-[101] animate-in slide-in-from-left-2 duration-200"
+                  className="z-[101] animate-in slide-in-from-left-2 duration-150"
                 >
                   {flyoutContent}
                 </Popover.Content>
@@ -164,23 +176,24 @@ const SidebarItem = ({
       <div className="space-y-1">
         <ItemWithTooltip>
           <button
+            type="button"
             onClick={() => toggleMenu(link.label)}
             className={cn(
-              "flex items-center w-full rounded-xl transition-all duration-200 p-2.5 group cursor-pointer text-sm",
+              "flex items-center w-full rounded-xl transition-all duration-200 p-2.5 min-h-[44px] group cursor-pointer text-sm font-semibold select-none",
               isCollapsed ? "justify-center" : "justify-between",
               isActive 
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 font-semibold" 
-                : "text-slate-600 hover:bg-slate-100 hover:text-indigo-600 font-medium"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30" 
+                : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             )}
           >
             <div className="flex items-center gap-3">
-              <Icon size={18} className={cn("transition-transform", !isActive && "group-hover:scale-110")} />
+              <Icon size={19} className={cn("transition-transform shrink-0", !isActive && "group-hover:scale-110")} />
               {!isCollapsed && <span className="whitespace-nowrap">{link.label}</span>}
             </div>
             {!isCollapsed && (
               <ChevronRight 
                 size={16} 
-                className={cn("transition-transform duration-200", openMenus[link.label] && "rotate-90")} 
+                className={cn("transition-transform duration-200 shrink-0", openMenus[link.label] && "rotate-90")} 
               />
             )}
           </button>
@@ -199,15 +212,16 @@ const SidebarItem = ({
                 <Link
                   key={child.to}
                   to={child.to}
+                  onClick={handleItemClick}
                   className={cn(
-                    "flex items-center gap-2.5 p-2 rounded-lg text-xs transition-all duration-200",
+                    "flex items-center gap-2.5 p-2 rounded-lg text-xs transition-all duration-200 min-h-[38px]",
                     pathname === child.to
                       ? "text-indigo-600 font-bold bg-indigo-50"
                       : "text-slate-600 font-medium hover:text-indigo-600 hover:bg-slate-50"
                   )}
                 >
-                  <child.icon size={15} />
-                  <span>{child.label}</span>
+                  <child.icon size={15} className="shrink-0" />
+                  <span className="truncate">{child.label}</span>
                 </Link>
               ))}
             </motion.div>
@@ -219,35 +233,71 @@ const SidebarItem = ({
 
   return (
     <ItemWithTooltip>
-      <Link
-        to={link.to}
-        className={cn(
-          "flex items-center w-full rounded-xl p-2.5 transition-all duration-200 group text-sm",
-          isCollapsed ? "justify-center" : "gap-3",
-          isSubActive 
-            ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20 font-semibold" 
-            : "text-slate-600 hover:bg-slate-100 hover:text-indigo-600 font-medium"
-        )}
-        onClick={(e) => {
-          if (link.label === "Lab Results") {
-            e.preventDefault();
-            setOpenLabModal(true);
-          } else if (link.label === "Add Patient") {
-            e.preventDefault();
-            setOpenAddPatientModal(true);
-          } else {
-            onClose?.();
-          }
-        }}
-      >
-        <Icon size={18} className={cn("transition-transform", !isSubActive && "group-hover:scale-110")} />
-        {!isCollapsed && <span className="whitespace-nowrap">{link.label}</span>}
-      </Link>
+      {isCollapsed ? (
+        <div className="flex justify-center py-0.5">
+          <Link
+            to={link.to}
+            className={cn(
+              "flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 group active:scale-95",
+              isSubActive 
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30" 
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            )}
+            onClick={(e) => {
+              if (link.label === "Lab Results") {
+                e.preventDefault();
+                setOpenLabModal(true);
+              } else if (link.label === "Add Patient") {
+                e.preventDefault();
+                setOpenAddPatientModal(true);
+              } else {
+                handleItemClick();
+              }
+            }}
+            aria-label={link.label}
+          >
+            <Icon size={20} className="transition-transform group-hover:scale-110" />
+          </Link>
+        </div>
+      ) : (
+        <Link
+          to={link.to}
+          className={cn(
+            "flex items-center w-full rounded-xl p-2.5 min-h-[44px] transition-all duration-200 group text-sm font-semibold select-none gap-3",
+            isSubActive 
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30" 
+              : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+          )}
+          onClick={(e) => {
+            if (link.label === "Lab Results") {
+              e.preventDefault();
+              setOpenLabModal(true);
+            } else if (link.label === "Add Patient") {
+              e.preventDefault();
+              setOpenAddPatientModal(true);
+            } else {
+              handleItemClick();
+            }
+          }}
+        >
+          <Icon size={19} className={cn("transition-transform shrink-0", !isSubActive && "group-hover:scale-110")} />
+          <span className="whitespace-nowrap truncate">{link.label}</span>
+        </Link>
+      )}
     </ItemWithTooltip>
   );
 };
 
-export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }) {
+export default function Sidebar({ 
+  isOpen, 
+  onClose, 
+  isCollapsed, 
+  setIsCollapsed,
+  isMobile = false,
+  isTablet = false,
+  isDesktop = true,
+  onNavigate
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { pathname } = location;
@@ -262,6 +312,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
 
   const handleLogout = () => {
     localStorage.clear();
+    onClose?.();
     navigate("/login");
   };
 
@@ -304,6 +355,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
       ],
       superadmin: [
         { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/analytics", label: "Analytics Hub", icon: TrendingUp },
         { 
             label: "Staff Management", 
             icon: IdCardLanyard,
@@ -363,6 +415,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
       ],
       admin: [
         { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/analytics", label: "Analytics Hub", icon: TrendingUp },
         { 
             label: "Staff Management", 
             icon: IdCardLanyard,
@@ -414,6 +467,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
       ],
       accountant: [
         { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/analytics", label: "Analytics Hub", icon: TrendingUp },
         { to: "/billing", label: "Billing", icon: ReceiptText },
         { to: "/admissions", label: "Admissions", icon: Bed },
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
@@ -461,93 +515,120 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
     }));
   };
 
-  const renderContent = () => (
-    <div className="flex flex-col h-full bg-white relative">
-      <div className={cn(
-          "flex items-center px-4 h-15 border-b border-slate-200 transition-all duration-300",
-          isCollapsed ? "justify-center" : "justify-between"
-      )}>
-        <Link to="/dashboard" className="flex items-center gap-2.5">
-            <img src={logo} alt="Atelier HMS" className="w-8 h-8 object-contain rounded-lg" />
-            {!isCollapsed && (
-              <div>
-                <h1 className="text-sm font-bold text-slate-900 leading-tight">
+  const renderContent = (forceExpanded = false) => {
+    const effectiveCollapsed = forceExpanded ? false : isCollapsed;
+
+    return (
+      <div className="flex flex-col h-full bg-white relative select-none">
+        {/* Sidebar Brand Header */}
+        <div className={cn(
+          "flex items-center px-4 h-[60px] border-b border-slate-200/80 transition-all duration-300 shrink-0",
+          effectiveCollapsed ? "justify-center" : "justify-between"
+        )}>
+          <Link 
+            to="/dashboard" 
+            onClick={() => { onClose?.(); onNavigate?.(); }}
+            className="flex items-center gap-2.5 active:scale-95 transition-transform"
+          >
+            <img src={logo} alt="Atelier HMS" className="w-8 h-8 object-contain rounded-xl shadow-2xs" />
+            {!effectiveCollapsed && (
+              <div className="flex flex-col">
+                <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight">
                   Atelier HMS
                 </h1>
-                <span className="text-[10px] text-slate-400 font-medium">Hospital Enterprise</span>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                  {role ? role.toUpperCase() : "HOSPITAL"}
+                </span>
               </div>
             )}
-        </Link>
-        <button onClick={onClose} aria-label="Close menu" className="lg:hidden p-1.5 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-50">
-          <X size={18} />
-        </button>
-      </div>
+          </Link>
 
-      <div className="flex-1 px-3 py-3 custom-scrollbar overflow-y-auto">
-        <nav className="space-y-1">
-          {links.map((link, i) => (
-            <SidebarItem 
-              key={link.label || i} 
-              link={link} 
-              pathname={pathname}
-              isCollapsed={isCollapsed}
-              onClose={onClose}
-              toggleMenu={toggleMenu}
-              openMenus={openMenus}
-              setOpenLabModal={setOpenLabModal}
-              setOpenAddPatientModal={setOpenAddPatientModal}
-            />
-          ))}
-        </nav>
-      </div>
+          {!effectiveCollapsed && (
+            <button 
+              onClick={onClose} 
+              aria-label="Close navigation"
+              className="md:hidden min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 hover:text-slate-900 rounded-xl hover:bg-slate-100 active:scale-95 transition-all"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
 
-      <div className="p-3 border-t border-slate-200">
-        <Tooltip.Provider delayDuration={0}>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <button
-                onClick={handleLogout}
-                className={cn(
-                  "flex items-center w-full p-2.5 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold transition-all duration-200 text-xs",
-                  isCollapsed ? "justify-center" : "gap-2.5"
-                )}
-              >
-                <LogOut size={18} />
-                {!isCollapsed && <span>Sign Out</span>}
-              </button>
-            </Tooltip.Trigger>
-            {isCollapsed && (
-              <Tooltip.Portal>
-                <Tooltip.Content
-                  className="rounded-md bg-slate-900 px-[12px] py-[6px] text-xs font-medium text-white shadow-xl z-[101]"
-                  side="right"
-                  sideOffset={10}
+        {/* Scrollable Navigation List */}
+        <div className="flex-1 px-2.5 py-3 custom-scrollbar overflow-y-auto">
+          <nav className="space-y-1">
+            {links.map((link, i) => (
+              <SidebarItem 
+                key={link.label || i} 
+                link={link} 
+                pathname={pathname}
+                isCollapsed={effectiveCollapsed}
+                onClose={onClose}
+                onNavigate={onNavigate}
+                toggleMenu={toggleMenu}
+                openMenus={openMenus}
+                setOpenLabModal={setOpenLabModal}
+                setOpenAddPatientModal={setOpenAddPatientModal}
+              />
+            ))}
+          </nav>
+        </div>
+
+        {/* Sign Out Action at Bottom */}
+        <div className="p-2.5 border-t border-slate-200/80 shrink-0 pb-safe">
+          <Tooltip.Provider delayDuration={0}>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className={cn(
+                    "flex items-center w-full p-2.5 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-all duration-200 text-xs min-h-[44px] active:scale-95 cursor-pointer",
+                    effectiveCollapsed ? "justify-center" : "gap-2.5"
+                  )}
+                  aria-label="Sign Out"
                 >
-                  Sign Out
-                </Tooltip.Content>
-              </Tooltip.Portal>
-            )}
-          </Tooltip.Root>
-        </Tooltip.Provider>
-      </div>
+                  <LogOut size={18} className="shrink-0" />
+                  {!effectiveCollapsed && <span>Sign Out</span>}
+                </button>
+              </Tooltip.Trigger>
+              {effectiveCollapsed && (
+                <Tooltip.Portal>
+                  <Tooltip.Content
+                    className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-xl z-[101]"
+                    side="right"
+                    sideOffset={12}
+                  >
+                    Sign Out
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              )}
+            </Tooltip.Root>
+          </Tooltip.Provider>
+        </div>
 
-      <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
-      <AddPatientModal open={openAddPatientModal} setOpen={setOpenAddPatientModal} />
-    </div>
-  );
+        <LabResultModal open={openLabModal} setOpen={setOpenLabModal} />
+        <AddPatientModal open={openAddPatientModal} setOpen={setOpenAddPatientModal} />
+      </div>
+    );
+  };
+
+  const desktopWidth = isTablet ? 68 : isCollapsed ? 80 : 260;
 
   return (
     <>
-      <div className="hidden lg:block h-screen sticky top-0 bg-[#FBFBFD]">
+      {/* Desktop (≥1024px) & Tablet (768px-1024px) Sticky Navigation Rail */}
+      <div className="hidden md:block h-screen sticky top-0 bg-white shrink-0 z-30">
         <motion.aside
-          animate={{ width: isCollapsed ? 80 : 280 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="h-full border-r shadow-sm overflow-hidden"
+          animate={{ width: desktopWidth }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
+          className="h-full border-r border-slate-200/80 shadow-2xs overflow-hidden"
         >
-          {renderContent()}
+          {renderContent(false)}
         </motion.aside>
       </div>
 
+      {/* Mobile (<768px) Smooth Slide-Over Drawer */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -555,17 +636,18 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] lg:hidden"
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[90] md:hidden"
               onClick={onClose}
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="fixed top-0 left-0 h-full w-[280px] bg-white shadow-2xl z-[100] lg:hidden"
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="fixed top-0 left-0 h-full w-[85%] max-w-[320px] bg-white shadow-2xl z-[100] md:hidden rounded-r-2xl overflow-hidden"
             >
-              {renderContent()}
+              {renderContent(true)}
             </motion.aside>
           </>
         )}
@@ -573,3 +655,4 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, setIsCollapsed }
     </>
   );
 }
+

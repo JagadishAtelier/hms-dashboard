@@ -110,6 +110,7 @@ const FoodManagerList = lazy(() => import("./pages/AdminPage/FoodManagerList"));
 const FoodManagerCreate = lazy(() => import("./pages/AdminPage/FoodManagerCreate"));
 const ProceduresList = lazy(() => import("./pages/SurgeriesPage/ProceduresList"));
 const ProcedureForm = lazy(() => import("./pages/SurgeriesPage/ProcedureForm"));
+const AnalyticsHub = lazy(() => import("./pages/Analytics/AnalyticsHub.jsx"));
 
 function App() {
   return (
@@ -124,6 +125,14 @@ function App() {
             element={
               <AdminLayout>
                 <DashboardDispatcher />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <AdminLayout>
+                <AnalyticsHub />
               </AdminLayout>
             }
           />

@@ -1,7 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Figtree', sans-serif;
   background-color: var(--color-background);
   color: var(--color-foreground);
   transition: background-color 0.3s, color 0.3s;
