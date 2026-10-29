@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -124,12 +125,15 @@ export default function CommandPalette({ isOpen, onClose }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, selectedIndex, filteredNav, patientResults, navigate, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-150">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-20 px-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-150 cursor-pointer"
+      onClick={onClose}
+    >
       <div 
-        className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh]"
+        className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh] cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
@@ -260,6 +264,7 @@ export default function CommandPalette({ isOpen, onClose }) {
           <span className="font-medium text-slate-400">Atelier HMS Navigation</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -23,6 +23,13 @@ import billableItemService from "../../service/billableItemService.js";
 import Loading from "../Loading.jsx";
 import PageHeader from "../../components/shared/PageHeader.jsx";
 import ConfirmDialog from "../../components/shared/ConfirmDialog.jsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "../../components/ui/badge.jsx";
 import { Button } from "../../components/ui/button.jsx";
 import { Input } from "../../components/ui/input.jsx";
@@ -218,17 +225,18 @@ export default function BillableItemsList() {
 
           {/* Desktop dropdown filter */}
           <div className="hidden sm:flex items-center gap-2">
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="h-10 px-3.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-700 shadow-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-            >
-              {FILTER_TABS.map((tab) => (
-                <option key={tab.value} value={tab.value}>
-                  {tab.label}
-                </option>
-              ))}
-            </select>
+            <Select value={typeFilter} onValueChange={(val) => setTypeFilter(val)}>
+              <SelectTrigger className="h-10 px-3.5 text-sm rounded-lg border-slate-200 bg-white text-slate-700 shadow-xs min-w-[170px]">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                {FILTER_TABS.map((tab) => (
+                  <SelectItem key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

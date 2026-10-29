@@ -31,6 +31,13 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import adminDashboardService from "../../service/admindashboardService";
 
 /**
@@ -348,23 +355,17 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Filter Dropdown Pill */}
-            <div className="relative">
-              <select
-                value={daysFilter}
-                onChange={(e) => setDaysFilter(e.target.value)}
-                className="appearance-none bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold py-1.5 pl-3 pr-8 rounded-lg border border-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="7">Last 7 Days</option>
-                <option value="30">Last 30 Days</option>
-                <option value="90">Last 90 Days</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                <svg className="fill-current h-3 w-3" viewBox="0 0 20 20">
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              </div>
-            </div>
+            {/* Filter Dropdown Pill with Shadcn Select */}
+            <Select value={daysFilter} onValueChange={(val) => setDaysFilter(val)}>
+              <SelectTrigger className="h-8 text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 rounded-lg px-2.5 py-1 min-w-[120px] shadow-none">
+                <SelectValue placeholder="Select Range" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="7">Last 7 Days</SelectItem>
+                <SelectItem value="30">Last 30 Days</SelectItem>
+                <SelectItem value="90">Last 90 Days</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Bar Chart */}
@@ -422,23 +423,17 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Filter Dropdown Pill */}
-            <div className="relative">
-              <select
-                value={revenueFilter}
-                onChange={(e) => setRevenueFilter(e.target.value)}
-                className="appearance-none bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold py-1.5 pl-3 pr-8 rounded-lg border border-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="this_month">This Month</option>
-                <option value="last_month">Last Month</option>
-                <option value="year_to_date">Year to Date</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                <svg className="fill-current h-3 w-3" viewBox="0 0 20 20">
-                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                </svg>
-              </div>
-            </div>
+            {/* Filter Dropdown Pill with Shadcn Select */}
+            <Select value={revenueFilter} onValueChange={(val) => setRevenueFilter(val)}>
+              <SelectTrigger className="h-8 text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 rounded-lg px-2.5 py-1 min-w-[115px] shadow-none">
+                <SelectValue placeholder="Select Period" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="this_month">This Month</SelectItem>
+                <SelectItem value="last_month">Last Month</SelectItem>
+                <SelectItem value="year_to_date">Year to Date</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Donut Chart with Center Total */}
