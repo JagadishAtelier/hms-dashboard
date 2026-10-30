@@ -826,7 +826,7 @@ export default function POSPage() {
                                 <label className="text-xs font-medium text-gray-500 uppercase">Payment Method</label>
                                 <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2 mt-1 text-sm">
-                                    {["cash", "card", "upi", "net_banking", "wallet"].map(m => (
+                                    {["cash", "card", "upi", "split", "scheme", "net_banking", "wallet"].map(m => (
                                         <option key={m} value={m}>{m.replace("_", " ").toUpperCase()}</option>
                                     ))}
                                 </select>

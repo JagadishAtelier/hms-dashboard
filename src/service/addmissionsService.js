@@ -85,6 +85,15 @@ const admissionsService = {
     });
     return res.data;
   },
+  /**
+   * Phase 3 Edge Case 10: 4-Stage Decoupled Discharge Gate Pass
+   */
+  async recordPhysicalDeparture(id, data = {}) {
+    const res = await axios.post(`${API_URL}/admission/${id}/physical-departure`, data, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
 };
 
 export default admissionsService;

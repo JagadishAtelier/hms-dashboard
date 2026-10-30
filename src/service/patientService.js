@@ -112,6 +112,15 @@ const patientService = {
     const res = await axios.post(API_URL, payload, { headers: authHeader() });
     return res.data;
   },
+  /**
+   * Phase 2 Edge Case 39: Atomic Merge of Anonymous Emergency Alias into Verified Patient UHID
+   */
+  async mergePatients(payload) {
+    const res = await axios.post(`${BASE_API}/hms/patient/merge`, payload, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
 };
 
 export default patientService;

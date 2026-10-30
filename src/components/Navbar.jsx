@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CommandPalette from "./CommandPalette";
+import PanicAlertBanner from "./shared/PanicAlertBanner";
 
 export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, isMobile, isTablet }) {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
 
   return (
     <>
+      <PanicAlertBanner />
       <header className="flex items-center justify-between bg-white px-3 sm:px-6 h-[54px] sm:h-[64px] border-b border-slate-200/80 transition-all select-none">
         {/* Left Section: Mobile Brand + Hamburger / Desktop Collapse Toggle + Search */}
         <div className="flex items-center gap-2 sm:gap-3">

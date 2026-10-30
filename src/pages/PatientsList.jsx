@@ -24,6 +24,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import PatientMergeModal from "@/components/shared/PatientMergeModal";
+import { GitMerge } from "lucide-react";
 
 const DEFAULT_LIMIT = 10;
 
@@ -47,6 +49,7 @@ function PatientsList() {
 
   // Sorting
   const [sortBy, setSortBy] = useState("createdAt");
+  const [mergingPatient, setMergingPatient] = useState(null);
   const [sortOrder, setSortOrder] = useState("DESC");
 
   // Animation control: key increments when loading finishes so animations replay after loader
@@ -398,6 +401,9 @@ function PatientsList() {
                           <div className="flex gap-1.5 items-center">
                             <Button variant="outline" size="icon" className="h-7 w-7 text-xs rounded-md text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => handleViewPatient(p.id)} title="View Profile">
                               <Eye size={13} />
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-7 w-7 text-xs rounded-md border-blue-200 text-blue-700 hover:bg-blue-50" onClick={() => setMergingPatient(p)} title="Merge Patient Records">
+                              <GitMerge size={13} />
                             </Button>
                             <Button variant="outline" size="icon" className="h-7 w-7 text-xs rounded-md border-slate-200 text-slate-700 hover:bg-slate-50" onClick={() => handleEditPatient(p.id)} title="Edit">
                               <Edit2 size={13} />

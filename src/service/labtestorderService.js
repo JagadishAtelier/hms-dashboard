@@ -141,6 +141,55 @@ async uploadFile(formData) {
   return res.data;
 },
 
+  /**
+   * Phase 4 Edge Case 21: Get Active Critical Panic Alerts
+   */
+  async getActivePanicAlerts() {
+    const res = await axios.get(`${API_URL}/panic-alerts/active`, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
+
+  /**
+   * Phase 4 Edge Case 21: Acknowledge Critical Panic Alert
+   */
+  async acknowledgePanicAlert(logId, data) {
+    const res = await axios.post(`${API_URL}/panic-alert/${logId}/acknowledge`, data, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
+
+  /**
+   * Phase 4 Edge Case 19: Collect Specimen with DOB Check
+   */
+  async collectSample(itemId, data) {
+    const res = await axios.post(`${API_URL}/item/${itemId}/collect`, data, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
+
+  /**
+   * Phase 4 Edge Case 20: Reject Quality-Defective Sample
+   */
+  async rejectSample(itemId, data) {
+    const res = await axios.post(`${API_URL}/item/${itemId}/reject`, data, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
+
+  /**
+   * Phase 4 Edge Case 22: Amend Result Report with Version 2
+   */
+  async amendResult(itemId, data) {
+    const res = await axios.post(`${API_URL}/item/${itemId}/amend`, data, {
+      headers: authHeader(),
+    });
+    return res.data;
+  },
 };
 
 export default labTestOrderService;
