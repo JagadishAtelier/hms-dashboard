@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ShoppingBasket, Package, ClipboardCheck, Clock, User, Eye } from "lucide-react";
+import { ShoppingBasket, Package, ClipboardCheck, Clock, User, Eye, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import productService from "../../service/productService.js";
@@ -233,7 +233,9 @@ export default function PharmacistDashboard() {
                   {viewModal.prescription_date ? dayjs(viewModal.prescription_date).format("DD MMM YYYY") : "—"}
                 </p>
               </div>
-              <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-700 text-lg font-bold px-2">✕</button>
+              <button onClick={() => setViewModal(null)} className="text-gray-400 hover:text-gray-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                <X size={18} />
+              </button>
             </div>
             <div className="p-4">
               {/* Status + Total */}

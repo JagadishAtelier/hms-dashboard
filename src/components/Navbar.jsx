@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logo from "/favicon.png";
@@ -8,8 +8,6 @@ import {
   User,
   Settings,
   LogOut,
-  CircleChevronRight,
-  CircleChevronLeft,
   ReceiptText,
   Command as CommandIcon,
   ShieldCheck,
@@ -19,6 +17,10 @@ import {
   Bed,
   CheckCircle2,
   Sparkles,
+  AlertTriangle,
+  FlaskConical,
+  Pill,
+  CheckCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -30,10 +32,50 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CommandPalette from "./CommandPalette";
 import PanicAlertBanner from "./shared/PanicAlertBanner";
+import notificationService from "../service/notificationService";
+import websocketService from "../service/websocketService";
+
+function formatRelativeTime(dateString) {
+  if (!dateString) return "Recently";
+  const now = new Date();
+  const past = new Date(dateString);
+  const diffMs = now - past;
+  const diffSec = Math.floor(diffMs / 1000);
+  if (diffSec < 45) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour}h ago`;
+  const diffDays = Math.floor(diffHour / 24);
+  return `${diffDays}d ago`;
+}
+
+function getCategoryIconConfig(category, severity) {
+  if (severity === "CRITICAL" || category === "PANIC_ALERT") {
+    return { icon: AlertTriangle, color: "text-rose-600 bg-rose-50 border border-rose-200" };
+  }
+  switch (category) {
+    case "ADMISSION":
+      return { icon: Bed, color: "text-blue-600 bg-blue-50 border border-blue-100" };
+    case "APPOINTMENT":
+      return { icon: CalendarCheck, color: "text-emerald-600 bg-emerald-50 border border-emerald-100" };
+    case "LAB_RESULT":
+      return { icon: FlaskConical, color: "text-indigo-600 bg-indigo-50 border border-indigo-100" };
+    case "PHARMACY":
+      return { icon: Pill, color: "text-amber-600 bg-amber-50 border border-amber-100" };
+    case "BED_READY":
+      return { icon: CheckCircle2, color: "text-teal-600 bg-teal-50 border border-teal-100" };
+    default:
+      return { icon: Bell, color: "text-slate-600 bg-slate-50 border border-slate-200" };
+  }
+}
 
 export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, isMobile, isTablet }) {
   const navigate = useNavigate();
   const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   
   const role = (localStorage.getItem("role") || "").toLowerCase().replace(/\s+/g, "");
   const username = localStorage.getItem("username") || "User";
@@ -55,17 +97,70 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setIsLoadingNotifications(true);
+      const res = await notificationService.getNotifications({ role, limit: 15 });
+      if (res && res.data && Array.isArray(res.data)) {
+        setNotifications(res.data);
+        setUnreadCount(typeof res.unread_count === "number" ? res.unread_count : 0);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch hospital notifications");
+    } finally {
+      setIsLoadingNotifications(false);
+    }
+  }, [role]);
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Subscribe to live real-time notifications via WebSocket
+    const unsubscribe = websocketService.subscribe((event) => {
+      if (event.type === "HOSPITAL_NOTIFICATION_RECEIVED" && event.data) {
+        const newNotif = event.data;
+        setNotifications((prev) => {
+          const exists = prev.some((n) => n.id === newNotif.id);
+          if (exists) return prev;
+          return [newNotif, ...prev.slice(0, 19)];
+        });
+        setUnreadCount((prev) => prev + 1);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [fetchNotifications]);
+
+  const handleNotificationClick = async (notif) => {
+    if (!notif.is_read) {
+      await notificationService.markAsRead(notif.id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
+    if (notif.link_url) {
+      navigate(notif.link_url);
+    }
+  };
+
+  const handleMarkAllAsRead = async (e) => {
+    e.stopPropagation();
+    try {
+      await notificationService.markAllAsRead({ role });
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.warn("Failed to mark all notifications read");
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
   };
-
-  // Sample recent activity notifications
-  const recentNotifications = [
-    { id: 1, title: "New Inpatient Admission", desc: "Ward A · Bed 102", time: "10m ago", icon: Bed, color: "text-blue-600 bg-blue-50" },
-    { id: 2, title: "Doctor Appointment Booked", desc: "Dr. Smith · Room 4", time: "25m ago", icon: CalendarCheck, color: "text-emerald-600 bg-emerald-50" },
-    { id: 3, title: "Lab Results Ready", desc: "Blood Profile #LP-891", time: "1h ago", icon: CheckCircle2, color: "text-indigo-600 bg-indigo-50" },
-  ];
 
   return (
     <>
@@ -89,21 +184,6 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
             <span className="text-sm font-black text-slate-900 tracking-tight">Atelier HMS</span>
           </div>
 
-          {/* Tablet / Desktop sidebar collapse toggle */}
-          <button
-            type="button"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:flex min-w-[36px] min-h-[36px] items-center justify-center border border-slate-200/90 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-indigo-600 active:scale-95 transition-all cursor-pointer"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? (
-              <CircleChevronRight size={18} className="text-slate-500 hover:text-indigo-600" />
-            ) : (
-              <CircleChevronLeft size={18} className="text-slate-500 hover:text-indigo-600" />
-            )}
-          </button>
-
           {/* Global Search / Command Bar (Google M3 Pill) */}
           <button
             type="button"
@@ -121,7 +201,7 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
 
         {/* Right Section: POS Pill + Billable Items + Notifications + User Avatar */}
         <div className="flex items-center gap-1.5 sm:gap-3">
-          {/* POS Terminal Shortcut Pill (Matching general-pos) */}
+          {/* POS Terminal Shortcut Pill */}
           {showPOS && (
             <button
               type="button"
@@ -146,7 +226,7 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
             </button>
           )}
 
-          {/* Hospital Notifications Dropdown */}
+          {/* Real-Time Hospital Notifications Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -155,35 +235,85 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
                 aria-label="View notifications"
               >
                 <Bell size={18} />
-                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
-                  3
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white animate-pulse">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 p-2 shadow-2xl border border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 duration-150">
+            <DropdownMenuContent align="end" className="w-84 sm:w-96 p-2 shadow-2xl border border-slate-200 rounded-2xl animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
-                <span className="text-xs font-bold text-slate-800">Hospital Activity</span>
-                <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">3 New</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-800">Hospital Activity</span>
+                  {unreadCount > 0 && (
+                    <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.2 rounded-full">
+                      {unreadCount} New
+                    </span>
+                  )}
+                </div>
+                {notifications.some((n) => !n.is_read) && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllAsRead}
+                    className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <CheckCheck size={13} />
+                    Mark all read
+                  </button>
+                )}
               </div>
-              <div className="py-1 space-y-1">
-                {recentNotifications.map((n) => (
-                  <div key={n.id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", n.color)}>
-                      <n.icon size={16} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-slate-800 leading-tight">{n.title}</p>
-                      <p className="text-[11px] text-slate-500 truncate">{n.desc}</p>
-                    </div>
-                    <span className="text-[10px] text-slate-400 shrink-0">{n.time}</span>
+
+              <div className="py-1 max-h-[360px] overflow-y-auto space-y-1">
+                {isLoadingNotifications && notifications.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-slate-400">Loading activity feed...</div>
+                ) : notifications.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-400">
+                    <CheckCircle2 size={24} className="mx-auto mb-1.5 text-slate-300" />
+                    All caught up. No recent activity.
                   </div>
-                ))}
+                ) : (
+                  notifications.map((n) => {
+                    const { icon: CategoryIcon, color: iconStyle } = getCategoryIconConfig(n.category, n.severity);
+                    return (
+                      <div
+                        key={n.id}
+                        onClick={() => handleNotificationClick(n)}
+                        className={cn(
+                          "flex items-start gap-3 p-2.5 rounded-xl transition-all cursor-pointer relative",
+                          !n.is_read ? "bg-indigo-50/40 hover:bg-indigo-50/70" : "hover:bg-slate-50"
+                        )}
+                      >
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", iconStyle)}>
+                          <CategoryIcon size={15} />
+                        </div>
+                        <div className="flex-1 min-w-0 pr-1">
+                          <p className="text-xs font-semibold text-slate-900 leading-snug">
+                            {n.title}
+                          </p>
+                          <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">
+                            {n.message}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {formatRelativeTime(n.createdAt)}
+                          </span>
+                          {!n.is_read && (
+                            <span className="w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-indigo-200" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
+
               <DropdownMenuSeparator className="bg-slate-100 my-1" />
               <button 
                 type="button"
                 onClick={() => navigate("/dashboard")}
-                className="w-full text-center py-1.5 text-xs font-bold text-indigo-600 hover:underline"
+                className="w-full text-center py-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
               >
                 View Hospital Dashboard
               </button>
@@ -252,4 +382,3 @@ export default function TopNavbar({ onMenuClick, isCollapsed, setIsCollapsed, is
     </>
   );
 }
-

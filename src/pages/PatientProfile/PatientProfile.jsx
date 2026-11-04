@@ -31,6 +31,7 @@ import {
 import { toast } from "sonner";
 import patientService from "../../service/patientService.js";
 import PatientOverviewFields from "./PatientOverviewFields.jsx";
+import PatientTimeline from "./PatientTimeline.jsx";
 
 export default function PatientProfile() {
   const { id } = useParams();
@@ -416,6 +417,7 @@ export default function PatientProfile() {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-200/80 no-scrollbar">
           {[
             { id: "overview", label: "Consultation & Overview", icon: Stethoscope },
+            { id: "timeline", label: "Health Timeline", icon: Activity },
             { id: "notes", label: `Clinical Encounters (${history?.encounters?.length || 0})`, icon: FileText },
             { id: "labs", label: `Lab Diagnostics (${history?.labOrders?.length || 0})`, icon: FlaskConical },
             { id: "meds", label: `Prescriptions (${history?.medications?.length || 0})`, icon: Pill },
@@ -440,6 +442,11 @@ export default function PatientProfile() {
         {/* Tab 1: Consultation & Overview */}
         {activeTab === "overview" && (
           <PatientOverviewFields patient={patient} history={history} />
+        )}
+
+        {/* Tab: Longitudinal Health Timeline */}
+        {activeTab === "timeline" && (
+          <PatientTimeline patientId={id} patientInfo={patient} />
         )}
 
         {/* Tab 2: Encounters Timeline */}

@@ -38,7 +38,7 @@ import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from ".
 import { cn } from "@/lib/utils";
 
 const FILTER_TABS = [
-  { label: "All Items", value: "" },
+  { label: "All Items", value: "all" },
   { label: "Services", value: "Service" },
   { label: "Products", value: "Product" },
   { label: "Medications", value: "Medication" },
@@ -107,7 +107,7 @@ export default function BillableItemsList() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
   const limit = 15;
 
@@ -122,7 +122,7 @@ export default function BillableItemsList() {
         page: p,
         limit,
         search,
-        type: typeFilter || undefined,
+        type: (typeFilter && typeFilter !== "all") ? typeFilter : undefined,
       });
       const d = res?.data?.data;
       setItems(d?.data ?? []);
@@ -274,17 +274,17 @@ export default function BillableItemsList() {
               No billable items found
             </h4>
             <p className="text-xs text-slate-500 mb-4 max-w-xs mx-auto">
-              {search || typeFilter
+              {search || (typeFilter && typeFilter !== "all")
                 ? "Try adjusting your search criteria or type filters to find what you're looking for."
                 : "Your catalogue has no billable items yet. Create your first medical service or product."}
             </p>
-            {search || typeFilter ? (
+            {search || (typeFilter && typeFilter !== "all") ? (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setSearch("");
-                  setTypeFilter("");
+                  setTypeFilter("all");
                 }}
                 className="text-xs"
               >

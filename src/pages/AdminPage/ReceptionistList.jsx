@@ -9,6 +9,7 @@ import {
   RotateCw,
   RefreshCw, Clock,
   BriefcaseMedical,
+  Phone,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -257,7 +258,9 @@ function ReceptionistList() {
               </span>
             </div>
 
-            <p className="text-xs text-gray-600">📞 {item.receptionist_phone}</p>
+            <p className="text-xs text-gray-600 flex items-center gap-1.5">
+              <Phone size={12} className="text-slate-400 shrink-0" /> {item.receptionist_phone}
+            </p>
 
             <div className="flex gap-2 mt-3">
               <Button size="sm" variant="outline" className="flex-1 bg-gray-100" onClick={() => handleEdit(item.id)}>

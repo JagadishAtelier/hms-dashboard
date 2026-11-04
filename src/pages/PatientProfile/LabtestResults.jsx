@@ -3,7 +3,18 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileText, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Loader2,
+  FileText,
+  Upload,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  ShieldAlert,
+  Info,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import labTestOrderService from "../../service/labtestorderService.js";
 import BASE_API from "../../api/baseurl.js";
@@ -20,6 +31,7 @@ function LabTestResults() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [resultValue, setResultValue] = useState("");
   const [resultFileUrl, setResultFileUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const userInfo = JSON.parse(localStorage.getItem("user"));
   const userRole = userInfo?.role;
@@ -67,26 +79,34 @@ function LabTestResults() {
 
   const handleSubmitResult = async () => {
     if (!resultValue.trim()) {
-      toast.error("Please enter a result value");
+      toast.error("Please enter a diagnostic result value");
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const res = await labTestOrderService.markLabTestItemResulted(selectedItem.id, {
         result_value: resultValue,
         result_file_url: resultFileUrl,
       });
-      toast.success(res?.message || "Result updated successfully");
+
+      if (res?.is_panic_value) {
+        toast.error("CRITICAL PANIC VALUE BREACH: Emergency alert dispatched to attending clinicians.");
+      } else {
+        toast.success(res?.message || "Result saved successfully");
+      }
+
       setShowModal(false);
       if (admission_id) fetchByAdmission(admission_id);
       else fetchLabTestOrder(appointment_id);
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to update result");
+      toast.error(err?.response?.data?.message || "Failed to record result");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // ✅ File Upload Handler
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -94,12 +114,11 @@ function LabTestResults() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const toastId = toast.loading("Uploading file...");
+    const toastId = toast.loading("Uploading diagnostic file...");
     try {
       const res = await labTestOrderService.uploadFile(formData);
       const relativePath = res?.fileUrl || res?.data?.fileUrl;
       if (relativePath) {
-        // ✅ Store relative path only
         setResultFileUrl(relativePath);
         toast.success("File uploaded successfully", { id: toastId });
       } else {
@@ -113,6 +132,15 @@ function LabTestResults() {
     }
   };
 
+  // Biological & panic calculation helpers for modal
+  const numVal = parseFloat(resultValue);
+  const testObj = selectedItem?.test;
+  const isPanic =
+    !isNaN(numVal) &&
+    testObj &&
+    ((testObj.critical_low !== null && numVal < testObj.critical_low) ||
+      (testObj.critical_high !== null && numVal > testObj.critical_high));
+
   if (loading)
     return (
       <div className="flex justify-center items-center h-[70vh]">
@@ -120,110 +148,164 @@ function LabTestResults() {
       </div>
     );
 
-  if (!order)
-    return (
-      <div className="p-6 text-center text-gray-600">
-        No lab test order found for this {admission_id ? "admission" : "appointment"}.
-      </div>
-    );
-
-  const { patient, items } = order;
+  const patient = order?.patient;
+  const items = order?.items || [];
 
   return (
-    <div className="p-8 w-full space-y-8">
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-[#0E1680] flex items-center gap-2">
-          <FileText size={24} /> Lab Test Results
-        </h2>
+      <div className="border-b pb-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-[#0E1680]">
+            Diagnostic Laboratory Report
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Verified analytical measurements, reference intervals, and panic value audit trails
+          </p>
+        </div>
+        {order?.has_panic_alert && (
+          <div className="bg-red-50 border border-red-300 text-red-700 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-bold animate-pulse">
+            <ShieldAlert className="h-4 w-4 text-red-600" />
+            CRITICAL PANIC ALERT BREACH
+          </div>
+        )}
       </div>
 
-      {/* Patient Info */}
-      <Card>
-        <CardContent className="grid grid-cols-3 gap-4 text-sm text-gray-800">
-          <div>
-            <h3 className="font-semibold text-[#0E1680] mb-2">Patient Details</h3>
-            <p>
-              <span className="font-medium">Name:</span> {patient?.first_name}{" "}
-              {patient?.last_name}
+      {/* Patient & Order Details Card */}
+      <Card className="border-slate-200 shadow-xs">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5">
+          <div className="space-y-1.5 text-sm">
+            <h3 className="font-bold text-[#0E1680] text-sm uppercase tracking-wider mb-2">
+              Patient Information
+            </h3>
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">Name:</span>{" "}
+              {patient?.first_name} {patient?.last_name}
             </p>
-            <p>
-              <span className="font-medium">Patient Code:</span>{" "}
-              {patient?.patient_code}
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">UHID:</span>{" "}
+              {patient?.patient_code || "PAT-N/A"}
             </p>
-            <p>
-              <span className="font-medium">Gender / Age:</span> {patient?.gender},{" "}
-              {patient?.age} yrs
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">Gender / Age:</span>{" "}
+              {patient?.gender || "N/A"} / {patient?.age ? `${patient.age} yrs` : "N/A"}
             </p>
-            <p>
-              <span className="font-medium">Phone:</span> {patient?.phone}
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">Phone:</span>{" "}
+              {patient?.phone || "N/A"}
             </p>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-[#0E1680] mb-2">Order Info</h3>
-            <p><span className="font-medium">Order No:</span> {order?.order_no}</p>
-            <p><span className="font-medium">Priority:</span> {order?.priority?.toUpperCase()}</p>
-            <p><span className="font-medium">Status:</span> {order?.status?.toUpperCase()}</p>
-            <p><span className="font-medium">Ordered On:</span> {new Date(order?.order_date).toLocaleString()}</p>
+          <div className="space-y-1.5 text-sm">
+            <h3 className="font-bold text-[#0E1680] text-sm uppercase tracking-wider mb-2">
+              Order Requisition Details
+            </h3>
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">Order No:</span>{" "}
+              <span className="font-mono font-bold text-slate-900">{order?.order_no}</span>
+            </p>
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">Clinical Priority:</span>{" "}
+              <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold uppercase ${
+                order?.priority === "stat"
+                  ? "bg-red-100 text-red-800"
+                  : order?.priority === "urgent"
+                  ? "bg-amber-100 text-amber-800"
+                  : "bg-slate-100 text-slate-800"
+              }`}>
+                {order?.priority || "Routine"}
+              </span>
+            </p>
+            <p className="text-slate-700">
+              <span className="font-semibold text-slate-500">Requisition Date:</span>{" "}
+              {new Date(order?.order_date).toLocaleString()}
+            </p>
           </div>
         </CardContent>
       </Card>
 
       {/* Test Results Table */}
-      <Card>
-        <CardContent>
-          <h3 className="text-lg font-semibold text-[#0E1680] mb-4">
-            Test Details
-          </h3>
+      <Card className="border-slate-200 shadow-xs">
+        <CardContent className="pt-5">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-base font-bold text-[#0E1680]">
+              Diagnostic Items & Analytical Results
+            </h3>
+            <span className="text-xs text-slate-500">Total Items: {items.length}</span>
+          </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 text-sm">
-              <thead className="bg-[#0E1680] text-white">
+            <table className="min-w-full border border-slate-200 text-sm rounded-lg overflow-hidden">
+              <thead className="bg-[#0E1680] text-white text-xs uppercase tracking-wider">
                 <tr>
                   <th className="p-3 text-left">#</th>
-                  <th className="p-3 text-left">Test Name</th>
-                  <th className="p-3 text-left">Category</th>
-                  <th className="p-3 text-left">Sample Type</th>
+                  <th className="p-3 text-left">Diagnostic Test</th>
+                  <th className="p-3 text-left">Biological Specimen</th>
                   <th className="p-3 text-left">Result Value</th>
                   <th className="p-3 text-left">Units</th>
-                  <th className="p-3 text-left">Reference Range</th>
-                  <th className="p-3 text-left">Result File</th>
+                  <th className="p-3 text-left">Reference Interval</th>
+                  <th className="p-3 text-left">Clinical Status</th>
+                  <th className="p-3 text-left">Attachment</th>
                   {userRole === "Lab Technician" && (
                     <th className="p-3 text-left">Actions</th>
                   )}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100">
                 {items?.map((it, idx) => (
-                  <tr key={it.id} className="border-b hover:bg-gray-50 transition">
-                    <td className="p-3">{idx + 1}</td>
-                    <td className="p-3">{it?.test?.name}</td>
-                    <td className="p-3">{it?.test?.category}</td>
-                    <td className="p-3">{it?.sample_type}</td>
+                  <tr key={it.id} className="hover:bg-slate-50/70 transition">
+                    <td className="p-3 text-xs text-slate-400 font-medium">{idx + 1}</td>
+                    <td className="p-3">
+                      <div className="font-semibold text-slate-900">{it?.test?.name}</div>
+                      <div className="text-xs text-slate-400 font-mono">{it?.test?.code} • {it?.test?.category}</div>
+                    </td>
+                    <td className="p-3 text-xs text-slate-700">
+                      <span className="bg-slate-100 px-2 py-0.5 rounded font-medium">
+                        {it?.sample_type || "Specimen Unassigned"}
+                      </span>
+                    </td>
                     <td className="p-3">
                       {it?.result_value ? (
-                        <span className="font-medium text-green-700">
+                        <span className={`font-bold font-mono text-base ${
+                          it.is_panic_value
+                            ? "text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200"
+                            : "text-slate-900"
+                        }`}>
                           {it.result_value}
                         </span>
                       ) : (
-                        <span className="italic text-gray-400">Pending</span>
+                        <span className="italic text-xs text-slate-400">Awaiting result</span>
                       )}
                     </td>
-                    <td className="p-3">{it?.test?.units}</td>
-                    <td className="p-3">{it?.test?.reference_range}</td>
+                    <td className="p-3 text-xs font-semibold text-slate-600">{it?.test?.units || "-"}</td>
+                    <td className="p-3 text-xs text-slate-600 font-medium">{it?.test?.reference_range || "-"}</td>
+                    <td className="p-3">
+                      {it.is_panic_value ? (
+                        <span className="bg-red-100 text-red-800 text-[11px] font-bold px-2 py-0.5 rounded inline-flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" /> Panic Alert
+                        </span>
+                      ) : it.result_value ? (
+                        <span className="bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded inline-flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" /> Resulted
+                        </span>
+                      ) : (
+                        <span className="bg-amber-50 text-amber-700 text-[11px] font-medium px-2 py-0.5 rounded inline-flex items-center gap-1">
+                          <Clock className="h-3 w-3" /> In Process
+                        </span>
+                      )}
+                    </td>
                     <td className="p-3">
                       {it?.result_file_url ? (
                         <a
                           href={`${BASE_API}/hms/${it.result_file_url}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-blue-600 underline"
+                          className="text-indigo-600 hover:text-indigo-800 font-semibold text-xs flex items-center gap-1"
                         >
-                          View File
+                          <FileText className="h-3.5 w-3.5" /> View
                         </a>
                       ) : (
-                        <span className="text-gray-400">N/A</span>
+                        <span className="text-slate-300 text-xs">-</span>
                       )}
                     </td>
                     {userRole === "Lab Technician" && (
@@ -231,10 +313,10 @@ function LabTestResults() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-[#0E1680] border-[#0E1680]"
+                          className="text-[#0E1680] border-[#0E1680] hover:bg-indigo-50 text-xs cursor-pointer"
                           onClick={() => handleAddResult(it)}
                         >
-                          Add Result
+                          {it.result_value ? "Amend Result" : "Enter Result"}
                         </Button>
                       </td>
                     )}
@@ -246,94 +328,120 @@ function LabTestResults() {
         </CardContent>
       </Card>
 
-      {/* Modal for Add Result */}
+      {/* Result Entry Modal with Clinical Guidance & Live Reference Bounds */}
       {showModal && (
-        <div className="fixed inset-0 bg-[#000000a1] flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[400px] p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-[#0E1680] mb-2">
-              Add Result – {selectedItem?.test?.name}
-            </h2>
-
-            {/* Result Value */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Result Value
-              </label>
-              <input
-                type="text"
-                value={resultValue}
-                onChange={(e) => setResultValue(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-[#0E1680]"
-              />
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+              <div>
+                <h2 className="text-lg font-bold text-[#0E1680]">
+                  Record Diagnostic Result
+                </h2>
+                <p className="text-xs text-slate-500 font-medium">
+                  {selectedItem?.test?.name} ({selectedItem?.test?.code})
+                </p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
-            {/* File Upload */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Upload Result File
+            {/* Reference Intervals & Panic Bounds Display */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-700 space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-slate-400 font-semibold uppercase block text-[10px]">Reference Range</span>
+                  <span className="font-bold text-slate-800 text-sm">
+                    {testObj?.reference_range} {testObj?.units}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-semibold uppercase block text-[10px]">Specimen Type</span>
+                  <span className="font-medium text-slate-800 text-xs">
+                    {selectedItem?.sample_type || "N/A"}
+                  </span>
+                </div>
+              </div>
+
+              {(testObj?.critical_low !== null || testObj?.critical_high !== null) && (
+                <div className="border-t border-slate-200 pt-1.5 flex items-center gap-2 text-slate-600 text-[11px]">
+                  <Info className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+                  <span>
+                    Critical Thresholds: Low &lt; <strong>{testObj?.critical_low ?? "N/A"}</strong> | High &gt; <strong>{testObj?.critical_high ?? "N/A"}</strong>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Live Panic Alert Warning */}
+            {isPanic && (
+              <div className="bg-red-50 border border-red-300 text-red-800 rounded-xl p-3 text-xs flex items-center gap-2.5 animate-pulse">
+                <ShieldAlert className="h-5 w-5 text-red-600 shrink-0" />
+                <div>
+                  <strong className="block font-bold">CRITICAL PANIC VALUE BREACH</strong>
+                  Entered value is outside physiological safety bounds. Saving will broadcast an immediate hospital-wide clinical alert.
+                </div>
+              </div>
+            )}
+
+            {/* Result Value Input with Attached Unit Badge */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 block">
+                Observed Measurement Value *
               </label>
-              <input
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  value={resultValue}
+                  onChange={(e) => setResultValue(e.target.value)}
+                  placeholder={`Enter value (e.g. 95)`}
+                  className="font-mono text-base font-bold flex-1"
+                  autoFocus
+                />
+                <span className="bg-slate-100 border border-slate-300 px-3 py-2 rounded-md font-semibold text-xs text-slate-700">
+                  {testObj?.units || "units"}
+                </span>
+              </div>
+            </div>
+
+            {/* Diagnostic Document File Upload */}
+            <div className="space-y-1.5 pt-1">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 block">
+                Analyzer Printout / PDF Report (Optional)
+              </label>
+              <Input
                 type="file"
                 accept="image/*,application/pdf"
                 onChange={handleFileUpload}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-[#0E1680]"
+                className="text-xs"
               />
-
-              {/* Preview */}
-              {/* {resultFileUrl && (
-                <div className="mt-2">
-                  <p className="text-xs text-gray-500 mb-1">
-                    Uploaded File Preview:
-                  </p>
-                  {resultFileUrl.endsWith(".pdf") ? (
-                    <a
-                      href={`${BASE_API}/hms/${resultFileUrl}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-blue-600 underline text-sm"
-                    >
-                      View PDF
-                    </a>
-                  ) : (
-                    <img
-                      src={`${BASE_API}/${resultFileUrl}`}
-                      alt="Result preview"
-                      className="w-full h-[180px] object-contain border rounded-md"
-                    />
-                  )}
-                </div>
-              )} */}
+              {resultFileUrl && (
+                <span className="text-[11px] text-emerald-600 font-medium block">
+                  File attached: {resultFileUrl.split("/").pop()}
+                </span>
+              )}
             </div>
 
-            <div className="flex justify-end gap-2 mt-4">
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
               <Button variant="outline" onClick={() => setShowModal(false)}>
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmitResult}
-                className="bg-[#0E1680] text-white flex items-center"
+                disabled={isSubmitting}
+                className="bg-[#0E1680] hover:bg-[#0b1163] text-white font-semibold cursor-pointer gap-1.5"
               >
-                <Upload size={16} className="mr-1" /> Submit
+                <CheckCircle2 className="h-4 w-4" />
+                {isSubmitting ? "Validating & Submitting..." : "Submit Diagnostic Result"}
               </Button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <div className="text-center text-xs text-gray-500 mt-8">
-        <p>
-          Generated on{" "}
-          {new Date().toLocaleString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </p>
-        <p>Atelier HMS</p>
-      </div>
     </div>
   );
 }

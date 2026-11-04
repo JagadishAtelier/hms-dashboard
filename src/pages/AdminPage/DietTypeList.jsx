@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Plus, RefreshCw, Pencil, Trash2, UtensilsCrossed } from "lucide-react";
+import { Plus, RefreshCw, Pencil, Trash2, UtensilsCrossed, Sun, SunMedium, Moon, Apple } from "lucide-react";
 import { toast } from "sonner";
 import foodService from "../../service/foodService";
 
 const inputCls = "w-full h-9 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400";
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"];
-const MEAL_LABELS = { breakfast: "Breakfast 🌅", lunch: "Lunch ☀️", dinner: "Dinner 🌙", snack: "Snack 🍎" };
+const MEAL_LABELS = { breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner", snack: "Snack" };
 
 const EMPTY = { name: "", description: "", breakfast: "", lunch: "", dinner: "", snack: "" };
 
@@ -106,7 +106,13 @@ export default function DietTypeList() {
                 <div className="space-y-3">
                   {MEAL_TYPES.map(type => (
                     <div key={type} className="space-y-1">
-                      <label className="text-xs font-medium text-gray-600">{MEAL_LABELS[type]}</label>
+                      <label className="text-xs font-medium text-gray-600 flex items-center gap-1.5">
+                        {type === "breakfast" && <Sun size={13} className="text-amber-500" />}
+                        {type === "lunch" && <SunMedium size={13} className="text-orange-500" />}
+                        {type === "dinner" && <Moon size={13} className="text-indigo-400" />}
+                        {type === "snack" && <Apple size={13} className="text-emerald-500" />}
+                        {MEAL_LABELS[type]}
+                      </label>
                       <input className={inputCls} placeholder={`${type} menu items`} value={form[type]} onChange={e => set(type, e.target.value)} />
                     </div>
                   ))}
@@ -145,8 +151,14 @@ export default function DietTypeList() {
               </div>
               <div className="p-4 space-y-2">
                 {MEAL_TYPES.map(type => (
-                  <div key={type} className="flex gap-2 text-sm">
-                    <span className="text-gray-400 w-20 shrink-0 text-xs capitalize">{type}</span>
+                  <div key={type} className="flex gap-2 text-sm items-center">
+                    <span className="text-gray-400 w-24 shrink-0 text-xs capitalize flex items-center gap-1">
+                      {type === "breakfast" && <Sun size={12} className="text-amber-500" />}
+                      {type === "lunch" && <SunMedium size={12} className="text-orange-500" />}
+                      {type === "dinner" && <Moon size={12} className="text-indigo-400" />}
+                      {type === "snack" && <Apple size={12} className="text-emerald-500" />}
+                      {type}
+                    </span>
                     <span className="text-gray-700 text-xs">{item[type] || <span className="text-gray-300 italic">Not set</span>}</span>
                   </div>
                 ))}

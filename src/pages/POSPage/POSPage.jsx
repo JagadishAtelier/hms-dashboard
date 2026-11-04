@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { Search, Trash2, X, ArrowLeft, User, Phone, ChevronDown, ChevronUp, MessageCircle, LayoutDashboard, Printer, ShoppingCart, CreditCard, Plus, Minus } from "lucide-react";
+import { Search, Trash2, X, ArrowLeft, User, Phone, ChevronDown, ChevronUp, MessageCircle, LayoutDashboard, Printer, ShoppingCart, CreditCard, Plus, Minus, AlertCircle, Banknote, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import posService from "../../service/posService.js";
 import patientService from "../../service/patientService.js";
@@ -520,9 +520,9 @@ export default function POSPage() {
                             <button 
                                 type="button"
                                 onClick={() => { setShowSessionPay(false); setSessionAmount(""); }} 
-                                className="px-3 py-2 border border-slate-200 rounded-xl text-xs hover:bg-slate-100"
+                                className="px-3 py-2 border border-slate-200 rounded-xl text-xs hover:bg-slate-100 flex items-center justify-center"
                             >
-                                ✕
+                                <X size={14} />
                             </button>
                         </div>
                     </div>
@@ -795,20 +795,20 @@ export default function POSPage() {
                             {paid > 0 && (
                                 <div className={`rounded-lg p-3 space-y-1.5 text-sm ${isPartial ? "bg-yellow-50 border border-yellow-200" : paid > total ? "bg-blue-50 border border-blue-200" : "bg-green-50 border border-green-200"}`}>
                                     {isPartial && (
-                                        <div className="flex justify-between font-semibold text-yellow-700">
-                                            <span>⚠ Pending Due</span>
+                                        <div className="flex justify-between font-semibold text-yellow-700 items-center">
+                                            <span className="flex items-center gap-1.5"><AlertCircle size={14} className="text-yellow-600 shrink-0" /> Pending Due</span>
                                             <span>{fmt(due)}</span>
                                         </div>
                                     )}
                                     {change > 0 && (
-                                        <div className="flex justify-between font-semibold text-blue-700">
-                                            <span>💵 Change to Return</span>
+                                        <div className="flex justify-between font-semibold text-blue-700 items-center">
+                                            <span className="flex items-center gap-1.5"><Banknote size={14} className="text-blue-600 shrink-0" /> Change to Return</span>
                                             <span>{fmt(change)}</span>
                                         </div>
                                     )}
                                     {!isPartial && change === 0 && (
-                                        <div className="flex justify-between font-semibold text-green-700">
-                                            <span>✓ Fully Paid</span>
+                                        <div className="flex justify-between font-semibold text-green-700 items-center">
+                                            <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-600 shrink-0" /> Fully Paid</span>
                                             <span>{fmt(paid)}</span>
                                         </div>
                                     )}

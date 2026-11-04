@@ -3,7 +3,7 @@ import StatCard from '../../components/DashboardWidgets/StatCard';
 import ChartCard from '../../components/DashboardWidgets/ChartCard';
 import RecentTableCard from '../../components/DashboardWidgets/RecentTableCard';
 import { StatSkeleton } from '../../components/DashboardWidgets/SkeletonLoaders';
-import { Pill, Activity, Receipt, PackageSearch } from 'lucide-react';
+import { Pill, Activity, Receipt, PackageSearch, AlertTriangle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 
@@ -78,7 +78,10 @@ export default function PharmacyDashboard() {
 
           <div className="bg-red-50/50 rounded-lg shadow-sm border border-red-100 p-5 w-full flex flex-col justify-between">
              <div>
-                <h3 className="text-lg font-semibold text-red-800 mb-2 whitespace-nowrap">⚠️ Urgent Restocks</h3>
+                <h3 className="text-lg font-semibold text-red-800 mb-2 whitespace-nowrap flex items-center gap-2">
+                  <AlertTriangle size={18} className="text-red-600 shrink-0" />
+                  Urgent Restocks
+                </h3>
                 <p className="text-sm text-red-600 mb-4 whitespace-nowrap lg:whitespace-normal">The following items are critically low on stock.</p>
                 <div className="space-y-3">
                    <div className="flex justify-between bg-white px-3 py-2 rounded border border-red-100 shadow-sm whitespace-nowrap">

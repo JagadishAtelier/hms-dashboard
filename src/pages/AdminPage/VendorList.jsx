@@ -12,6 +12,9 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
+  Phone,
+  User,
+  MapPin,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -333,11 +336,11 @@ export default function VendorList() {
                     {v.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
-                <p className="text-xs text-gray-700">
-                  📞 {v.phone || "—"} <br />
-                  👤 {v.contact_person || "—"} <br />
-                  🏠 {v.address || "—"}
-                </p>
+                <div className="text-xs text-gray-700 space-y-1">
+                  <div className="flex items-center gap-1.5"><Phone size={12} className="text-slate-400 shrink-0" /> {v.phone || "—"}</div>
+                  <div className="flex items-center gap-1.5"><User size={12} className="text-slate-400 shrink-0" /> {v.contact_person || "—"}</div>
+                  <div className="flex items-center gap-1.5"><MapPin size={12} className="text-slate-400 shrink-0" /> {v.address || "—"}</div>
+                </div>
                 <div className="flex gap-2 mt-2">
                   <Button
                     size="sm"

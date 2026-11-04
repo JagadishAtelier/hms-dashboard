@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StatCard from '../../components/DashboardWidgets/StatCard';
 import RecentTableCard from '../../components/DashboardWidgets/RecentTableCard';
 import { StatSkeleton } from '../../components/DashboardWidgets/SkeletonLoaders';
-import { Users, UserMinus, UserCheck, CreditCard } from 'lucide-react';
+import { Users, UserMinus, UserCheck, CreditCard, Plus, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function HRDashboard() {
@@ -66,7 +66,9 @@ export default function HRDashboard() {
                    <span className="font-semibold text-indigo-900 block text-sm">Add New Employee</span>
                    <span className="text-xs text-indigo-700/80">Onboard a new staff member</span>
                 </div>
-                <div className="bg-indigo-200 text-indigo-800 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">+</div>
+                <div className="bg-indigo-200 text-indigo-800 rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                   <Plus size={16} />
+                </div>
              </button>
 
              <button onClick={() => navigate('/salary-config')} className="w-full text-left px-5 py-4 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 transition flex items-center justify-between">
@@ -74,7 +76,9 @@ export default function HRDashboard() {
                    <span className="font-semibold text-emerald-900 block text-sm">Process Payroll</span>
                    <span className="text-xs text-emerald-700/80">Check salary slips and generate</span>
                 </div>
-                <div className="bg-emerald-200 text-emerald-800 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">➔</div>
+                <div className="bg-emerald-200 text-emerald-800 rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                   <ArrowRight size={16} />
+                </div>
              </button>
              
              <button onClick={() => navigate('/attendance')} className="w-full text-left px-5 py-4 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-100 transition flex items-center justify-between">

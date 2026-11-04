@@ -40,6 +40,11 @@ import {
   UtensilsCrossed,
   ReceiptText,
   TrendingUp,
+  Sparkles,
+  PanelLeftClose,
+  PanelLeftOpen,
+  CircleDollarSign,
+  HardDrive,
 } from "lucide-react";
 import { useEffect, useState, useRef, useMemo } from "react";
 import AddPatientModal from "./Context/AddPatientModal";
@@ -330,6 +335,8 @@ export default function Sidebar({
         { to: "/patient-list", label: "Patient List", icon: Users },
         { to: "/today-appoinments", label: "Today's Appointments", icon: CalendarCheck },
         { to: "/admissions", label: "Admissions", icon: Bed },
+        { to: "/clinical-tasks", label: "Clinical Engine", icon: Stethoscope },
+        { to: "/task-board", label: "Hospital Tasks", icon: ClipboardList },
         { to: "/records", label: "Medical Records", icon: ClipboardList },
         { to: "/session-plans", label: "Session Plans", icon: CalendarDays },
         { to: "/my-hrms", label: "My HRMS", icon: IdCardLanyard },
@@ -378,6 +385,11 @@ export default function Sidebar({
         { to: "/ward", label: "Ward", icon: DoorOpen },
         { to: "/room", label: "Room", icon: HousePlus },
         { to: "/bed", label: "Bed", icon: BedDouble },
+        { to: "/bed-readiness", label: "Bed Readiness", icon: Sparkles },
+        { to: "/task-board", label: "Central Task Board", icon: ClipboardList },
+        { to: "/clinical-tasks", label: "Clinical Engine", icon: Stethoscope },
+        { to: "/revenue-leakage", label: "Revenue Leakage", icon: CircleDollarSign },
+        { to: "/disaster-recovery", label: "Disaster Recovery", icon: HardDrive },
         { to: "/labtest", label: "Lab Tests", icon: TestTubeDiagonal },
         { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
         { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
@@ -431,6 +443,11 @@ export default function Sidebar({
         { to: "/patient-list", label: "Patient List", icon: Users },
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/admissions", label: "Admissions", icon: Bed },
+        { to: "/bed-readiness", label: "Bed Readiness", icon: Sparkles },
+        { to: "/task-board", label: "Central Task Board", icon: ClipboardList },
+        { to: "/clinical-tasks", label: "Clinical Engine", icon: Stethoscope },
+        { to: "/revenue-leakage", label: "Revenue Leakage", icon: CircleDollarSign },
+        { to: "/disaster-recovery", label: "Disaster Recovery", icon: HardDrive },
         { to: "/billable-items", label: "Billable Items", icon: ReceiptText },
         { to: "/pos", label: "New Sale (POS)", icon: ReceiptText },
         { to: "/pos/sales", label: "POS Sales", icon: ClipboardList },
@@ -457,6 +474,9 @@ export default function Sidebar({
         { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/admissions", label: "Admissions", icon: Bed },
+        { to: "/bed-readiness", label: "Bed Readiness", icon: Sparkles },
+        { to: "/task-board", label: "Central Task Board", icon: ClipboardList },
+        { to: "/clinical-tasks", label: "Clinical Engine", icon: Stethoscope },
         { to: "/my-hrms", label: "My HRMS", icon: IdCardLanyard },
       ],
       foodmanager: [
@@ -469,6 +489,7 @@ export default function Sidebar({
         { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { to: "/analytics", label: "Analytics Hub", icon: TrendingUp },
         { to: "/billing", label: "Billing", icon: ReceiptText },
+        { to: "/revenue-leakage", label: "Revenue Leakage", icon: CircleDollarSign },
         { to: "/admissions", label: "Admissions", icon: Bed },
         { to: "/appointment", label: "Appointments", icon: CalendarDays },
         { to: "/patient-list", label: "Patients", icon: Users },
@@ -520,37 +541,109 @@ export default function Sidebar({
 
     return (
       <div className="flex flex-col h-full bg-white relative select-none">
-        {/* Sidebar Brand Header */}
+        {/* Sidebar Brand Header with ChatGPT-style Hover Logo Collapse */}
         <div className={cn(
-          "flex items-center px-4 h-[60px] border-b border-slate-200/80 transition-all duration-300 shrink-0",
-          effectiveCollapsed ? "justify-center" : "justify-between"
+          "flex items-center h-[60px] border-b border-slate-200/80 transition-all duration-300 shrink-0",
+          effectiveCollapsed ? "justify-center px-2" : "justify-between px-3"
         )}>
-          <Link 
-            to="/dashboard" 
-            onClick={() => { onClose?.(); onNavigate?.(); }}
-            className="flex items-center gap-2.5 active:scale-95 transition-transform"
-          >
-            <img src={logo} alt="Atelier HMS" className="w-8 h-8 object-contain rounded-xl shadow-2xs" />
-            {!effectiveCollapsed && (
-              <div className="flex flex-col">
-                <h1 className="text-sm font-black text-slate-900 tracking-tight leading-tight">
-                  Atelier HMS
-                </h1>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
-                  {role ? role.toUpperCase() : "HOSPITAL"}
-                </span>
-              </div>
-            )}
-          </Link>
+          {effectiveCollapsed ? (
+            /* Collapsed State: Logo hover transforms into PanelLeftOpen */
+            <Tooltip.Provider delayDuration={100}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => setIsCollapsed(false)}
+                    aria-label="Open sidebar"
+                    className="group relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-slate-100 active:scale-95 transition-all cursor-pointer focus:outline-hidden"
+                  >
+                    <img 
+                      src={logo} 
+                      alt="Atelier HMS" 
+                      className="w-8 h-8 object-contain rounded-xl shadow-2xs transition-all duration-200 group-hover:opacity-0 group-hover:scale-75 shrink-0" 
+                    />
+                    <PanelLeftOpen 
+                      size={20} 
+                      className="absolute text-slate-700 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-200 shrink-0" 
+                    />
+                  </button>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content
+                    className="select-none rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold leading-none text-white shadow-xl animate-in fade-in zoom-in-95 duration-150 z-[101]"
+                    side="right"
+                    sideOffset={12}
+                  >
+                    Open sidebar
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+            </Tooltip.Provider>
+          ) : (
+            /* Expanded State: Logo hover transforms into PanelLeftClose */
+            <>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Tooltip.Provider delayDuration={100}>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isMobile) {
+                            onClose?.();
+                          } else {
+                            setIsCollapsed(true);
+                          }
+                        }}
+                        aria-label="Close sidebar"
+                        className="group relative flex items-center justify-center w-9 h-9 rounded-xl hover:bg-slate-100 active:scale-95 transition-all cursor-pointer focus:outline-hidden shrink-0"
+                      >
+                        <img 
+                          src={logo} 
+                          alt="Atelier HMS" 
+                          className="w-8 h-8 object-contain rounded-xl shadow-2xs transition-all duration-200 group-hover:opacity-0 group-hover:scale-75 shrink-0" 
+                        />
+                        <PanelLeftClose 
+                          size={20} 
+                          className="absolute text-slate-700 group-hover:text-indigo-600 opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-200 shrink-0" 
+                        />
+                      </button>
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="select-none rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold leading-none text-white shadow-xl animate-in fade-in zoom-in-95 duration-150 z-[101]"
+                        side="bottom"
+                        sideOffset={8}
+                      >
+                        Close sidebar
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
 
-          {!effectiveCollapsed && (
-            <button 
-              onClick={onClose} 
-              aria-label="Close navigation"
-              className="md:hidden min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 hover:text-slate-900 rounded-xl hover:bg-slate-100 active:scale-95 transition-all"
-            >
-              <X size={18} />
-            </button>
+                <Link 
+                  to="/dashboard" 
+                  onClick={() => { onClose?.(); onNavigate?.(); }}
+                  className="flex flex-col min-w-0 group/brand"
+                >
+                  <h1 className="text-sm font-black text-slate-900 group-hover/brand:text-indigo-600 tracking-tight leading-tight transition-colors truncate">
+                    Atelier HMS
+                  </h1>
+                  <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider truncate">
+                    {role ? role.toUpperCase() : "HOSPITAL"}
+                  </span>
+                </Link>
+              </div>
+
+              {/* Mobile slide drawer close button */}
+              <button 
+                onClick={onClose} 
+                aria-label="Close navigation"
+                className="md:hidden min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 hover:text-slate-900 rounded-xl hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </>
           )}
         </div>
 

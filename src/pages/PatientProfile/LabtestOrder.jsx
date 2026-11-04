@@ -4,10 +4,19 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
+import { FlaskConical, AlertTriangle, Clock, Plus, Trash2, CheckCircle2, Sparkles } from "lucide-react";
 
 import labTestOrderService from "../../service/labtestorderService.js";
 import labtestService from "../../service/labtestService.js";
+import clinicalMasterService from "../../service/clinicalMasterService.js";
 
 function LabTestOrder() {
   const { patient_id } = useParams();
@@ -20,6 +29,7 @@ function LabTestOrder() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [orderId, setOrderId] = useState(null);
+  const [specimenOptions, setSpecimenOptions] = useState([]);
 
   const [order, setOrder] = useState({
     patient_id: patient_id || null,
@@ -33,13 +43,23 @@ function LabTestOrder() {
 
   useEffect(() => {
     init();
+    loadSpecimenOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const loadSpecimenOptions = async () => {
+    try {
+      const specs = await clinicalMasterService.getMastersByCategory("SPECIMEN_TYPE");
+      setSpecimenOptions(specs);
+    } catch (err) {
+      console.error("Failed to load specimen options", err);
+    }
+  };
 
   const init = async () => {
     setLoading(true);
     try {
-      const res = await labtestService.getAllLabTests();
+      const res = await labtestService.getAllLabTests({ limit: 500, is_active: true });
       const data = res?.data?.data ?? res?.data ?? res;
       setLabTests(Array.isArray(data) ? data : []);
 
@@ -107,24 +127,8 @@ function LabTestOrder() {
         }));
       }
     } catch {
-      // no existing order — that's fine
+      // no existing order — fine
     }
-  };
-
-  const fetchLabTests = async () => {
-    try {
-      const res = await labtestService.getAllLabTests();
-      const data = res?.data?.data ?? res?.data ?? res;
-      setLabTests(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Failed to fetch lab tests", err);
-      toast.error(err?.response?.data?.message || "Failed to load lab tests");
-    }
-  };
-
-  const handleOrderChange = (e) => {
-    const { name, value } = e.target;
-    setOrder((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddItem = () => {
@@ -144,10 +148,31 @@ function LabTestOrder() {
     });
   };
 
-  const handleItemChange = (index, field, value) => {
+  // ✅ Intelligent Specimen Auto-Determination on Test Selection
+  const handleTestSelect = (index, testId) => {
+    const selectedTest = labTests.find((t) => String(t.id) === String(testId));
+    let autoSpecimen = "";
+    if (selectedTest) {
+      autoSpecimen =
+        selectedTest.default_specimen_type ||
+        clinicalMasterService.determineSpecimen(selectedTest.name, selectedTest.code, selectedTest.category);
+    }
+
     setOrder((prev) => {
       const items = [...prev.items];
-      items[index] = { ...items[index], [field]: value };
+      items[index] = {
+        ...items[index],
+        lab_test_id: testId,
+        sample_type: autoSpecimen || items[index].sample_type,
+      };
+      return { ...prev, items };
+    });
+  };
+
+  const handleSampleTypeSelect = (index, specimenValue) => {
+    setOrder((prev) => {
+      const items = [...prev.items];
+      items[index] = { ...items[index], sample_type: specimenValue };
       return { ...prev, items };
     });
   };
@@ -158,7 +183,7 @@ function LabTestOrder() {
     for (let i = 0; i < order.items.length; i++) {
       const it = order.items[i];
       if (!it.lab_test_id) { toast.error(`Select lab test for row ${i + 1}`); return false; }
-      if (!it.sample_type || it.sample_type.trim().length < 2) { toast.error(`Enter sample type for row ${i + 1}`); return false; }
+      if (!it.sample_type || it.sample_type.trim().length < 2) { toast.error(`Select or enter sample type for row ${i + 1}`); return false; }
     }
     return true;
   };
@@ -209,16 +234,21 @@ function LabTestOrder() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center h-64 text-gray-500 text-sm">
-        Loading...
+      <div className="p-6 flex items-center justify-center h-64 text-slate-500 text-sm">
+        Loading diagnostic catalog...
       </div>
     );
   }
 
   return (
-    <div className="p-6 w-full">
+    <div className="p-6 max-w-5xl mx-auto w-full">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-[#0E1680]">Lab Test Order</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-[#0E1680]">Diagnostic Requisition Order</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Automated specimen accessioning, tube color coordination, and clinical priority routing
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           {orderId && (
             <Button
@@ -238,46 +268,141 @@ function LabTestOrder() {
         </div>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="grid grid-cols-3 gap-4 pt-4">
+      <Card className="mb-6 border-slate-200 shadow-xs">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
           <div>
-            <label className="text-sm font-medium">Priority</label>
-            <select name="priority" value={order.priority} onChange={handleOrderChange} className="w-full border rounded px-2 py-2 mt-1">
-              <option value="normal">Normal</option>
-              <option value="urgent">Urgent</option>
-            </select>
+            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1">
+              Clinical Priority & Triage Level
+            </label>
+            <Select
+              value={order.priority}
+              onValueChange={(val) => setOrder((prev) => ({ ...prev, priority: val }))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Clinical Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="normal">Routine / Normal Queue</SelectItem>
+                <SelectItem value="urgent">Urgent Clinical Escalation</SelectItem>
+                <SelectItem value="stat">STAT / Emergency Priority (&lt;45m SLA)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1">
+              Order Requisition Status
+            </label>
+            <Input
+              value={order.status.toUpperCase()}
+              disabled
+              className="bg-slate-100 font-bold text-slate-700 text-xs tracking-wider"
+            />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
+      <Card className="mb-6 border-slate-200 shadow-xs">
         <CardContent className="pt-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#0E1680]">Order Items</h3>
-            <Button onClick={handleAddItem}>Add Item</Button>
+            <div>
+              <h3 className="text-base font-bold text-[#0E1680]">Ordered Diagnostic Tests & Specimens</h3>
+              <p className="text-xs text-slate-500">Specimen types are automatically determined by laboratory rulebook</p>
+            </div>
+            <Button onClick={handleAddItem} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs gap-1.5 cursor-pointer">
+              <Plus className="h-4 w-4" /> Add Test
+            </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {order.items.map((item, idx) => {
-              const optionsForRow = labTests.filter((t) => t.id === item.lab_test_id || !selectedTestIds.includes(t.id));
+              const optionsForRow = labTests.filter(
+                (t) => String(t.id) === String(item.lab_test_id) || !selectedTestIds.includes(String(t.id))
+              );
+              const selectedTestObj = labTests.find((t) => String(t.id) === String(item.lab_test_id));
+
               return (
-                <div key={item.id ?? idx} className="grid grid-cols-12 gap-3 items-center border rounded p-3">
-                  <div className="col-span-5">
-                    <label className="text-sm font-medium">Test</label>
-                    <select value={item.lab_test_id} onChange={(e) => handleItemChange(idx, "lab_test_id", e.target.value)} className="w-full border rounded px-2 py-2 mt-1">
-                      <option value="">Select test</option>
-                      {optionsForRow.map((t) => (
-                        <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
-                      ))}
-                    </select>
+                <div
+                  key={item.id ?? idx}
+                  className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                >
+                  {/* Test Selection */}
+                  <div className="md:col-span-6">
+                    <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-1">
+                      Diagnostic Test <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={item.lab_test_id || ""}
+                      onValueChange={(val) => handleTestSelect(idx, val)}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Select diagnostic test..." />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {optionsForRow.map((t) => (
+                          <SelectItem key={t.id} value={String(t.id)}>
+                            {t.name} ({t.code}) — {t.category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="col-span-5">
-                    <label className="text-sm font-medium">Sample Type</label>
-                    <Input value={item.sample_type} onChange={(e) => handleItemChange(idx, "sample_type", e.target.value)} placeholder="e.g. Blood" className="w-full mt-1" />
+
+                  {/* Specimen / Sample Type (Auto-Determined + Radix Selectable) */}
+                  <div className="md:col-span-5">
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                        Biological Specimen <span className="text-red-500">*</span>
+                      </label>
+                      {item.sample_type && (
+                        <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100/70 px-1.5 py-0.2 rounded flex items-center gap-0.5">
+                          <Sparkles className="h-2.5 w-2.5" /> Auto-Set
+                        </span>
+                      )}
+                    </div>
+                    <Select
+                      value={item.sample_type || ""}
+                      onValueChange={(val) => handleSampleTypeSelect(idx, val)}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue placeholder="Select or auto-determine specimen..." />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {specimenOptions.map((sp) => (
+                          <SelectItem key={sp.code || sp.display_label} value={sp.display_label}>
+                            {sp.display_label}
+                          </SelectItem>
+                        ))}
+                        {/* Fallback if item has a custom sample_type not in predefined list */}
+                        {item.sample_type &&
+                          !specimenOptions.some((sp) => sp.display_label === item.sample_type) && (
+                            <SelectItem value={item.sample_type}>{item.sample_type}</SelectItem>
+                          )}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="col-span-2 flex items-end justify-end">
-                    <Button variant="secondary" onClick={() => handleRemoveItem(idx)} className="h-10">Remove</Button>
+
+                  {/* Remove Button */}
+                  <div className="md:col-span-1 flex items-end justify-end pt-5 md:pt-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveItem(idx)}
+                      disabled={order.items.length === 1}
+                      className="text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                      title="Remove test"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
+
+                  {/* Test Metadata Footer (Reference Range, Unit, SLA) */}
+                  {selectedTestObj && (
+                    <div className="md:col-span-12 text-xs text-slate-500 flex flex-wrap gap-4 pt-1 border-t border-slate-100 mt-1">
+                      <span>Method: <strong className="text-slate-700">{selectedTestObj.method}</strong></span>
+                      <span>Ref Range: <strong className="text-slate-700">{selectedTestObj.reference_range} {selectedTestObj.units}</strong></span>
+                      <span>SLA: <strong className="text-slate-700">{selectedTestObj.turnaround_time}</strong></span>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -285,9 +410,16 @@ function LabTestOrder() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button className="bg-[#0E1680] text-white" onClick={handleSaveOrder} disabled={saving}>
-          {saving ? "Saving..." : orderId ? "Update Order" : "Create Order"}
+      <div className="flex justify-end gap-3">
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          Cancel
+        </Button>
+        <Button
+          className="bg-[#0E1680] hover:bg-[#0b1163] text-white px-6 font-semibold"
+          onClick={handleSaveOrder}
+          disabled={saving}
+        >
+          {saving ? "Submitting Requisition..." : orderId ? "Update Diagnostic Order" : "Submit Diagnostic Order"}
         </Button>
       </div>
     </div>

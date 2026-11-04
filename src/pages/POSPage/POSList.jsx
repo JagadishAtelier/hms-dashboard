@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, RefreshCw, ReceiptText, Edit2, MessageCircle, IndianRupee, X } from "lucide-react";
+import { Plus, RefreshCw, ReceiptText, Edit2, MessageCircle, IndianRupee, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import posService from "../../service/posService.js";
 import whatsappService from "../../service/whatsappService.js";
@@ -238,8 +238,8 @@ export default function POSList() {
                                             <span>Still Remaining</span><span>{fmt(remaining)}</span>
                                         </div>
                                     ) : (
-                                        <div className="flex justify-between font-semibold text-green-700">
-                                            <span>✓ Fully Cleared</span><span>{fmt(due)}</span>
+                                        <div className="flex justify-between font-semibold text-green-700 items-center">
+                                            <span className="flex items-center gap-1.5"><CheckCircle2 size={13} className="text-green-600 shrink-0" /> Fully Cleared</span><span>{fmt(due)}</span>
                                         </div>
                                     )}
                                     {change > 0 && (

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import sessionService from "../../service/sessionService.js";
 import patientService from "../../service/patientService.js";
@@ -261,7 +261,10 @@ export default function SessionPlanCreate() {
 
                     {/* Summary preview */}
                     <div className="bg-[#F0F4FF] border border-[#506EE4]/20 rounded-xl p-4 text-sm space-y-1">
-                        <p className="font-semibold text-[#0E1680] mb-1">📋 Plan Summary</p>
+                        <p className="font-semibold text-[#0E1680] mb-1 flex items-center gap-1.5">
+                            <ClipboardList size={16} className="text-[#506EE4] shrink-0" />
+                            <span>Plan Summary</span>
+                        </p>
                         <p className="text-gray-600"><span className="font-medium">{form.total_sessions}</span> total sessions</p>
                         <p className="text-gray-600">
                             <span className="font-medium capitalize">{form.frequency_type}</span> · {form.sessions_per_period} session{form.sessions_per_period > 1 ? "s" : ""} per {form.frequency_type === "daily" ? "day" : form.frequency_type === "weekly" ? "week" : "month"}

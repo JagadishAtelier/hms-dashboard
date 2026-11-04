@@ -9,6 +9,7 @@ import {
   RotateCw,
   RefreshCw,
   TestTubeDiagonal,
+  Phone,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
@@ -293,8 +294,8 @@ const endIndex = Math.min(total, currentPage * limit);
         </span>
       </div>
 
-      <p className="text-xs text-gray-600">
-        📞 {item.labtech_phone}
+      <p className="text-xs text-gray-600 flex items-center gap-1.5">
+        <Phone size={12} className="text-slate-400 shrink-0" /> {item.labtech_phone}
       </p>
 
       <div className="flex gap-2 mt-3">

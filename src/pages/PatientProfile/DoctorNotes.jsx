@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Stethoscope, HeartPulse, ClipboardList, FileText } from "lucide-react";
+import { Stethoscope, HeartPulse, ClipboardList, FileText, AlertTriangle, Sparkles, Scale, Info, CheckCircle2, ShieldAlert } from "lucide-react";
 
 import encounterService from "../../service/encounterService.js";
 import vitalsService from "../../service/vitalsService.js";
@@ -65,6 +65,89 @@ function DoctorNotes() {
   const [clinicalId, setClinicalId] = useState(null);
 
   const [activeTab, setActiveTab] = useState("encounter");
+
+  // --- Clinical Intelligence & Decision Support ---
+  const COMMON_ICD_QUICK_PICKS = [
+    { code: "I10", label: "Hypertension", desc: "Essential (primary) hypertension" },
+    { code: "E11.9", label: "Type 2 Diabetes", desc: "Type 2 diabetes mellitus without complications" },
+    { code: "J06.9", label: "Acute URTI", desc: "Acute upper respiratory tract infection, unspecified" },
+    { code: "J20.9", label: "Bronchitis", desc: "Acute bronchitis, unspecified" },
+    { code: "A09", label: "Gastroenteritis", desc: "Infectious gastroenteritis and colitis" },
+    { code: "A90", label: "Dengue", desc: "Dengue fever [classical dengue]" },
+    { code: "K21.9", label: "GERD", desc: "Gastro-esophageal reflux disease without esophagitis" },
+    { code: "R50.9", label: "Pyrexia / Fever", desc: "Fever of other and unknown origin" },
+  ];
+
+  // Automatic BMI Calculation
+  const heightNum = parseFloat(vitals.height);
+  const weightNum = parseFloat(vitals.weight);
+  let computedBmi = null;
+  let bmiCategory = null;
+  if (!isNaN(heightNum) && !isNaN(weightNum) && heightNum > 40 && weightNum > 2) {
+    const heightM = heightNum / 100;
+    computedBmi = (weightNum / (heightM * heightM)).toFixed(1);
+    if (computedBmi < 18.5) bmiCategory = { label: "Underweight", color: "bg-blue-50 text-blue-800 border-blue-200" };
+    else if (computedBmi < 25) bmiCategory = { label: "Normal Weight", color: "bg-emerald-50 text-emerald-800 border-emerald-200" };
+    else if (computedBmi < 30) bmiCategory = { label: "Overweight", color: "bg-amber-50 text-amber-800 border-amber-200" };
+    else bmiCategory = { label: "Obese (Classified)", color: "bg-red-50 text-red-800 border-red-200" };
+  }
+
+  // Vital Signs Abnormality Warnings
+  const tempNum = parseFloat(vitals.temperature);
+  const pulseNum = parseFloat(vitals.pulse);
+  const spo2Num = parseFloat(vitals.spo2);
+  const bpParts = (vitals.blood_pressure || "").split("/").map((p) => parseFloat(p.trim()));
+  const systolic = bpParts[0];
+  const diastolic = bpParts[1];
+
+  const vitalWarnings = [];
+  if (!isNaN(tempNum) && tempNum >= 38.5) {
+    vitalWarnings.push(`High Pyrexia / Fever (${tempNum}°C >= 38.5°C)`);
+  }
+  if (!isNaN(pulseNum)) {
+    if (pulseNum > 120) vitalWarnings.push(`Severe Tachycardia (${pulseNum} bpm > 120)`);
+    else if (pulseNum < 50) vitalWarnings.push(`Bradycardia (${pulseNum} bpm < 50)`);
+  }
+  if (!isNaN(spo2Num) && spo2Num > 0 && spo2Num < 92) {
+    vitalWarnings.push(`Critical Hypoxia (${spo2Num}% < 92%) — Supplemental Oxygen Indicated`);
+  }
+  if (!isNaN(systolic) && !isNaN(diastolic)) {
+    if (systolic >= 180 || diastolic >= 120) {
+      vitalWarnings.push(`Hypertensive Crisis (${systolic}/${diastolic} mmHg >= 180/120)`);
+    } else if (systolic < 90 || diastolic < 60) {
+      vitalWarnings.push(`Hypotension Warning (${systolic}/${diastolic} mmHg < 90/60)`);
+    }
+  }
+
+  // SOAP Clinical Template Loader
+  const applySoapTemplate = () => {
+    const template = `[SUBJECTIVE]
+Chief Complaints: 
+History of Presenting Illness: 
+
+[OBJECTIVE]
+General Examination: Conscious, oriented to time/place/person, afebrile.
+Systemic Examination:
+- CVS: S1S2 heard, no murmurs
+- Respiratory: Bilateral air entry equal, chest clear
+- Abdomen: Soft, non-tender, no organomegaly
+- CNS: Grossly intact, no focal deficits
+
+[ASSESSMENT]
+Clinical Impression / Working Diagnosis: 
+
+[PLAN]
+Investigations Ordered: 
+Treatment & Medication: 
+Diet & Activity Advice: 
+Follow-up: Review in OPD after 3 days or SOS`;
+
+    setClinical((prev) => ({
+      ...prev,
+      note: prev.note?.trim() ? `${prev.note}\n\n${template}` : template,
+    }));
+    toast.info("SOAP Clinical Template inserted into clinical note");
+  };
 
   useEffect(() => {
     if (appointment_id) {
@@ -568,13 +651,47 @@ function DoctorNotes() {
           <Card className="border border-slate-200 shadow-xs">
             <CardContent className="p-6 space-y-5">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900">Patient Vitals</h3>
+                <div className="flex items-center gap-2">
+                  <HeartPulse className="h-5 w-5 text-indigo-600" />
+                  <h3 className="text-base font-bold text-slate-900">Patient Vitals & Biometrics</h3>
+                </div>
                 {vitalsId && (
                   <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium px-2 py-0.5 rounded-full">
                     Vitals Recorded
                   </span>
                 )}
               </div>
+              {/* Vital Signs Abnormality Warnings Banner */}
+              {vitalWarnings.length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3.5 space-y-1 text-xs animate-in fade-in">
+                  <div className="font-bold text-red-900 flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    Clinical Vital Sign Abnormality Alerts ({vitalWarnings.length})
+                  </div>
+                  <ul className="list-disc list-inside text-red-800 space-y-0.5">
+                    {vitalWarnings.map((w, idx) => (
+                      <li key={idx} className="font-medium">{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Live BMI Metric Display */}
+              {computedBmi && (
+                <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 flex justify-between items-center text-xs">
+                  <div className="flex items-center gap-2">
+                    <Scale className="h-4 w-4 text-indigo-600" />
+                    <span className="font-semibold text-slate-700">Calculated Body Mass Index (BMI):</span>
+                    <span className="font-mono font-bold text-sm text-indigo-900">{computedBmi} kg/m²</span>
+                  </div>
+                  {bmiCategory && (
+                    <span className={`px-2.5 py-0.5 rounded-full font-bold border text-[11px] ${bmiCategory.color}`}>
+                      {bmiCategory.label}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {[
                   ["height", "Height (cm)"],
@@ -612,6 +729,25 @@ function DoctorNotes() {
                   </span>
                 )}
               </div>
+              {/* Clinical Quick-Picks Bar */}
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                  Frequent Diagnostic Quick-Picks (One-Click Auto-Fill)
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {COMMON_ICD_QUICK_PICKS.map((qp) => (
+                    <button
+                      key={qp.code}
+                      type="button"
+                      onClick={() => setDiagnosis((prev) => ({ ...prev, icd_code: qp.code, description: qp.desc }))}
+                      className="bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-lg transition cursor-pointer"
+                    >
+                      <strong className="font-mono text-indigo-600 mr-1">{qp.code}</strong> {qp.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">ICD Code</label>
@@ -640,7 +776,19 @@ function DoctorNotes() {
           <Card className="border border-slate-200 shadow-xs">
             <CardContent className="p-6 space-y-5">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900">Doctor’s Clinical Note</h3>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-indigo-600" />
+                  <h3 className="text-base font-bold text-slate-900">Doctor’s Clinical Note</h3>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={applySoapTemplate}
+                  className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs gap-1 cursor-pointer"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> Insert SOAP Template
+                </Button>
                 {clinicalId && (
                   <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium px-2 py-0.5 rounded-full">
                     Note Recorded

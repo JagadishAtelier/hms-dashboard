@@ -9,6 +9,11 @@ import {
   RotateCw,
   RefreshCw,
   BriefcaseMedical,
+  Mail,
+  Phone,
+  Building2,
+  Briefcase,
+  Receipt,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -227,20 +232,20 @@ function AccountantList() {
           </span>
         </div>
 
-        <p className="text-xs text-gray-600">
-          📧 {a.accountant_email}
+        <p className="text-xs text-gray-600 flex items-center gap-1.5">
+          <Mail size={12} className="text-slate-400 shrink-0" /> {a.accountant_email}
         </p>
-        <p className="text-xs text-gray-600">
-          📞 {a.accountant_phone}
+        <p className="text-xs text-gray-600 flex items-center gap-1.5">
+          <Phone size={12} className="text-slate-400 shrink-0" /> {a.accountant_phone}
         </p>
-        <p className="text-xs text-gray-600">
-          🏥 {a.staff_profiles?.department?.name}
+        <p className="text-xs text-gray-600 flex items-center gap-1.5">
+          <Building2 size={12} className="text-slate-400 shrink-0" /> {a.staff_profiles?.department?.name}
         </p>
-        <p className="text-xs text-gray-600">
-          💼 {a.staff_profiles?.designation?.title}
+        <p className="text-xs text-gray-600 flex items-center gap-1.5">
+          <Briefcase size={12} className="text-slate-400 shrink-0" /> {a.staff_profiles?.designation?.title}
         </p>
-        <p className="text-xs text-gray-600">
-          🧾 {a.ledger_code || "-"}
+        <p className="text-xs text-gray-600 flex items-center gap-1.5">
+          <Receipt size={12} className="text-slate-400 shrink-0" /> {a.ledger_code || "-"}
         </p>
 
         {/* ACTIONS */}

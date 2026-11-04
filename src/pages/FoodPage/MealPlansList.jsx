@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { RefreshCw, UtensilsCrossed, Pencil } from "lucide-react";
+import { RefreshCw, UtensilsCrossed, Pencil, Sun, SunMedium, Moon, Apple, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import dayjs from "dayjs";
 import foodService from "../../service/foodService";
@@ -12,7 +12,15 @@ const STATUS_COLORS = {
 };
 
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"];
-const MEAL_ICONS = { breakfast: "🌅", lunch: "☀️", dinner: "🌙", snack: "🍎" };
+const renderMealIcon = (type) => {
+  switch (type) {
+    case "breakfast": return <Sun size={14} className="text-amber-500" />;
+    case "lunch": return <SunMedium size={14} className="text-orange-500" />;
+    case "dinner": return <Moon size={14} className="text-indigo-400" />;
+    case "snack": return <Apple size={14} className="text-emerald-500" />;
+    default: return null;
+  }
+};
 
 export default function MealPlansList() {
   const [plans, setPlans] = useState([]);
@@ -129,7 +137,7 @@ export default function MealPlansList() {
                 <div className="p-4 space-y-2">
                   {MEAL_TYPES.map(type => (
                     <div key={type} className="flex gap-2 items-start">
-                      <span className="text-sm w-6">{MEAL_ICONS[type]}</span>
+                      <span className="w-5 pt-0.5 flex items-center justify-center">{renderMealIcon(type)}</span>
                       <div>
                         <span className="text-xs font-medium text-gray-500 capitalize">{type}: </span>
                         <span className="text-xs text-gray-700">{dt?.[type] || <span className="text-gray-300 italic">Not set</span>}</span>
@@ -137,7 +145,10 @@ export default function MealPlansList() {
                     </div>
                   ))}
                   {plan.allergies && (
-                    <div className="mt-2 text-xs text-red-500">⚠️ Allergies: {plan.allergies}</div>
+                    <div className="mt-2 text-xs text-red-500 flex items-center gap-1.5 font-medium">
+                      <AlertTriangle size={13} className="shrink-0 text-red-500" />
+                      Allergies: {plan.allergies}
+                    </div>
                   )}
                 </div>
                 <div className="px-4 py-2 bg-gray-50 text-xs text-gray-400">

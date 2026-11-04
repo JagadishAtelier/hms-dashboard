@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TestTube2 } from "lucide-react";
+import { TestTube2, AlertCircle } from "lucide-react";
 import LabTechRecentTable from "./LabTechRecentTable";
 import labDashboardService from "../../service/labdashboardService.js"; // ✅ adjust import path if needed
 
@@ -21,11 +21,11 @@ function LabTechDashboard() {
           setRecentOrders(res.data.recent_orders || []);
           setErrorMsg("");
         } else {
-          setErrorMsg("⚠️ Failed to load dashboard data");
+          setErrorMsg("Failed to load dashboard data");
         }
       } catch (err) {
         console.error("Error fetching lab dashboard:", err);
-        setErrorMsg("❌ Error fetching dashboard");
+        setErrorMsg("Error fetching dashboard");
       } finally {
         setLoading(false);
       }
@@ -69,8 +69,9 @@ function LabTechDashboard() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[#011D4A] border-solid"></div>
         </div>
       ) : errorMsg ? (
-        <div className="text-center text-red-600 font-semibold py-10">
-          {errorMsg}
+        <div className="flex items-center justify-center gap-2 text-center text-red-600 font-semibold py-10">
+          <AlertCircle size={18} />
+          <span>{errorMsg}</span>
         </div>
       ) : (
         <>

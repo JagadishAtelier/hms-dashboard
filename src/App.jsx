@@ -46,6 +46,11 @@ const RoomList = lazy(() => import("./pages/AdminPage/RoomList"));
 const RoomCreate = lazy(() => import("./pages/AdminPage/RoomCreate"));
 const BedList = lazy(() => import("./pages/AdminPage/BedList"));
 const BedCreate = lazy(() => import("./pages/AdminPage/BedCreate"));
+const BedReadinessDashboard = lazy(() => import("./pages/BedReadiness/BedReadinessDashboard"));
+const CentralTaskBoard = lazy(() => import("./pages/TaskBoard/CentralTaskBoard"));
+const ClinicalTasksPage = lazy(() => import("./pages/ClinicalEngine/ClinicalTasksPage"));
+const RevenueLeakageDashboard = lazy(() => import("./pages/RevenueLeakage/RevenueLeakageDashboard"));
+const DisasterRecoveryPage = lazy(() => import("./pages/DisasterRecovery/DisasterRecoveryPage"));
 const LabtestList = lazy(() => import("./pages/AdminPage/LabtestList"));
 const LabtestCreate = lazy(() => import("./pages/AdminPage/LabtestCreate"));
 const CategoryList = lazy(() => import("./pages/AdminPage/CategoryList"));
@@ -497,6 +502,46 @@ function App() {
             element={
               <AdminLayout>
                 <RoomCreate />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/bed-readiness"
+            element={
+              <AdminLayout>
+                <BedReadinessDashboard />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/task-board"
+            element={
+              <AdminLayout>
+                <CentralTaskBoard />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/clinical-tasks"
+            element={
+              <AdminLayout>
+                <ClinicalTasksPage />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/revenue-leakage"
+            element={
+              <AdminLayout>
+                <RevenueLeakageDashboard />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/disaster-recovery"
+            element={
+              <AdminLayout>
+                <DisasterRecoveryPage />
               </AdminLayout>
             }
           />

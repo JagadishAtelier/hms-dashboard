@@ -95,6 +95,14 @@ const patientService = {
    * Accepts optional query params: fromDate, toDate, limit
    * Example: getHistory(patientId, { fromDate: '2025-01-01', limit: 200 })
    */
+  async getTimeline(patientId, params = {}) {
+    const res = await axios.get(`${API_URL}/${patientId}/timeline`, {
+      headers: authHeader(),
+      params,
+    });
+    return res.data;
+  },
+
   async getHistory(patientId, params = {}) {
     const res = await axios.get(`${API_URL}/${patientId}/history`, {
       headers: authHeader(),

@@ -24,6 +24,11 @@ import {
   Stethoscope,
   ChevronLeft,
   Building,
+  Utensils,
+  Sun,
+  SunMedium,
+  Moon,
+  Apple,
 } from "lucide-react";
 
 import patientService from "../../service/patientService.js";
@@ -586,7 +591,9 @@ export default function AdmissionsCreate() {
             {/* 4. DIET TYPE */}
             <div>
               <Label className="mb-2 flex items-center gap-2">
-                🍽️ Diet Type <span className="text-gray-400 text-xs font-normal">(optional — sets meal plan automatically)</span>
+                <Utensils size={15} className="text-indigo-600 shrink-0" />
+                <span>Diet Type</span>
+                <span className="text-gray-400 text-xs font-normal">(optional — sets meal plan automatically)</span>
               </Label>
               {dietTypes.length === 0 ? (
                 <p className="text-sm text-gray-400 italic">No diet types configured. Ask admin to add them.</p>
@@ -605,11 +612,11 @@ export default function AdmissionsCreate() {
                       <div className="font-medium">{dt.name}</div>
                       {dt.description && <div className="text-xs text-gray-400 mt-0.5 truncate">{dt.description}</div>}
                       {selectedDietTypeId === dt.id && (
-                        <div className="mt-2 space-y-0.5 text-xs text-blue-600">
-                          {dt.breakfast && <div>🌅 {dt.breakfast}</div>}
-                          {dt.lunch && <div>☀️ {dt.lunch}</div>}
-                          {dt.dinner && <div>🌙 {dt.dinner}</div>}
-                          {dt.snack && <div>🍎 {dt.snack}</div>}
+                        <div className="mt-2 space-y-1 text-xs text-blue-600">
+                          {dt.breakfast && <div className="flex items-center gap-1.5"><Sun size={11} className="text-amber-500 shrink-0" /> {dt.breakfast}</div>}
+                          {dt.lunch && <div className="flex items-center gap-1.5"><SunMedium size={11} className="text-orange-500 shrink-0" /> {dt.lunch}</div>}
+                          {dt.dinner && <div className="flex items-center gap-1.5"><Moon size={11} className="text-indigo-400 shrink-0" /> {dt.dinner}</div>}
+                          {dt.snack && <div className="flex items-center gap-1.5"><Apple size={11} className="text-emerald-500 shrink-0" /> {dt.snack}</div>}
                         </div>
                       )}
                     </button>

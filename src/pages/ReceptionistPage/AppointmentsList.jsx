@@ -452,8 +452,8 @@ function AppointmentsList() {
                         <td className="px-4 py-3 text-center text-gray-700 text-[12px]">
                           {formatDate(item.scheduled_at)}
                           {item.is_auto_rescheduled && (
-                            <span className="block mt-1 px-2 py-[2px] w-max mx-auto bg-orange-100 text-orange-700 text-[9px] font-bold rounded-full uppercase tracking-wider" title="Automatically rolled over from a previous day">
-                              🔄 Auto-Rolled
+                            <span className="inline-flex items-center gap-1 mt-1 px-2 py-[2px] w-max mx-auto bg-orange-100 text-orange-700 text-[9px] font-bold rounded-full uppercase tracking-wider" title="Automatically rolled over from a previous day">
+                              <RefreshCw size={10} className="shrink-0" /> Auto-Rolled
                             </span>
                           )}
                         </td>
@@ -559,8 +559,8 @@ function AppointmentsList() {
                     </span>
                     <span className="text-[11px] text-gray-500">{item.scheduled_time || "—"}</span>
                     {item.is_auto_rescheduled && (
-                      <span className="px-2 py-[2px] bg-orange-100 text-orange-700 text-[9px] font-bold rounded-full uppercase tracking-wider">
-                        🔄 Rolled
+                      <span className="inline-flex items-center gap-1 px-2 py-[2px] bg-orange-100 text-orange-700 text-[9px] font-bold rounded-full uppercase tracking-wider">
+                        <RefreshCw size={10} className="shrink-0" /> Rolled
                       </span>
                     )}
                   </div>

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Upload, Trash2, FileText, X, Eye, Loader2 } from "lucide-react";
+import { Upload, Trash2, FileText, X, Eye, Loader2, Image, FileSpreadsheet, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import dayjs from "dayjs";
 import hrmsService from "../../service/hrmsService.js";
@@ -17,13 +17,13 @@ const typeColor = (t) => ({
     "Other": "bg-gray-100 text-gray-600",
 }[t] ?? "bg-gray-100 text-gray-600");
 
-const fileIcon = (name = "") => {
+const renderFileIcon = (name = "") => {
     const ext = name.split('.').pop()?.toLowerCase();
-    if (['jpg','jpeg','png'].includes(ext)) return '🖼️';
-    if (ext === 'pdf') return '📄';
-    if (['doc','docx'].includes(ext)) return '📝';
-    if (['xls','xlsx'].includes(ext)) return '📊';
-    return '📎';
+    if (['jpg','jpeg','png'].includes(ext)) return <Image size={24} className="text-blue-500 shrink-0" />;
+    if (ext === 'pdf') return <FileText size={24} className="text-red-500 shrink-0" />;
+    if (['doc','docx'].includes(ext)) return <FileText size={24} className="text-indigo-500 shrink-0" />;
+    if (['xls','xlsx'].includes(ext)) return <FileSpreadsheet size={24} className="text-emerald-500 shrink-0" />;
+    return <Paperclip size={24} className="text-slate-400 shrink-0" />;
 };
 
 export default function StaffDocuments() {
@@ -112,7 +112,9 @@ export default function StaffDocuments() {
                                 <div key={d.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col gap-2">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-2xl">{fileIcon(d.file_name)}</span>
+                                            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                                                {renderFileIcon(d.file_name)}
+                                            </div>
                                             <div>
                                                 <p className="font-medium text-gray-800 text-sm">{d.document_name}</p>
                                                 <p className="text-xs text-gray-400">{d.file_name}</p>
