@@ -274,9 +274,8 @@ export default function Login() {
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className={`w-full ${
-          isMobile ? "h-9 py-1 px-2.5 text-xs" : "h-10 py-2 px-3 text-sm"
-        } flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/90 active:scale-[0.98] rounded-lg font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer disabled:opacity-60`}
+        className={`w-full ${isMobile ? "h-9 py-1 px-2.5 text-xs" : "h-10 py-2 px-3 text-sm"
+          } flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/90 active:scale-[0.98] rounded-lg font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer disabled:opacity-60`}
       >
         <svg className={`${isMobile ? "w-3.5 h-3.5" : "w-4 h-4"} shrink-0`} viewBox="0 0 24 24">
           <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z" />
@@ -292,9 +291,8 @@ export default function Login() {
           type="button"
           onClick={handleMicrosoftSignIn}
           disabled={loading}
-          className={`w-full ${
-            isMobile ? "h-9 py-1 px-2.5 text-xs" : "h-10 py-2 px-3 text-sm"
-          } flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/90 active:scale-[0.98] rounded-lg font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer disabled:opacity-60`}
+          className={`w-full ${isMobile ? "h-9 py-1 px-2.5 text-xs" : "h-10 py-2 px-3 text-sm"
+            } flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50/90 active:scale-[0.98] rounded-lg font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer disabled:opacity-60`}
         >
           <svg className={`${isMobile ? "w-3 h-3" : "w-3.5 h-3.5"} shrink-0`} viewBox="0 0 21 21">
             <rect x="1" y="1" width="9" height="9" fill="#F25022" />
@@ -328,9 +326,8 @@ export default function Login() {
             placeholder="Enter your email or username"
             value={formData.identifier}
             onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
-            className={`w-full ${
-              isMobile ? "h-9 pl-8 pr-3 text-xs rounded-lg" : "h-11 pl-10 pr-4 text-sm rounded-xl"
-            } bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 text-slate-800 placeholder:text-slate-400 outline-none transition-all`}
+            className={`w-full ${isMobile ? "h-9 pl-8 pr-3 text-xs rounded-lg" : "h-11 pl-10 pr-4 text-sm rounded-xl"
+              } bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 text-slate-800 placeholder:text-slate-400 outline-none transition-all`}
           />
         </div>
       </div>
@@ -352,9 +349,8 @@ export default function Login() {
             placeholder="Enter your password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className={`w-full ${
-              isMobile ? "h-9 pl-8 pr-8 text-xs rounded-lg" : "h-11 pl-10 pr-10 text-sm rounded-xl"
-            } bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 text-slate-800 placeholder:text-slate-400 outline-none transition-all`}
+            className={`w-full ${isMobile ? "h-9 pl-8 pr-8 text-xs rounded-lg" : "h-11 pl-10 pr-10 text-sm rounded-xl"
+              } bg-white border border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-500/10 text-slate-800 placeholder:text-slate-400 outline-none transition-all`}
           />
           <button
             type="button"
@@ -397,9 +393,8 @@ export default function Login() {
       <button
         type="submit"
         disabled={loading}
-        className={`w-full ${
-          isMobile ? "h-9 text-xs rounded-lg mt-1" : "h-11 sm:h-12 text-sm rounded-xl"
-        } bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.99] text-white font-bold shadow-md shadow-blue-600/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer`}
+        className={`w-full ${isMobile ? "h-9 text-xs rounded-lg mt-1" : "h-11 sm:h-12 text-sm rounded-xl"
+          } bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-[0.99] text-white font-bold shadow-md shadow-blue-600/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer`}
       >
         {loading ? (
           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -447,14 +442,14 @@ export default function Login() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-slate-100 font-sans select-none">
-      
+
       {/* ========================================================================= */}
       {/* ================= MOBILE VIEW (< 1024px, ZERO SCROLL, 100dvh) =========== */}
       {/* ========================================================================= */}
       <div className="lg:hidden h-[100dvh] max-h-[100dvh] w-full overflow-hidden flex flex-col justify-between bg-slate-900">
-        
+
         {/* HERO TOP SECTION: Image Background with Integrated Header & Welcome Content */}
-        <div className="relative h-[25vh] min-h-[145px] max-h-[185px] w-full shrink-0 overflow-hidden">
+        <div className="relative h-[40vh] min-h-[145px] max-h-[200px] w-full shrink-0 overflow-hidden">
           {/* Background Hospital Image */}
           <img
             src="/Modern-Hospital-Under-a-Blue-Sky.png"
@@ -500,7 +495,7 @@ export default function Login() {
           </div>
 
           {/* Welcome Typography Content Overlaid on Background */}
-          <div className="absolute bottom-4 left-4 right-4 z-10">
+          <div className="absolute bottom-6 left-4 right-4 z-10">
             <div className="flex items-center gap-1.5 mb-0.5 text-[9px] font-medium text-emerald-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Atelier Medical Center · Online</span>
@@ -515,8 +510,8 @@ export default function Login() {
         </div>
 
         {/* FLOATING WHITE CARD: Holds the Form Perfectly Within Remaining Height */}
-        <div className="relative flex-1 -mt-3.5 bg-white rounded-t-[22px] shadow-2xl z-20 px-4 sm:px-6 pt-3 pb-2 flex flex-col justify-between overflow-hidden">
-          
+        <div className="relative flex-1 -mt-3.5 bg-white rounded-t-[22px] shadow-2xl z-20 px-4 sm:px-6 pt-8 pb-5 flex flex-col justify-between overflow-hidden">
+
           {/* Card Header */}
           <div className="text-center shrink-0">
             <h3 className="text-lg font-extrabold text-[#0B1E48] tracking-tight leading-none">
@@ -530,7 +525,7 @@ export default function Login() {
           {/* Social Logins */}
           <div className="shrink-0 my-1.5">
             <SocialButtons isMobile={true} />
-            
+
             {/* Compact Divider */}
             <div className="relative my-1.5 text-center">
               <div className="absolute inset-0 flex items-center">
@@ -584,10 +579,10 @@ export default function Login() {
       {/* ================= DESKTOP SPLIT LAYOUT (>= 1024px) ====================== */}
       {/* ========================================================================= */}
       <div className="hidden lg:grid lg:grid-cols-2 h-screen w-screen overflow-hidden bg-white">
-        
+
         {/* LEFT COLUMN: Branding & Hospital Architecture Overview */}
         <div className="flex flex-col justify-between bg-gradient-to-b from-blue-50/90 via-sky-50/40 to-blue-100/50 p-8 xl:p-10 2xl:p-12 border-r border-slate-200/80 h-full overflow-hidden">
-          
+
           {/* Brand & Titles */}
           <div className="shrink-0">
             <div className="flex items-center gap-3 mb-4 xl:mb-5">
@@ -624,7 +619,7 @@ export default function Login() {
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-900/10 to-transparent pointer-events-none" />
-            
+
             <div className="absolute bottom-3 left-3 text-white text-[11px] xl:text-xs font-semibold flex items-center gap-1.5 drop-shadow">
               <span className="w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-300/40 animate-pulse" />
               <span>Atelier Hospital Management System · Main Campus</span>
@@ -637,7 +632,7 @@ export default function Login() {
 
         {/* RIGHT COLUMN: Sign In Form */}
         <div className="flex flex-col justify-between bg-white p-6 sm:p-8 xl:p-10 2xl:p-12 h-full overflow-y-auto">
-          
+
           {/* Top Header Row with Need Help? */}
           <div className="flex items-center justify-end shrink-0 mb-2">
             <button
@@ -652,7 +647,7 @@ export default function Login() {
 
           {/* Center Sign In Form Container */}
           <div className="max-w-[400px] w-full mx-auto my-auto py-2">
-            
+
             <div className="text-center mb-4 xl:mb-5">
               <h3 className="text-2xl xl:text-3xl font-extrabold text-[#0B1E48] tracking-tight">
                 Sign In
