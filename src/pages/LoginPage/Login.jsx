@@ -498,7 +498,7 @@ export default function Login() {
           <div className="absolute bottom-6 left-4 right-4 z-10">
             <div className="flex items-center gap-1.5 mb-0.5 text-[9px] font-medium text-emerald-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Atelier Medical Center · Online</span>
+              <span>Atelier Hospital Management System</span>
             </div>
             <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight drop-shadow-sm">
               Welcome Back
@@ -566,7 +566,7 @@ export default function Login() {
             <FeatureBadges isMobile={true} />
 
             <p className="text-center text-[8px] text-slate-400 pt-1">
-              © 2025 HMS. All rights reserved.
+              © {new Date().getFullYear()} HMS. All rights reserved.
             </p>
           </div>
 
@@ -631,7 +631,7 @@ export default function Login() {
         </div>
 
         {/* RIGHT COLUMN: Sign In Form */}
-        <div className="flex flex-col justify-between bg-white p-6 sm:p-8 xl:p-10 2xl:p-12 h-full overflow-y-auto">
+        <div className="flex flex-col justify-between bg-white p-6 sm:p-6 xl:p-10 2xl:p-12 h-full overflow-y-auto">
 
           {/* Top Header Row with Need Help? */}
           <div className="flex items-center justify-end shrink-0 mb-2">
@@ -706,7 +706,7 @@ export default function Login() {
               </button>
             </p>
             <p className="text-[10px] text-slate-400 mt-1">
-              © 2025 HMS. All rights reserved.
+              © {new Date().getFullYear()} HMS. All rights reserved.
             </p>
           </div>
         </div>
