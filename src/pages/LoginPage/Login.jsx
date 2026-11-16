@@ -510,7 +510,7 @@ export default function Login() {
         </div>
 
         {/* FLOATING WHITE CARD: Holds the Form Perfectly Within Remaining Height */}
-        <div className="relative flex-1 -mt-3.5 bg-white rounded-t-[22px] shadow-2xl z-20 px-6 sm:px-12 pt-8 pb-5 flex flex-col justify-between overflow-hidden">
+        <div className="relative flex-1 -mt-3.5 bg-white rounded-t-[22px] shadow-2xl z-20 px-8 sm:px-12 pt-16 pb-5 flex flex-col justify-between overflow-hidden">
 
           {/* Card Header */}
           <div className="text-center shrink-0">
