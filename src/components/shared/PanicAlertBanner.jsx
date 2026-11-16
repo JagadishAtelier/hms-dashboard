@@ -134,106 +134,118 @@ export default function PanicAlertBanner() {
 
       {/* Radix UI Portaled Dialog: escapes any parent backdrop-filter or sticky constraints */}
       <Dialog open={!!selectedAlert} onOpenChange={(open) => !open && setSelectedAlert(null)}>
-        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto p-0 gap-0 border-red-200 shadow-2xl rounded-xl">
+        <DialogContent
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="sm:max-w-xl max-h-[85vh] flex flex-col p-0 gap-0 border-red-200 shadow-2xl rounded-2xl overflow-hidden"
+        >
           {selectedAlert && (
-            <div className="p-6">
-              <DialogHeader className="border-b border-slate-100 pb-4 mb-4 text-left">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-red-100 text-red-600 ring-4 ring-red-50">
-                    <AlertTriangle className="h-5 w-5" />
+            <>
+              {/* Fixed Header */}
+              <div className="p-5 pb-4 border-b border-slate-100 bg-red-50/60 shrink-0">
+                <DialogHeader className="text-left space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-lg bg-red-100 text-red-600 ring-4 ring-red-50 shrink-0">
+                      <AlertTriangle className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-lg font-bold text-red-700 leading-tight">
+                        Critical Panic Alert Intervention
+                      </DialogTitle>
+                      <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                        Statutory clinical review & immediate physician action required
+                      </DialogDescription>
+                    </div>
                   </div>
-                  <div>
-                    <DialogTitle className="text-lg font-bold text-red-700">
-                      Critical Panic Alert Intervention
-                    </DialogTitle>
-                    <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                      Statutory clinical review & immediate physician action required
-                    </DialogDescription>
+                </DialogHeader>
+              </div>
+
+              {/* Scrollable Body Container */}
+              <div className="p-5 overflow-y-auto flex-1 space-y-4">
+                {/* Patient & Metric Spotlight Card */}
+                <div className="bg-gradient-to-br from-red-50/80 via-white to-red-50/40 border border-red-200/80 rounded-xl p-4 text-sm shadow-2xs">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-[11px] text-slate-500 uppercase font-semibold block">Patient UHID</span>
+                      <span className="font-bold text-slate-900 font-mono">
+                        {selectedAlert.patient?.patient_id || selectedAlert.patient_code || 'PAT-EMERGENCY'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-slate-500 uppercase font-semibold block">Diagnostic Test</span>
+                      <span className="font-bold text-slate-900">{selectedAlert.test_name}</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-red-100/70 border border-red-200">
+                      <span className="text-[11px] text-red-800 uppercase font-bold block">Reported Panic Value</span>
+                      <span className="font-extrabold text-red-700 text-lg">
+                        {selectedAlert.result_value} <span className="text-xs font-normal text-red-600">{selectedAlert.units || ''}</span>
+                      </span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-slate-100/70 border border-slate-200">
+                      <span className="text-[11px] text-slate-600 uppercase font-bold block">Critical Threshold</span>
+                      <span className="font-semibold text-slate-800 text-sm">
+                        {selectedAlert.critical_thresholds || selectedAlert.reference_range || 'Out of bounds'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </DialogHeader>
 
-              {/* Patient & Metric Spotlight Card */}
-              <div className="bg-gradient-to-br from-red-50/80 via-white to-red-50/40 border border-red-200/80 rounded-xl p-4 mb-4 text-sm shadow-2xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-[11px] text-slate-500 uppercase font-semibold block">Patient UHID</span>
-                    <span className="font-bold text-slate-900 font-mono">
-                      {selectedAlert.patient?.patient_id || selectedAlert.patient_code || 'PAT-EMERGENCY'}
-                    </span>
+                {/* Quick-Pick Response Chips */}
+                <div>
+                  <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mb-2">
+                    <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                    Quick Action Response Templates:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {quickActionTemplates.map((template, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAddTemplate(template)}
+                        className="text-xs bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
+                      >
+                        + {template}
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <span className="text-[11px] text-slate-500 uppercase font-semibold block">Diagnostic Test</span>
-                    <span className="font-bold text-slate-900">{selectedAlert.test_name}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-red-100/70 border border-red-200">
-                    <span className="text-[11px] text-red-800 uppercase font-bold block">Reported Panic Value</span>
-                    <span className="font-extrabold text-red-700 text-lg">
-                      {selectedAlert.result_value} <span className="text-xs font-normal text-red-600">{selectedAlert.units || ''}</span>
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-100/70 border border-slate-200">
-                    <span className="text-[11px] text-slate-600 uppercase font-bold block">Critical Threshold</span>
-                    <span className="font-semibold text-slate-800 text-sm">
-                      {selectedAlert.critical_thresholds || selectedAlert.reference_range || 'Out of bounds'}
-                    </span>
-                  </div>
+                </div>
+
+                {/* Notes Input */}
+                <div>
+                  <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
+                    Physician Acknowledgment & Urgent Actions Taken <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={ackNotes}
+                    onChange={(e) => setAckNotes(e.target.value)}
+                    placeholder="Describe emergency medication administered, specialist consultation alerted, repeat specimen ordered, or immediate clinical instructions..."
+                    rows={3}
+                    className="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-all placeholder:text-slate-400"
+                  />
                 </div>
               </div>
 
-              {/* Quick-Pick Response Chips */}
-              <div className="mb-3.5">
-                <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mb-2">
-                  <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
-                  Quick Action Response Templates:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {quickActionTemplates.map((template, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleAddTemplate(template)}
-                      className="text-xs bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
-                    >
-                      + {template}
-                    </button>
-                  ))}
-                </div>
+              {/* Fixed Footer */}
+              <div className="p-4 border-t border-slate-100 bg-slate-50/70 shrink-0">
+                <DialogFooter className="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAlert(null)}
+                    className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAcknowledge}
+                    disabled={isSubmitting}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50 flex items-center gap-1.5 transition cursor-pointer"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    {isSubmitting ? 'Acknowledging...' : 'Confirm Clinical Acknowledgment'}
+                  </button>
+                </DialogFooter>
               </div>
-
-              {/* Notes Input */}
-              <div className="mb-5">
-                <label className="block text-xs font-bold uppercase text-slate-700 mb-1.5">
-                  Physician Acknowledgment & Urgent Actions Taken <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={ackNotes}
-                  onChange={(e) => setAckNotes(e.target.value)}
-                  placeholder="Describe emergency medication administered, specialist consultation alerted, repeat specimen ordered, or immediate clinical instructions..."
-                  rows={3}
-                  className="w-full text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-all placeholder:text-slate-400"
-                />
-              </div>
-
-              <DialogFooter className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedAlert(null)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAcknowledge}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50 flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  {isSubmitting ? 'Acknowledging...' : 'Confirm Clinical Acknowledgment'}
-                </button>
-              </DialogFooter>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
